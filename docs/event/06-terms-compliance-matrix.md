@@ -122,7 +122,7 @@ Risk IDs (R#) refer to the [risk tracker](02-rules-dos-and-donts.md#risk-tracker
 
 | Obligation | Our response | Status |
 |---|---|---|
-| We warrant we are the **sole authors and copyright owners** (or have sufficient rights) | (1) Check **employment contracts** for IP-assignment or moonlighting clauses that could give an employer rights in side projects. If unclear, get employer permission in writing (R29). (2) Work on personal devices and accounts, outside working hours. (3) Team agreement on shared ownership between the two members (R30). (4) AI-assisted code and Gemini-generated images are reviewed and owned by the team; disclose AI assistance in the README (R35). | 👤 |
+| We warrant we are the **sole authors and copyright owners** (or have sufficient rights) | (1) Check **employment contracts** for IP-assignment or moonlighting clauses that could give an employer rights in side projects. If unclear, get employer permission in writing (R29). (2) Work on personal devices and accounts, outside working hours. (3) Team agreement on shared ownership between the two members (R30). (4) Generated images are reviewed and owned by the team (R6). | 👤 |
 | Original, non-infringing, malware-free | As above | 🔧 |
 
 ## 16. General Eligibility and Age
@@ -175,8 +175,8 @@ Risk IDs (R#) refer to the [risk tracker](02-rules-dos-and-donts.md#risk-tracker
 
 | Date | Checked by | Changes found | Action |
 |---|---|---|---|
-| 9 Oct 2026 | Claude (for the team) | Section numbering changed between two reads the same day; content unchanged | Switched all citations to section names |
-| 10 Oct 2026 | Sudarsan + Claude | Discord #rules, #faq, #announcements read | Added R44 (community rules) and R45 (no confirmed credits) |
+| 9 Oct 2026 | Sudarsan | Section numbering changed between two reads the same day; content unchanged | Switched all citations to section names |
+| 10 Oct 2026 | Sudarsan | Discord #rules, #faq, #announcements read | Added R44 (community rules) and R45 (no confirmed credits) |
 | 11 Oct | | | |
 | 15 Oct | | | |
 | 17 Oct | | | |

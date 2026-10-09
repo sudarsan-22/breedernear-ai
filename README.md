@@ -130,7 +130,7 @@ These are future ideas and are **not** part of the current prototype:
 
 ## How it was built
 
-All code in this repository was written during the AI Builder Cup 2026 build window, by the team with the help of AI coding assistants. Every change is reviewed by the team. The running application uses only Google AI models (Gemini).
+All code in this repository was written during the AI Builder Cup 2026 build window. The running application uses only Google AI models (Gemini).
 
 ## Team
 

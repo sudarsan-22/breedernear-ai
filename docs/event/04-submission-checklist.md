@@ -11,7 +11,7 @@ Use this from **16 Oct** onward. Every box must be ticked before pressing Submit
 - [ ] ID and employment proof ready for both members
 - [ ] Neither member is on any other AI Builder Cup team
 - [x] Team stays at 2 members (Sudarsan N, Shreya Azad); no 3rd/4th member (decided 9 Oct)
-- [ ] Both members joined the official Discord
+- [ ] Both members joined the official Discord (Sudarsan ✅ 10 Oct; Shreya pending)
 
 ## B. Live prototype URL
 

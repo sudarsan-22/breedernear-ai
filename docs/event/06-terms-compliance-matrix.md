@@ -150,6 +150,18 @@ Risk IDs (R#) refer to the [risk tracker](02-rules-dos-and-donts.md#risk-tracker
 | Video and repo links publicly accessible | Session | R18, R23 | 👤 |
 | Deck as PDF; includes user guide, scalability, feasibility | Themes page, session | Deck outline slides 12 and 15 | 👤 |
 
+## Hack2skill Discord community rules (#rules channel, read 10 Oct)
+
+| Obligation | Our response | Status |
+|---|---|---|
+| Zero tolerance for bullying, abuse, harassment or discrimination | Professional tone everywhere | ℹ️ |
+| **No spam or promotional messages** outside the promotions channel (direct ban) | Never post petzonic.co, the waitlist or other startup links (R44) | 👤 |
+| No misbehaviour or abusive language | — | ℹ️ |
+| **Non-disclosure:** don't misuse other members' ideas; don't share sensitive community information with third parties | Don't reuse ideas seen in Discord; don't repost community content (R44) | 👤 |
+| No off-topic discussion (temporary ban) | Use the right channel; eligibility questions go by email or private ticket | 👤 |
+
+#faq (posted 24 Sep) repeats the website FAQ, with no new obligations. #announcements (10 Oct) has only the Foundation Day support closure (8 Oct to 9 Oct, 1 PM IST).
+
 ## Team agreement (R30): agree in writing, keep it private (not in this repo)
 
 - [ ] Ownership of the hackathon code and assets: jointly owned by both members (or as agreed)
@@ -164,6 +176,7 @@ Risk IDs (R#) refer to the [risk tracker](02-rules-dos-and-donts.md#risk-tracker
 | Date | Checked by | Changes found | Action |
 |---|---|---|---|
 | 9 Oct 2026 | Claude (for the team) | Section numbering changed between two reads the same day; content unchanged | Switched all citations to section names |
+| 10 Oct 2026 | Sudarsan + Claude | Discord #rules, #faq, #announcements read | Added R44 (community rules) and R45 (no confirmed credits) |
 | 11 Oct | | | |
 | 15 Oct | | | |
 | 17 Oct | | | |

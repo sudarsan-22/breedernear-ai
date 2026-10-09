@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BreederNear AI</title>
+  <style>
+    :root { --bg: #fbfaf7; --fg: #1d1d1b; --muted: #5c5a55; --accent: #2f6b3f; --card: #ffffff; --line: #e4e1da; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #161614; --fg: #f1efe9; --muted: #b3afa6; --accent: #7cc48e; --card: #20201d; --line: #33322e; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+    main { max-width: 640px; margin: 0 auto; padding: 32px 16px 96px; }
+    h1 { font-size: 1.75rem; margin: 0 0 4px; }
+    p.lead { color: var(--muted); margin: 0 0 24px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+    button { font: inherit; min-height: 44px; padding: 0 18px; border-radius: 8px; border: 0;
+             background: var(--accent); color: #fff; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: progress; }
+    #reply { white-space: pre-wrap; margin-top: 12px; }
+    footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 16px; font-size: .85rem;
+             color: var(--muted); background: var(--bg); border-top: 1px solid var(--line); text-align: center; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>🐾 BreederNear AI</h1>
+    <p class="lead">Find the trusted breeder next door. Fair prices. Legal, healthy pets.</p>
+    <div class="card">
+      <p>Under construction for the AI Builder Cup 2026. This button checks the live AI connection.</p>
+      <button id="ping" type="button">Say hello to the AI</button>
+      <div id="reply" aria-live="polite"></div>
+    </div>
+  </main>
+  <footer>Prototype — sample breeders, listings and products. No payments. Not veterinary advice.</footer>
+  <script>
+    const APP = "breedernear";
+    function guestId() {
+      try {
+        let id = localStorage.getItem("breedernear_guest_id");
+        if (!id) { id = crypto.randomUUID(); localStorage.setItem("breedernear_guest_id", id); }
+        return id;
+      } catch { return crypto.randomUUID(); }
+    }
+    document.getElementById("ping").addEventListener("click", async (event) => {
+      const button = event.currentTarget, out = document.getElementById("reply");
+      button.disabled = true; out.textContent = "Thinking…";
+      try {
+        const user = guestId();
+        const session = await fetch(`/apps/${APP}/users/${user}/sessions`, {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
+        }).then((r) => { if (!r.ok) throw new Error(`session ${r.status}`); return r.json(); });
+        const events = await fetch("/run", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            app_name: APP, user_id: user, session_id: session.id,
+            new_message: { role: "user", parts: [{ text: "Hello! In one sentence, what can you help me with?" }] },
+          }),
+        }).then((r) => { if (!r.ok) throw new Error(`run ${r.status}`); return r.json(); });
+        const text = events.flatMap((e) => e.content?.parts ?? []).map((p) => p.text ?? "").join("").trim();
+        out.textContent = text || "No reply received.";
+      } catch (error) {
+        out.textContent = "Couldn't reach the AI right now. Please try again in a moment.";
+        console.error(error);
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

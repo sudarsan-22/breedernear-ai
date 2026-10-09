@@ -1,0 +1,3 @@
+# Runtime dependencies. Permissive licences only (rule R43).
+google-adk==2.11.0          # Apache-2.0; brings fastapi, uvicorn, google-genai, pydantic
+pydantic-settings==2.15.0   # MIT

@@ -30,3 +30,6 @@ sessions.db
 .vscode/
 .idea/
 .DS_Store
+
+# ADK local dev storage
+.adk/

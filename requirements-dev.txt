@@ -1,0 +1,4 @@
+-r requirements.txt
+pytest==9.1.1    # MIT
+httpx==0.28.1    # BSD-3-Clause (FastAPI TestClient)
+ruff==0.16.10    # MIT

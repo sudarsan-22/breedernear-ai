@@ -99,7 +99,19 @@ BreederNear AI is not a veterinary service and does not sell animals or products
 
 ## Getting started
 
-Setup and deployment are documented step by step in [docs/implementation/05-gcp-setup-and-deployment.md](docs/implementation/05-gcp-setup-and-deployment.md). Local run commands will be added here as the code lands.
+Requirements: Python 3.12, a Google Cloud project with the Vertex AI API enabled (or an AI Studio API key for local development). One-time cloud setup: [docs/implementation/05-gcp-setup-and-deployment.md](docs/implementation/05-gcp-setup-and-deployment.md).
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+cp .env.example .env                  # then fill in your project ID (or GOOGLE_API_KEY)
+gcloud auth application-default login # not needed if you use GOOGLE_API_KEY
+
+uvicorn app.main:app --reload --port 8080   # web app + API: http://localhost:8080
+PYTHONPATH=. adk web agents                 # ADK developer UI for testing agents
+ruff check . && pytest -m "not live"        # lint + unit tests
+PROJECT_ID=<your-project> scripts/deploy.sh # deploy to Cloud Run
+```
 
 ## Documentation
 

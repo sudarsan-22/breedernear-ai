@@ -15,20 +15,20 @@ Use this from **16 Oct** onward. Every box must be ticked before pressing Submit
 
 ## B. Live prototype URL
 
-- [ ] Deployed on **Cloud Run**; URL in the form `https://petzonic-…run.app`
+- [ ] Deployed on **Cloud Run**; URL in the form `https://breedernear-…run.app`
 - [ ] Opens in an **incognito window while logged out**, on a laptop
 - [ ] Opens on a **phone** (mobile data, not Wi-Fi), and the layout fits the screen
 - [ ] No login required; "Try as Priya" and "Try as Karthik" work
 - [ ] Every step of the smoke test passes, see [../implementation/06-testing-and-evaluation.md](../implementation/06-testing-and-evaluation.md#4-pre-submission-smoke-test)
 - [ ] `--min-instances=1` set (no cold start for judges)
 - [ ] Budget alert configured; credits or billing are valid until at least 4 Dec
-- [ ] Model is **not** `gemini-2.x`; it is set via `PETZONIC_MODEL`
+- [ ] Model is **not** `gemini-2.x`; it is set via `BREEDERNEAR_MODEL`
 - [ ] "Prototype — sample breeders, listings and products. No payments. Not veterinary advice." visible in the UI footer
 - [ ] Revision name of this known-good deployment written down for rollback: `________________`
 
 ## C. GitHub repository
 
-- [x] Repo is **public**: https://github.com/sudarsan-22/petzonic-ai (checked 9 Oct; keep it public)
+- [x] Repo is **public**: https://github.com/sudarsan-22/breedernear-ai (checked 9 Oct; keep it public)
 - [ ] README rewritten to match what is actually built (see [02-rules-dos-and-donts.md §5](02-rules-dos-and-donts.md#5-things-in-the-current-readme-that-must-change-before-submission))
 - [ ] README contains: theme, one-line pitch, **live URL**, **video link**, architecture diagram, Google Cloud services used, local setup steps that really work, how to run tests and evals, a "Simulated vs real" table, roadmap, team
 - [x] `LICENSE` file present (MIT, matching the README), added 9 Oct

@@ -35,7 +35,7 @@ What he saw, again and again:
 | **Priya, first-time pet buyer in Tiruppur (demand side)** | Find out which pet suits her family, then find a trustworthy breeder nearby at a fair price. Avoid scams and illegal or sick animals. Know exactly what to buy on day one. |
 | **Pet-shop and marketplace operators (business side)** | Trusted, structured listings; automated fraud and compliance screening; more conversions with less support work |
 
-## Solution: PetZonic AI
+## Solution: BreederNear AI
 
 An AI agent system that connects breeders and buyers **directly, safely and fairly**:
 
@@ -49,11 +49,11 @@ An AI agent system that connects breeders and buyers **directly, safely and fair
 
    The result is a **trust score with plain-language reasons**.
 3. **Find (buyer concierge):** the buyer chats: *"I want a pet bird for my 8-year-old, we live in a flat in Tiruppur, budget ₹3,000."* The concierge works out which pets suit them, finds trusted breeder listings nearby (by district and distance), and shows how each price compares with the typical range.
-4. **Start right (starter & care agent):** once the buyer picks a pet, PetZonic builds a personalised **starter kit** from the accessories catalogue (correct cage size for the species, food, perches) and a **first-14-days care plan** with "see a vet if…" warning signs.
+4. **Start right (starter & care agent):** once the buyer picks a pet, BreederNear builds a personalised **starter kit** from the accessories catalogue (correct cage size for the species, food, perches) and a **first-14-days care plan** with "see a vet if…" warning signs.
 
 ## Why AI is essential, not decorative
 
-| Step | Today (manual) | With PetZonic AI |
+| Step | Today (manual) | With BreederNear AI |
 |---|---|---|
 | Creating a listing | Breeder types the same details into every group | Photo + one casual message → structured listing (multimodal, multilingual) |
 | Trust | Word of mouth; scams are common | Automated multi-signal screening: vision + rules + pricing data |
@@ -61,9 +61,9 @@ An AI agent system that connects breeders and buyers **directly, safely and fair
 | Discovery | Walk into the nearest shop | Conversational matching on needs, location and fair price |
 | After purchase | Trial and error | Personalised starter kit + care plan |
 
-## Theme alignment (Retail & Commerce keywords → PetZonic)
+## Theme alignment (Retail & Commerce keywords → BreederNear)
 
-| Theme keyword | PetZonic feature |
+| Theme keyword | BreederNear feature |
 |---|---|
 | Conversational shopping | Buyer concierge chat |
 | Product discovery | Pet discovery by needs and location; starter-kit discovery |

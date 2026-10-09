@@ -6,10 +6,10 @@ The T&C (Deliverables) require the deck to cover **solution architecture and the
 
 | # | Slide | Content | Criterion |
 |---|---|---|---|
-| 1 | **Title** | PetZonic AI: trusted breeder-to-buyer pet commerce, powered by Gemini agents. Theme: **Retail & Commerce**. Team. Live URL, GitHub, video. | — |
+| 1 | **Title** | BreederNear AI: trusted breeder-to-buyer pet commerce, powered by Gemini agents. Theme: **Retail & Commerce**. Team. Live URL, GitHub, video. | — |
 | 2 | **"The breeder is 50 metres away."** | The founder's story: 5 years breeding and brokering birds in Coimbatore; ₹750 → ₹4L+ with a 100-person circle; customers overpay at shops; the market is hidden in district WhatsApp groups. Labelled as the founder's experience. | Alignment & Impact |
 | 3 | **The problem, in four parts** | Discovery (can't find breeders), trust (scams, sick animals), legality (protected birds, dyed munias, unregistered dog breeders; **cited news/rules**), time (breeders lose hours to manual selling) | Alignment & Impact |
-| 4 | **Theme alignment** | Theme keyword → PetZonic feature table (conversational shopping, product discovery, personalisation, fraud prevention, customer insights, efficiency) | Alignment (25%) |
+| 4 | **Theme alignment** | Theme keyword → BreederNear feature table (conversational shopping, product discovery, personalisation, fraud prevention, customer insights, efficiency) | Alignment (25%) |
 | 5 | **Solution overview** | List → Check → Find → Start right. One screenshot per step. | Alignment, UX |
 | 6 | **Breeder copilot** | Before: WhatsApp message. After: structured listing with fair-price bar. Timed: "≤ 60 s". | Innovation, UX |
 | 7 | **Trust & compliance** | Trust card screenshot; the signals table; BLOCKED example; "Is this listing safe?" for outside posts | Innovation, Impact |

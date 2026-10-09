@@ -14,9 +14,9 @@ Check exact shapes against the installed ADK version: run `adk api_server agents
 
 | Call | Purpose |
 |---|---|
-| `POST /apps/petzonic/users/{guest_id}/sessions` with `{"state": {"guest_id": "...", "mode": "buyer"}}` | Create a chat session |
-| `GET /apps/petzonic/users/{guest_id}/sessions/{session_id}` | Restore after reload |
-| `POST /run_sse` with `{"app_name": "petzonic", "user_id": guest_id, "session_id": ..., "new_message": {"role": "user", "parts": [{"text": "..."}]}, "streaming": true}` | Send a message; stream events |
+| `POST /apps/breedernear/users/{guest_id}/sessions` with `{"state": {"guest_id": "...", "mode": "buyer"}}` | Create a chat session |
+| `GET /apps/breedernear/users/{guest_id}/sessions/{session_id}` | Restore after reload |
+| `POST /run_sse` with `{"app_name": "breedernear", "user_id": guest_id, "session_id": ..., "new_message": {"role": "user", "parts": [{"text": "..."}]}, "streaming": true}` | Send a message; stream events |
 
 SSE events carry an `author` (agent) and `content.parts` (`text`, `function_call`, `function_response`). The UI renders:
 
@@ -56,7 +56,7 @@ Plain HTML, CSS and JavaScript. No build step. **Mobile-first**: breeders will u
 
 ```
 ┌──────────────────────────────────────────┐
-│ 🐾 PetZonic AI                            │
+│ 🐾 BreederNear AI                            │
 │ Find trusted breeders near you.           │
 │ Fair prices. Legal, healthy pets.         │
 │                                           │
@@ -119,8 +119,8 @@ Upload a screenshot and/or paste text → trust card with reasons and "Questions
 
 ### Client state
 
-- `localStorage.petzonic_guest_id`: UUID v4
-- `localStorage.petzonic_session_id`, `petzonic_mode`
+- `localStorage.breedernear_guest_id`: UUID v4
+- `localStorage.breedernear_session_id`, `breedernear_mode`
 - Wrap every `localStorage` access in try/catch with an in-memory fallback.
 
 ### Quality bar

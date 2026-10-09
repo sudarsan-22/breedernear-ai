@@ -1,4 +1,4 @@
-# PetZonic AI 🐾
+# BreederNear AI 🐾
 
 ### Find the trusted breeder next door: AI agents for safe, fair, direct pet commerce
 
@@ -20,13 +20,13 @@ Our founder spent five years as a bird breeder and broker in Coimbatore, India. 
 - **Buyers can't tell good sellers from bad.** Scams are common, and protected native birds are still traded illegally, sometimes dyed to disguise them.
 - **Breeders lose hours every day** to manual selling: repeating answers, confirming stock, negotiating.
 
-## What PetZonic AI does
+## What BreederNear AI does
 
 | Step | What happens | How |
 |---|---|---|
 | **List** | A breeder sends photos plus a casual message, the way they'd post on WhatsApp, in English or Tamil. They get a complete, priced listing ready to publish. | Gemini multimodal and multilingual extraction into a validated schema; fair-price range from data |
 | **Check** | Every listing is screened before buyers see it. Protected species are **blocked**. Dyed birds, visible health concerns, reused photos, suspicious prices and scam language are flagged. Buyers see an explainable trust score. | Gemini vision + deterministic rules (perceptual hashing, price rules, species lists) → trust score **computed in code** |
-| **Find** | A buyer describes their home, family and budget. PetZonic suggests suitable pets and finds trusted breeders nearby, with fair-price indicators. | ADK agent with tool calls over Firestore; distance by district |
+| **Find** | A buyer describes their home, family and budget. BreederNear suggests suitable pets and finds trusted breeders nearby, with fair-price indicators. | ADK agent with tool calls over Firestore; distance by district |
 | **Start right** | A personalised starter kit (correct cage size, food, accessories) and a first-14-days care plan with "see a vet if…" signs | Product rules + Gemini structured care plans |
 | **Is this listing safe?** | Upload a screenshot of a post seen on WhatsApp or Instagram and get the same trust screening | Same pipeline, nothing stored |
 
@@ -95,7 +95,7 @@ This is a hackathon prototype. To be transparent:
 | AI extraction, screening, matching, care plans | **Real**: live Gemini calls |
 | Trust score, species blocking, welfare rules | **Real**: enforced in code and covered by tests |
 
-PetZonic AI is not a veterinary service and does not sell animals or products.
+BreederNear AI is not a veterinary service and does not sell animals or products.
 
 ## Getting started
 

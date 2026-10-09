@@ -1,4 +1,4 @@
-# PetZonic AI — Documentation
+# BreederNear AI — Documentation
 
 This folder is the single source of truth for **what** we are building, **why**, **how**, and **how it gets submitted** to the Google Cloud AI Builder Cup 2026 (JAPAC).
 
@@ -11,7 +11,7 @@ This folder is the single source of truth for **what** we are building, **why**,
 | 1 | [event/01-event-overview.md](event/01-event-overview.md) | First. What the event is, dates, eligibility, prizes |
 | 2 | [event/02-rules-dos-and-donts.md](event/02-rules-dos-and-donts.md) | **Before writing any code.** Everything that can get us rejected |
 | 2b | [event/06-terms-compliance-matrix.md](event/06-terms-compliance-matrix.md) | Every T&C clause → what we do → status. Re-check schedule and team agreement. |
-| 3 | [event/03-judging-strategy.md](event/03-judging-strategy.md) | Before deciding scope. How each judging criterion maps to PetZonic |
+| 3 | [event/03-judging-strategy.md](event/03-judging-strategy.md) | Before deciding scope. How each judging criterion maps to BreederNear |
 | 4 | [product/01-problem-and-vision.md](product/01-problem-and-vision.md) | The real-world problem and theme alignment |
 | 5 | [product/02-requirements.md](product/02-requirements.md) | MVP scope, user stories, acceptance criteria |
 | 6 | [product/03-responsible-ai-and-safety.md](product/03-responsible-ai-and-safety.md) | Before writing any prompt or tool |
@@ -31,7 +31,7 @@ This folder is the single source of truth for **what** we are building, **why**,
 
 *"The breeder is 50 metres away. The customer never finds them."* That's the founder's 5 years as a bird breeder and broker in Coimbatore, in one line.
 
-PetZonic AI is an **agentic, trusted breeder-to-buyer pet commerce system** for India, entered under the **Retail & Commerce** theme. Five **Google ADK** agents on **Gemini** do the work:
+BreederNear AI is an **agentic, trusted breeder-to-buyer pet commerce system** for India, entered under the **Retail & Commerce** theme. Five **Google ADK** agents on **Gemini** do the work:
 - **Listing copilot:** a breeder's photos plus a WhatsApp-style Tamil/English message become a structured, fairly priced listing in under a minute.
 - **Trust & compliance:** every listing is screened. Protected native species are blocked in code. Dyed birds, health signs, reused photos, price anomalies, scam language and missing dog-breeder registration are flagged. The result is an explainable trust score.
 - **Buyer matching:** suitable pets, then trusted breeders nearby at fair prices.

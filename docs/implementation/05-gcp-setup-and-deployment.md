@@ -15,11 +15,11 @@ gcloud --version
 ## 1. Project and billing
 
 ```bash
-export PROJECT_ID=petzonic-ai-2026          # must be globally unique
+export PROJECT_ID=breedernear-ai-2026          # must be globally unique
 export REGION=asia-south1
 
 gcloud auth login
-gcloud projects create $PROJECT_ID --name="PetZonic AI"
+gcloud projects create $PROJECT_ID --name="BreederNear AI"
 gcloud config set project $PROJECT_ID
 # Link billing (free trial or hackathon credits) in the console:
 #   https://console.cloud.google.com/billing/linkedaccount?project=$PROJECT_ID
@@ -48,7 +48,7 @@ gcloud services enable \
 ```bash
 gcloud firestore databases create --location=$REGION --type=firestore-native
 
-export BUCKET=${PROJECT_ID}-petzonic-uploads
+export BUCKET=${PROJECT_ID}-breedernear-uploads
 gcloud storage buckets create gs://$BUCKET --location=$REGION --uniform-bucket-level-access
 
 cat > /tmp/lifecycle.json <<'EOF'
@@ -60,8 +60,8 @@ gcloud storage buckets update gs://$BUCKET --lifecycle-file=/tmp/lifecycle.json
 ## 4. Service account (least privilege)
 
 ```bash
-export SA=petzonic-run@${PROJECT_ID}.iam.gserviceaccount.com
-gcloud iam service-accounts create petzonic-run --display-name="PetZonic Cloud Run"
+export SA=breedernear-run@${PROJECT_ID}.iam.gserviceaccount.com
+gcloud iam service-accounts create breedernear-run --display-name="BreederNear Cloud Run"
 
 for ROLE in roles/aiplatform.user roles/datastore.user roles/logging.logWriter; do
   gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA" --role=$ROLE
@@ -83,15 +83,15 @@ Console → Billing → Budgets & alerts → create a budget for this project (e
 
 ```bash
 # Gemini via Google Cloud (used on Cloud Run and recommended locally)
-GOOGLE_CLOUD_PROJECT=petzonic-ai-2026
+GOOGLE_CLOUD_PROJECT=breedernear-ai-2026
 GOOGLE_CLOUD_LOCATION=global
 GOOGLE_GENAI_USE_ENTERPRISE=True      # current ADK docs; older ADK versions read GOOGLE_GENAI_USE_VERTEXAI=True
 # Alternative for local dev only: AI Studio key
 # GOOGLE_API_KEY=...
 
-PETZONIC_MODEL=gemini-3.8-flash       # re-check the newest GA Flash ID on build day; never gemini-2.x
-PETZONIC_BUCKET=petzonic-ai-2026-petzonic-uploads
-PETZONIC_REGION=asia-south1
+BREEDERNEAR_MODEL=gemini-3.8-flash       # re-check the newest GA Flash ID on build day; never gemini-2.x
+BREEDERNEAR_BUCKET=breedernear-ai-2026-breedernear-uploads
+BREEDERNEAR_REGION=asia-south1
 RATE_LIMIT_PER_HOUR=30
 MAX_UPLOAD_MB=5
 ```
@@ -110,7 +110,7 @@ python scripts/seed_firestore.py            # seed breeders, listings, products,
 adk web agents                              # ADK dev UI: test agents and tools in isolation
 uvicorn app.main:app --reload --port 8080   # full app: http://localhost:8080
 pytest                                      # unit tests
-adk eval agents/petzonic evals/core.evalset.json --config_file_path=evals/test_config.json
+adk eval agents/breedernear evals/core.evalset.json --config_file_path=evals/test_config.json
 ```
 
 ## 8. Dockerfile
@@ -131,7 +131,7 @@ Add a `.dockerignore` excluding `.venv`, `.git`, `docs/`, `tests/`, `.env*` and 
 ## 9. Deploy to Cloud Run
 
 ```bash
-gcloud run deploy petzonic \
+gcloud run deploy breedernear \
   --source . \
   --region $REGION \
   --service-account $SA \
@@ -141,7 +141,7 @@ gcloud run deploy petzonic \
   --session-affinity \
   --memory 1Gi --cpu 1 \
   --timeout 300 \
-  --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=global,GOOGLE_GENAI_USE_ENTERPRISE=True,GOOGLE_GENAI_USE_VERTEXAI=True,PETZONIC_MODEL=gemini-3.8-flash,PETZONIC_BUCKET=$BUCKET,PETZONIC_REGION=$REGION"
+  --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=global,GOOGLE_GENAI_USE_ENTERPRISE=True,GOOGLE_GENAI_USE_VERTEXAI=True,BREEDERNEAR_MODEL=gemini-3.8-flash,BREEDERNEAR_BUCKET=$BUCKET,BREEDERNEAR_REGION=$REGION"
 ```
 
 - `--max-instances 1` is used **because ADK sessions are in-memory in the MVP**: a second instance wouldn't know the chat. Raise it after moving to a persistent session service (see [01-architecture.md](01-architecture.md#key-decisions)).
@@ -152,8 +152,8 @@ gcloud run deploy petzonic \
 ### Rollback
 
 ```bash
-gcloud run revisions list --service petzonic --region $REGION
-gcloud run services update-traffic petzonic --region $REGION --to-revisions=<GOOD_REVISION>=100
+gcloud run revisions list --service breedernear --region $REGION
+gcloud run services update-traffic breedernear --region $REGION --to-revisions=<GOOD_REVISION>=100
 ```
 
 Write the known-good revision name into the [submission checklist](../event/04-submission-checklist.md) at submission time.
@@ -161,7 +161,7 @@ Write the known-good revision name into the [submission checklist](../event/04-s
 ### Logs
 
 ```bash
-gcloud run services logs read petzonic --region $REGION --limit 100
+gcloud run services logs read breedernear --region $REGION --limit 100
 ```
 
 ## 10. Deploy early, deploy often

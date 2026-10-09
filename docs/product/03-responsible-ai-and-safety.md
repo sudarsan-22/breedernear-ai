@@ -1,6 +1,6 @@
 # Responsible AI, Safety and Compliance
 
-PetZonic AI deals with live animals, wildlife law and money. Getting it wrong could harm animals, help illegal trade, or break the hackathon's "lawful content / no falsehoods" rules (T&C: Rules of Conduct, Eligibility, Content Warranties). **Safety-critical decisions are made in code. Prompts are a second layer.**
+BreederNear AI deals with live animals, wildlife law and money. Getting it wrong could harm animals, help illegal trade, or break the hackathon's "lawful content / no falsehoods" rules (T&C: Rules of Conduct, Eligibility, Content Warranties). **Safety-critical decisions are made in code. Prompts are a second layer.**
 
 ## 1. Wildlife law: protected species
 
@@ -10,7 +10,7 @@ Trade in protected Indian native birds (e.g. parakeets, munias, silverbills, myn
 
 | Rule | Enforced by |
 |---|---|
-| Listings whose species matches the protected list (common, scientific and Tamil names plus synonyms, e.g. "Indian ringneck", "rose-ringed parakeet", "pachai kili", "munia", "silverbill") are **BLOCKED** and can't be published or shown | **Code**: `petzonic_core/safety/species_rules.py`, run on both the model's species guess **and** the breeder's text |
+| Listings whose species matches the protected list (common, scientific and Tamil names plus synonyms, e.g. "Indian ringneck", "rose-ringed parakeet", "pachai kili", "munia", "silverbill") are **BLOCKED** and can't be published or shown | **Code**: `breedernear_core/safety/species_rules.py`, run on both the model's species guess **and** the breeder's text |
 | If vision says "possibly protected" with confidence ≥ 0.5, the listing is BLOCKED pending a human review (prototype: stays blocked) | Code |
 | The buyer concierge refuses requests for protected species, explains briefly, and suggests legal alternatives | Prompt + `search_listings` never returns BLOCKED listings (code) |
 | CITES-listed exotics show a PARIVESH registration note; without a registration ID the level is capped at CAUTION | Code |

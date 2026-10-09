@@ -41,7 +41,7 @@ Risk IDs (R#) refer to the [risk tracker](02-rules-dos-and-donts.md#risk-tracker
 |---|---|---|
 | Built **primarily on Google Cloud**; primarily competing clouds disqualified | Cloud Run, Gemini, ADK, Firestore, Cloud Storage. **No** AWS/Azure/Vercel/Supabase. **No non-Google AI model APIs at runtime** (R35). | 🔧 |
 | **Fresh code and original assets** created during the official timeline | New repo (first commit 23 Sep, inside the window); daily commits; nothing copied from the earlier PetZonic platform (R11, R25) | 🔧 |
-| Pre-existing products, ongoing projects or pre-launch code disqualified | R25: ideas only; organiser clarification email; public org profile handled (R32) | 👤 |
+| Pre-existing products, ongoing projects or pre-launch code disqualified | R25: ideas only; organiser clarification email disclosing petzonic.co; earlier-platform repos made private on 9 Oct (R32) | 👤 |
 | (a) working deployed live URL | Cloud Run (R16, R17) | 👤 |
 | (b) demo video **under 3 minutes** | Target 2:40, max 2:55 (R18) | 👤 |
 | (c) **public GitHub repository** | Already public (R23) | ✅ |
@@ -79,7 +79,7 @@ Risk IDs (R#) refer to the [risk tracker](02-rules-dos-and-donts.md#risk-tracker
 | Obligation | Our response | Status |
 |---|---|---|
 | Comply with all laws; no unlawful or objectionable content | Protected-species blocking, no real animal sales, welfare rules (R26, R34) | 🔧 |
-| **No third-party protected content or content under confidentiality obligations** | (1) No real brands or others' images (R6). (2) **Nothing from our employers**: no employer code, data, devices or accounts (R29). (3) No confidential material from the PetZonic investor deck (R31). | 👤 / 🔧 |
+| **No third-party protected content or content under confidentiality obligations** | (1) No real brands or others' images (R6). (2) **Nothing from our employers**: no employer code, data, devices or accounts (R29). (3) No confidential material from the BreederNear investor deck (R31). | 👤 / 🔧 |
 | Grant the organiser rights to use content for intended purposes | Accepted; see §13–15 | ℹ️ |
 | **Must not leave the online communication platform or dashboard** once the event begins | Stay in Discord, WhatsApp/Telegram groups if created, and the dashboard (R10) | 👤 |
 

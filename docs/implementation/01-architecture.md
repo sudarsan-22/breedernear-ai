@@ -15,12 +15,12 @@ flowchart TD
     B[Breeder<br/>phone browser] -->|HTTPS| CR
     U[Buyer<br/>phone / laptop] -->|HTTPS| CR
 
-    subgraph CR[Cloud Run service: petzonic, asia-south1]
+    subgraph CR[Cloud Run service: breedernear, asia-south1]
         WEB[Static web UI<br/>buyer mode · breeder mode]
         API[FastAPI /api/*<br/>uploads, listings, enquiries, cart]
         ADK[ADK runtime<br/>/run_sse, sessions]
         subgraph AG[ADK agents]
-            ROOT[petzonic_concierge<br/>root agent]
+            ROOT[breedernear_concierge<br/>root agent]
             LIST[listing_agent<br/>breeder copilot]
             TRUST[trust_agent<br/>screening & compliance]
             MATCH[match_agent<br/>buyer pet & breeder matching]
@@ -28,7 +28,7 @@ flowchart TD
             ROOT --> LIST & MATCH & CARE
             LIST --> TRUST
         end
-        CORE[petzonic_core<br/>tools · safety rules · trust score · schemas · services]
+        CORE[breedernear_core<br/>tools · safety rules · trust score · schemas · services]
         ADK --> AG
         AG --> CORE
         API --> CORE
@@ -113,7 +113,7 @@ Not used, to keep it simple: load balancer, CDN, Cloud SQL, BigQuery, Pub/Sub, M
 |---|---|---|
 | Language | Python 3.12 | TypeScript ADK: less mature |
 | Agent framework | ADK | Raw Gemini SDK: less structure, no built-in evals or sessions |
-| Model | Newest GA Gemini Flash (`gemini-3.8-flash` as of 9 Oct 2026), via `PETZONIC_MODEL` | Pro: slower and costlier. `gemini-2.x`: retiring 20 Oct. |
+| Model | Newest GA Gemini Flash (`gemini-3.8-flash` as of 9 Oct 2026), via `BREEDERNEAR_MODEL` | Pro: slower and costlier. `gemini-2.x`: retiring 20 Oct. |
 | Trust decision | Deterministic scoring in code from individual checks | Letting the LLM decide: not auditable, can be talked out of it |
 | Duplicate photos | Perceptual hashing (`imagehash` + Pillow) | Asking the LLM: unreliable and costly |
 | Distance | District centroids (lat/lng) + haversine in code | Maps API: stretch only |
@@ -128,13 +128,13 @@ Not used, to keep it simple: load balancer, CDN, Cloud SQL, BigQuery, Pub/Sub, M
 ## Repository layout (target)
 
 ```
-petzonic-ai/
+breedernear-ai/
 ├── agents/
-│   └── petzonic/                 # ADK app (name: "petzonic")
+│   └── breedernear/                 # ADK app (name: "breedernear")
 │       ├── __init__.py           # from . import agent
 │       ├── agent.py              # root_agent + sub-agents wiring
 │       └── prompts.py
-├── petzonic_core/                # business logic, unit-testable without ADK
+├── breedernear_core/                # business logic, unit-testable without ADK
 │   ├── config.py
 │   ├── schemas.py                # ListingDraft, PhotoScreen, Screening, CarePlan…
 │   ├── safety/

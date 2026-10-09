@@ -105,7 +105,7 @@ Protected and CITES species lists are **files**, versioned in git so changes are
 
 ## Cloud Storage
 
-Bucket `gs://<PROJECT_ID>-petzonic-uploads` (`asia-south1`, uniform access, **not public**).
+Bucket `gs://<PROJECT_ID>-breedernear-uploads` (`asia-south1`, uniform access, **not public**).
 
 - Path: `uploads/{guest_id}/{upload_id}.{ext}`; metadata `kind` = `listing_photo` | `external_listing`
 - Lifecycle: delete after 30 days

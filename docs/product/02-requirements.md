@@ -73,9 +73,9 @@
 ### F3b: "Is this listing safe?"
 *As a buyer who found a pet in a WhatsApp group, I want to know whether the post shows warning signs before I pay anyone.*
 - Input: a screenshot or photo of the post, and/or pasted text.
-- PetZonic extracts the listing and runs every F3 check except duplicate-photo matching against non-PetZonic sources. The result is shown as a trust card with reasons and **questions to ask the seller**.
+- BreederNear extracts the listing and runs every F3 check except duplicate-photo matching against non-BreederNear sources. The result is shown as a trust card with reasons and **questions to ask the seller**.
 - Nothing is stored as a listing. The upload follows the normal 30-day deletion rule.
-- This brings PetZonic's value to the informal groups where the trade actually happens today.
+- This brings BreederNear's value to the informal groups where the trade actually happens today.
 
 ### F4: Buyer concierge
 *As a first-time buyer, I want help choosing the right pet and a trustworthy breeder near me at a fair price.*

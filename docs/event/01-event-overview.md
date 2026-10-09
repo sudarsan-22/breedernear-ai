@@ -35,13 +35,13 @@ Sources, checked 9 Oct 2026:
 ## The six themes
 
 1. BFSI: Intelligent Risk, Fraud & Financial Experiences
-2. **Retail & Commerce: Intelligent Customer and Business Experiences** ← PetZonic
+2. **Retail & Commerce: Intelligent Customer and Business Experiences** ← BreederNear
 3. Manufacturing: Intelligent Operations & Industrial Efficiency
 4. Media, Content & Digital Experiences
 5. Future of Work & Enterprise Productivity
 6. Sustainability & Social Impact
 
-There is **no healthcare theme**. PetZonic is a pet-care **commerce** experience, and the Retail & Commerce theme explicitly lists *product discovery, personalisation, conversational shopping, customer insights and fraud prevention*. See [../product/01-problem-and-vision.md](../product/01-problem-and-vision.md).
+There is **no healthcare theme**. BreederNear is a pet-care **commerce** experience, and the Retail & Commerce theme explicitly lists *product discovery, personalisation, conversational shopping, customer insights and fraud prevention*. See [../product/01-problem-and-vision.md](../product/01-problem-and-vision.md).
 
 ## Mandatory technology
 

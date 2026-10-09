@@ -4,7 +4,7 @@ Three layers: **unit tests** for the code that makes decisions, **ADK evals** fo
 
 ## 1. Unit tests (pytest, no network)
 
-`tests/unit/`. They run in CI on every push. Firestore and Gemini are faked via dependency injection in `petzonic_core/services`.
+`tests/unit/`. They run in CI on every push. Firestore and Gemini are faked via dependency injection in `breedernear_core/services`.
 
 | Module | Must-have cases |
 |---|---|
@@ -29,7 +29,7 @@ Three layers: **unit tests** for the code that makes decisions, **ADK evals** fo
 `evals/` holds `*.evalset.json` files and `test_config.json`. Run them locally, and in CI on demand (they cost model calls).
 
 ```bash
-adk eval agents/petzonic evals/core.evalset.json \
+adk eval agents/breedernear evals/core.evalset.json \
   --config_file_path=evals/test_config.json --print_detailed_results
 ```
 

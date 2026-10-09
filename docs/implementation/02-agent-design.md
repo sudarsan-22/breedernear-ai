@@ -1,13 +1,13 @@
 # Agent Design (ADK)
 
-All agents are ADK `LlmAgent`s on the model in `PETZONIC_MODEL`. Tools are plain Python functions in `petzonic_core/tools/`. They take a `ToolContext` to read session state (`guest_id`, `mode`, demo identity) and return JSON-serialisable dicts.
+All agents are ADK `LlmAgent`s on the model in `BREEDERNEAR_MODEL`. Tools are plain Python functions in `breedernear_core/tools/`. They take a `ToolContext` to read session state (`guest_id`, `mode`, demo identity) and return JSON-serialisable dicts.
 
 Confirm ADK API details against the installed version (`pip show google-adk`, then <https://adk.dev>). ADK releases weekly and has parallel 1.x and 2.x lines.
 
 ## Agent tree
 
 ```
-petzonic_concierge (root)
+breedernear_concierge (root)
 ├── listing_agent   breeder copilot
 ├── trust_agent     screening, "is this listing safe?", explanations
 ├── match_agent     buyer: which pet, which breeder
@@ -16,7 +16,7 @@ petzonic_concierge (root)
 
 Delegation uses ADK agent transfer (`transfer_to_agent`) based on each agent's `description`. Sub-agents can transfer back to the root or to a sibling (e.g. match → care once a pet is chosen).
 
-### petzonic_concierge (root)
+### breedernear_concierge (root)
 
 - **Role:** greet, detect mode (buying / breeder) and language, route, refuse off-topic requests.
 - **Instruction essentials:**
@@ -106,7 +106,7 @@ All tools return `{"status": "ok" | "error", ...}`. Errors include a `message` t
 
 `screen_listing(listing)` is internal (called by `publish_listing` and `check_external_listing`). It is not exposed to the model, so the model can't skip it or re-run it selectively.
 
-## Structured schemas (Pydantic, in `petzonic_core/schemas.py`)
+## Structured schemas (Pydantic, in `breedernear_core/schemas.py`)
 
 ### ListingDraft
 
@@ -217,6 +217,6 @@ class CarePlan(BaseModel):
 ## Prompting guidelines
 
 - Follow Google's Gemini prompting best practices: clear role, explicit constraints, output format, a few short examples (including Tamil/mixed breeder messages).
-- Instructions live in `agents/petzonic/prompts.py`, one constant per agent.
+- Instructions live in `agents/breedernear/prompts.py`, one constant per agent.
 - Safety rules go in prompts **and** code. Prompts make good behaviour likely; code makes bad outcomes impossible.
 - Temperature: 0.2 for extraction and screening; default for conversation.

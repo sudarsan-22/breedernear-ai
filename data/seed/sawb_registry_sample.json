@@ -1,0 +1,11 @@
+{
+  "_about": "SIMULATED State Animal Welfare Board dog-breeder registry. All numbers are fictional and use a SIM- prefix. Never shown as real data.",
+  "simulated": true,
+  "registrations": [
+    {"registration_no": "SIM-TNAWB-DB-0042", "name": "Kovai Paws Kennel", "state": "TN", "valid_until": "2027-03-31"},
+    {"registration_no": "SIM-TNAWB-DB-0107", "name": "Salem Golden Labs", "state": "TN", "valid_until": "2027-08-15"},
+    {"registration_no": "SIM-TNAWB-DB-0233", "name": "Madurai Beagle House", "state": "TN", "valid_until": "2026-12-31"},
+    {"registration_no": "SIM-KAAWB-DB-0019", "name": "Bengaluru Shih Tzu Home", "state": "KA", "valid_until": "2027-06-30"},
+    {"registration_no": "SIM-TNAWB-DB-0001", "name": "Expired Example Kennel", "state": "TN", "valid_until": "2025-12-31"}
+  ]
+}

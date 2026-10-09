@@ -1,0 +1,17 @@
+{
+  "_about": "Indicative price ranges in INR. SAMPLE DATA: placeholders until the founder confirms them from first-hand market experience. Always shown in the UI as 'based on sample market data'.",
+  "confirmed_by_founder": false,
+  "ranges": [
+    {"species_key": "budgerigar", "unit": "pair", "varieties": {"default": [400, 900], "hand_tamed": [1200, 2500]}},
+    {"species_key": "lovebird_peach_faced", "unit": "pair", "varieties": {"default": [1200, 2500], "lutino": [1500, 3000], "albino": [1800, 3500]}},
+    {"species_key": "lovebird_fischers", "unit": "pair", "varieties": {"default": [1500, 3500]}},
+    {"species_key": "cockatiel", "unit": "pair", "varieties": {"default": [3000, 6000], "lutino": [3500, 7000], "pied": [3500, 7000]}},
+    {"species_key": "zebra_finch", "unit": "pair", "varieties": {"default": [300, 700]}},
+    {"species_key": "society_finch", "unit": "pair", "varieties": {"default": [300, 700]}},
+    {"species_key": "canary", "unit": "pair", "varieties": {"default": [2000, 5000]}},
+    {"species_key": "labrador", "unit": "single", "varieties": {"default": [15000, 35000]}},
+    {"species_key": "beagle", "unit": "single", "varieties": {"default": [20000, 40000]}},
+    {"species_key": "shih_tzu", "unit": "single", "varieties": {"default": [20000, 45000]}},
+    {"species_key": "persian_cat", "unit": "single", "varieties": {"default": [10000, 30000]}}
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "_about": "Protected Indian native species that must never be listed. Conservative policy: any match blocks the listing. Not legal advice; verify against the Wild Life (Protection) Act, 1972 schedules (as amended in 2022) on India Code before any real launch.",
+  "_sources": [
+    "Wild Life (Protection) Act, 1972, as amended by the Wild Life (Protection) Amendment Act, 2022: Schedules I and II (India Code)",
+    "https://www.sawen.org/news/details/pet-shop-owner-arrested-in-noida-for-selling-protected-bird-turtle-species-",
+    "https://www.deccanherald.com/india/karnataka/bengaluru/95-munias-dipped-in-textile-dye-rescued-from-pet-shop-owner-in-south-bengaluru-2657076",
+    "https://www.petaindia.com/?p=70429"
+  ],
+  "species": [
+    {
+      "key": "rose_ringed_parakeet",
+      "common_name": "Rose-ringed parakeet (Indian ringneck)",
+      "scientific_name": "Psittacula krameri",
+      "aliases": ["indian ringneck", "ringneck parrot", "ring neck parrot", "ringneck", "ring neck", "rose ringed parakeet", "rose-ringed parakeet", "psittacula krameri", "pachai kili", "tota", "green parrot"],
+      "note": "Conservative policy blocks all P. krameri listings, including colour mutations."
+    },
+    {
+      "key": "alexandrine_parakeet",
+      "common_name": "Alexandrine parakeet",
+      "scientific_name": "Psittacula eupatria",
+      "aliases": ["alexandrine", "alexandrine parakeet", "alexandrine parrot", "psittacula eupatria", "raw parrot", "hiraman"]
+    },
+    {
+      "key": "plum_headed_parakeet",
+      "common_name": "Plum-headed parakeet",
+      "scientific_name": "Psittacula cyanocephala",
+      "aliases": ["plum headed parakeet", "plum-headed parakeet", "plumhead", "psittacula cyanocephala"]
+    },
+    {
+      "key": "other_psittacula",
+      "common_name": "Other native Psittacula parakeets (Malabar, red-breasted, blossom-headed)",
+      "scientific_name": "Psittacula spp.",
+      "aliases": ["malabar parakeet", "blue winged parakeet", "red breasted parakeet", "moustached parakeet", "blossom headed parakeet", "psittacula"]
+    },
+    {
+      "key": "munias",
+      "common_name": "Native munias (scaly-breasted, tricoloured, white-rumped, black-headed)",
+      "scientific_name": "Lonchura spp. (native)",
+      "aliases": ["munia", "munias", "scaly breasted munia", "spotted munia", "tricoloured munia", "black headed munia", "white rumped munia", "lonchura punctulata", "lonchura malacca"]
+    },
+    {
+      "key": "indian_silverbill",
+      "common_name": "Indian silverbill",
+      "scientific_name": "Euodice malabarica",
+      "aliases": ["silverbill", "indian silverbill", "white throated munia", "euodice malabarica"]
+    },
+    {
+      "key": "red_avadavat",
+      "common_name": "Red avadavat (red munia, strawberry finch)",
+      "scientific_name": "Amandava amandava",
+      "aliases": ["red avadavat", "avadavat", "red munia", "strawberry finch", "amandava amandava", "green avadavat"]
+    },
+    {
+      "key": "mynas",
+      "common_name": "Mynas (common myna, hill myna)",
+      "scientific_name": "Acridotheres tristis, Gracula religiosa",
+      "aliases": ["myna", "mynah", "maina", "hill myna", "hill mynah", "talking myna", "common myna", "gracula religiosa"]
+    },
+    {
+      "key": "bulbuls",
+      "common_name": "Bulbuls",
+      "scientific_name": "Pycnonotus spp.",
+      "aliases": ["bulbul", "red vented bulbul", "red whiskered bulbul"]
+    },
+    {
+      "key": "indian_peafowl",
+      "common_name": "Indian peafowl",
+      "scientific_name": "Pavo cristatus",
+      "aliases": ["peacock", "peahen", "peafowl", "mayil", "pavo cristatus"]
+    },
+    {
+      "key": "indian_star_tortoise",
+      "common_name": "Indian star tortoise",
+      "scientific_name": "Geochelone elegans",
+      "aliases": ["star tortoise", "indian star tortoise", "geochelone elegans"]
+    }
+  ],
+  "generic_terms": {
+    "_about": "Words that usually mean a protected native bird, unless the text also names an allowed exotic species (e.g. 'budgie parakeet').",
+    "terms": ["parakeet", "parakeets", "native parrot", "indian parrot", "desi parrot", "kili"],
+    "allowed_if_also_mentions": ["budgie", "budgies", "budgerigar", "australian parakeet", "shell parakeet", "monk parakeet", "quaker", "love bird", "lovebird", "lovebirds", "cockatiel", "conure", "african grey", "macaw", "cockatoo", "eclectus", "amazon", "panchavarna"]
+  },
+  "allowed_lookalikes": {
+    "_about": "Domesticated or exotic species whose names contain a protected word. These must not trigger a block.",
+    "phrases": ["society finch", "bengalese finch", "society munia", "java sparrow", "java finch"]
+  }
+}

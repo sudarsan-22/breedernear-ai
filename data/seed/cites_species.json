@@ -1,0 +1,23 @@
+{
+  "_about": "Exotic pet species listed in the CITES Appendices. Under the Living Animal Species (Reporting and Registration) Rules, 2024, possession, transfer and births must be registered on PARIVESH 2.0. Listings without a PARIVESH registration ID are capped at CAUTION. Not legal advice.",
+  "_sources": [
+    "CITES Appendices: all Psittaciformes are in Appendix II except Agapornis roseicollis, Melopsittacus undulatus, Nymphicus hollandicus and Psittacula krameri (https://cites.org/eng/app/appendices.php)",
+    "https://indiaenvironmentportal.org.in/reports-and-documents/living-animal-species-reporting-and-registration-rules-2024"
+  ],
+  "species": [
+    {"key": "african_grey", "common_name": "African grey parrot", "appendix": "I", "aliases": ["african grey", "grey parrot", "psittacus erithacus", "timneh"]},
+    {"key": "macaw", "common_name": "Macaws", "appendix": "I/II", "aliases": ["macaw", "macaws", "blue and gold macaw", "scarlet macaw", "green winged macaw", "panchavarna kili"]},
+    {"key": "cockatoo", "common_name": "Cockatoos", "appendix": "I/II", "aliases": ["cockatoo", "cockatoos", "sulphur crested cockatoo", "umbrella cockatoo", "moluccan cockatoo"]},
+    {"key": "amazon_parrot", "common_name": "Amazon parrots", "appendix": "I/II", "aliases": ["amazon parrot", "amazona"]},
+    {"key": "eclectus", "common_name": "Eclectus parrot", "appendix": "II", "aliases": ["eclectus"]},
+    {"key": "conure", "common_name": "Conures", "appendix": "II", "aliases": ["conure", "conures", "sun conure", "green cheek conure", "jenday conure", "pineapple conure"]},
+    {"key": "fischers_lovebird", "common_name": "Fischer's lovebird", "appendix": "II", "aliases": ["fischer lovebird", "fischers lovebird", "fischer's lovebird", "fisher lovebird", "agapornis fischeri"]},
+    {"key": "masked_lovebird", "common_name": "Masked (yellow-collared) lovebird", "appendix": "II", "aliases": ["masked lovebird", "personata", "agapornis personatus", "black masked lovebird", "blue masked lovebird"]},
+    {"key": "monk_parakeet", "common_name": "Monk (quaker) parakeet", "appendix": "II", "aliases": ["monk parakeet", "quaker parrot", "quaker parakeet"]},
+    {"key": "java_sparrow", "common_name": "Java sparrow", "appendix": "II", "aliases": ["java sparrow", "java finch", "padda oryzivora"]}
+  ],
+  "not_cites": {
+    "_about": "Common pet birds explicitly excluded from the CITES Appendices (no PARIVESH note needed).",
+    "aliases": ["budgie", "budgerigar", "cockatiel", "peach faced lovebird", "peach-faced lovebird", "rosy faced lovebird", "agapornis roseicollis", "zebra finch", "society finch", "bengalese finch", "canary"]
+  }
+}

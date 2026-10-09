@@ -2,3 +2,9 @@
 google-adk==2.11.0          # Apache-2.0; brings fastapi, uvicorn, google-genai, pydantic
 pydantic-settings==2.15.0   # MIT
 pillow==12.3.0              # MIT-CMU (HPND); perceptual hashing of listing photos
+google-cloud-firestore==2.34.1  # Apache-2.0
+google-cloud-storage==3.17.0    # Apache-2.0
+python-multipart==0.0.32       # Apache-2.0; image uploads
+# Pinned to stay compatible with google-adk 2.11.0's OpenTelemetry version
+google-api-core==2.34.0        # Apache-2.0
+opentelemetry-api==1.42.1      # Apache-2.0

@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -9,6 +10,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    breedernear_backend: Literal["memory", "gcp"] = "memory"   # "gcp" = Firestore + Cloud Storage
     breedernear_model: str = "gemini-3.8-flash"
     breedernear_bucket: str = ""
     breedernear_region: str = "asia-south1"

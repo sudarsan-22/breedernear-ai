@@ -16,11 +16,14 @@ class ListingDraft(BaseModel):
     species_scientific: str | None = None
     variety: str | None = None
     animal_group: AnimalGroup
-    count: int = Field(ge=1, default=1)
-    unit: Literal["single", "pair", "litter"] = "single"
+    count: int = Field(ge=1, default=1, description=(
+        "How many sale units are offered, counted in `unit`: '4 pairs' -> 4; '2 chicks' -> 2; "
+        "'a litter of 6 puppies' -> 6."))
+    unit: Literal["single", "pair", "litter"] = Field(default="single", description=(
+        "'pair' if priced per pair (jodi), 'litter' only if the whole litter has one price, else 'single'."))
     sex: str | None = None
     age_months: int | None = Field(default=None, ge=0)
-    price_inr: int | None = Field(default=None, gt=0)
+    price_inr: int | None = Field(default=None, gt=0, description="Price per unit in rupees, digits only.")
     district: str | None = None
     locality: str | None = None
     health_notes: str | None = None
@@ -29,7 +32,8 @@ class ListingDraft(BaseModel):
     description: str = ""
     language_detected: str = "en"
     photo_text_consistent: bool = True
-    missing_fields: list[str] = []
+    missing_fields: list[str] = Field(default=[], description=(
+        "Buyer-relevant fields not stated, from: price_inr, age_months, health_notes, district."))
     confidence: float = Field(default=0.0, ge=0, le=1)
 
 

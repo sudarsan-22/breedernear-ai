@@ -25,7 +25,7 @@ gcloud run deploy "$SERVICE" \
   --session-affinity \
   --memory 1Gi --cpu 1 \
   --timeout 300 \
-  --set-env-vars "GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=global,GOOGLE_GENAI_USE_ENTERPRISE=True,GOOGLE_GENAI_USE_VERTEXAI=True,BREEDERNEAR_MODEL=${MODEL},BREEDERNEAR_BUCKET=${BUCKET},BREEDERNEAR_REGION=${REGION},GIT_SHA=${GIT_SHA}"
+  --set-env-vars "GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=global,GOOGLE_GENAI_USE_ENTERPRISE=True,GOOGLE_GENAI_USE_VERTEXAI=True,BREEDERNEAR_BACKEND=gcp,BREEDERNEAR_MODEL=${MODEL},BREEDERNEAR_BUCKET=${BUCKET},BREEDERNEAR_REGION=${REGION},GIT_SHA=${GIT_SHA}"
 
 URL="$(gcloud run services describe "$SERVICE" --project "$PROJECT_ID" --region "$REGION" --format='value(status.url)')"
 REVISION="$(gcloud run services describe "$SERVICE" --project "$PROJECT_ID" --region "$REGION" --format='value(status.latestReadyRevisionName)')"

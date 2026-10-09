@@ -30,7 +30,7 @@ Every risk below has a status. **✅ Resolved** = done and checked. **🔧 Built
 | R13 | Theme misalignment (zero alignment score) | 🔧 Built-in | Retail & Commerce, mapped to the theme's own wording ([judging strategy](03-judging-strategy.md)) | Both | — |
 | R14 | Diagnosis / dosage claims; welfare | 🔧 Built-in | Health signs worded as "ask the seller", disclaimer added by code, minimum cage rules ([safety](../product/03-responsible-ai-and-safety.md)) | Sudarsan | 14 Oct |
 | R15 | Looks like real selling / soliciting business | 🔧 Built-in | Demo enquiries and cart only, no payments, fictional breeders, prototype labels in the UI and README | Both | 14 Oct |
-| R16 | Not deployed on Google Cloud / no live URL | 👤 Owner action | GCP project + billing today; hello-world deploy on day 1 ([setup](../implementation/05-gcp-setup-and-deployment.md)) | Sudarsan | 9–10 Oct |
+| R16 | Not deployed on Google Cloud / no live URL | ✅ Resolved | Project `breedernear-ai-2026` with billing; deployed to Cloud Run on 10 Oct (`breedernear-00001-qb2`); live Gemini reply verified. Keep redeploying after each feature. | — | — |
 | R17 | App down during evaluation (credits, cold start, quota abuse) | 👤 Owner action | Check credit expiry; budget alert; `min-instances=1`; rate limit; smoke test every 2–3 days | Sudarsan | 17 Oct → 7 Nov |
 | R18 | Video ≥ 3:00 or not public | 👤 Owner action | Script targets 2:40 ([script](../submission/02-demo-video-script.md)); check uploaded duration; test the link in incognito | Shreya | 17 Oct |
 | R19 | Deck missing architecture or business case | 👤 Owner action | Slides 7 and 12 in the [deck outline](../submission/01-pitch-deck-outline.md) | Shreya | 16 Oct |
@@ -59,7 +59,7 @@ Every risk below has a status. **✅ Resolved** = done and checked. **🔧 Built
 | R42 | Prize payment: TDS, PAN, bank details | 👤 Owner action | Covered by the team agreement; keep PAN and bank details ready | Both | if shortlisted |
 | R43 | Dependency licence incompatible with MIT or the IP warranty | 🔧 Built-in | Permissive licences only (MIT/BSD/Apache-2.0/HPND); check before adding any dependency; listed in `requirements.txt` | Sudarsan | ongoing |
 | R44 | **Breaking Hack2skill Discord community rules** (ban → lose the official channel) | 👤 Owner action | Never post promotional links (no petzonic.co, waitlist or startup links); don't reuse other members' ideas or repost community content; stay on-topic and respectful; never post emails or personal data in public channels; ask eligibility questions by email or the private 🎫 support ticket | Both | ongoing |
-| R45 | **No confirmed Google Cloud credits**, so the project runs on our own billing | 👤 Owner action | Organisers haven't answered the credits question (Discord, 10 Oct). Use the GCP free trial if eligible, else a personal card with a **budget alert**; keep `min-instances=1` only from 17 Oct until results; watch spend weekly | Sudarsan | 10 Oct |
+| R45 | **No confirmed Google Cloud credits**, so the project runs on our own billing | ✅ Mitigated | Paid billing account linked (no free-trial credits). Budget **₹1,000/month** with email alerts at 25/50/90/100% and forecast 100% (created 10 Oct). `min-instances=0` until 17 Oct. Check spend weekly. | Sudarsan | weekly |
 
 ---
 

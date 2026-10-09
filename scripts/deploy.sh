@@ -14,6 +14,7 @@ BUCKET="${PROJECT_ID}-breedernear-uploads"
 GIT_SHA="$(git rev-parse --short HEAD)"
 
 gcloud run deploy "$SERVICE" \
+  --quiet \
   --project "$PROJECT_ID" \
   --source . \
   --region "$REGION" \

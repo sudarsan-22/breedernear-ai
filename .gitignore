@@ -1,0 +1,32 @@
+# Secrets: never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+service-account*.json
+*-sa.json
+*-key.json
+credentials*.json
+application_default_credentials.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local data
+sessions.db
+*.sqlite3
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

@@ -1,82 +1,130 @@
 # PetZonic AI 🐾
-### Autonomous Agentic Pet Healthcare & Multimodal Commerce Platform
-**Built for the Google Cloud AI Builder Cup 2026 (JAPAC Edition)**
 
-[![Google Cloud](https://img.shields.io/badge/Google%20Cloud-Cloud%20Run-4285F4?logo=google-cloud&logoColor=white)](https://cloud.google.com/run)
-[![Gemini](https://img.shields.io/badge/Gemini-2.0%20Multimodal%20Vision-8E75C2?logo=google&logoColor=white)](https://ai.google.dev/)
-[![Antigravity](https://img.shields.io/badge/Agentic-Google%20Antigravity-FF6F00)](https://cloud.google.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+### Find the trusted breeder next door: AI agents for safe, fair, direct pet commerce
 
----
+**Google Cloud AI Builder Cup 2026 (JAPAC) · Theme: Retail & Commerce**
 
-## 📌 Executive Summary
-**PetZonic AI** is an autonomous, agentic pet care and ethical commerce engine designed to solve the fragmented, opaque, and unregulated pet lifecycle. By integrating **Gemini Multimodal Vision**, **Google Antigravity Agentic Orchestration**, and **Google Cloud Run**, PetZonic AI provides:
-1. **Instant Veterinary Clinical Triage**: Vision-based symptom analysis (dermatology, ocular, oral) from smartphone photos with emergency scoring.
-2. **Prescription Verification & Safety Audit**: Autonomous OCR extraction of veterinary prescriptions, cross-referencing against Schedule H/VCI regulatory registries and flagging contraindications.
-3. **Conversational Multi-Turn Shopping Concierge**: Natural language intent extraction, semantic product recommendations, and automated tool/function calling.
-4. **Verified Ethical Breeder & Farm Hub**: Real-time geolocation, certification auditing, and direct farm discovery eliminating predatory puppy mills.
+> 🚧 **Status: in active development** during the AI Builder Cup build window (prototype submission: 18 Oct 2026).
+> The live demo link and demo video will be added here at submission. This README describes only what is built or being built. Future ideas are listed under [Roadmap](#roadmap).
 
 ---
 
-## 🏗️ Architecture & Google Cloud Tech Stack
+## The problem
+
+> **"The breeder is 50 metres away. The customer never finds them."**
+
+Our founder spent five years as a bird breeder and broker in Coimbatore, India. Over and over he saw the same thing:
+
+- **New buyers walk into a pet shop and overpay**, often for a less healthy animal, because the breeder down the street is invisible online.
+- **The real market is hidden** in district WhatsApp and Facebook groups, visible only to insiders.
+- **Buyers can't tell good sellers from bad.** Scams are common, and protected native birds are still traded illegally, sometimes dyed to disguise them.
+- **Breeders lose hours every day** to manual selling: repeating answers, confirming stock, negotiating.
+
+## What PetZonic AI does
+
+| Step | What happens | How |
+|---|---|---|
+| **List** | A breeder sends photos plus a casual message, the way they'd post on WhatsApp, in English or Tamil. They get a complete, priced listing ready to publish. | Gemini multimodal and multilingual extraction into a validated schema; fair-price range from data |
+| **Check** | Every listing is screened before buyers see it. Protected species are **blocked**. Dyed birds, visible health concerns, reused photos, suspicious prices and scam language are flagged. Buyers see an explainable trust score. | Gemini vision + deterministic rules (perceptual hashing, price rules, species lists) → trust score **computed in code** |
+| **Find** | A buyer describes their home, family and budget. PetZonic suggests suitable pets and finds trusted breeders nearby, with fair-price indicators. | ADK agent with tool calls over Firestore; distance by district |
+| **Start right** | A personalised starter kit (correct cage size, food, accessories) and a first-14-days care plan with "see a vet if…" signs | Product rules + Gemini structured care plans |
+| **Is this listing safe?** | Upload a screenshot of a post seen on WhatsApp or Instagram and get the same trust screening | Same pipeline, nothing stored |
+
+## Architecture
 
 ```mermaid
-graph TD
-    Client[Web & Mobile Client] --> CloudRun[Google Cloud Run API & App Service]
-    
-    subgraph "Google Cloud AI & Agentic Core"
-        CloudRun --> Antigravity[Google Antigravity Multi-Agent Orchestrator]
-        Antigravity --> TriageAgent[Clinical Triage Agent]
-        Antigravity --> RxAgent[Prescription Audit Agent]
-        Antigravity --> CommerceAgent[Commerce & Discovery Agent]
-        
-        TriageAgent --> GeminiVision[Gemini 2.0 / 1.5 Multimodal Vision]
-        RxAgent --> GeminiOCR[Gemini Document Intelligence]
-        CommerceAgent --> GeminiSearch[Gemini Function Calling & Search]
+flowchart TD
+    B[Breeder phone] -->|HTTPS| CR
+    U[Buyer] -->|HTTPS| CR
+    subgraph CR[Cloud Run service]
+        WEB[Web UI]
+        API[FastAPI endpoints]
+        subgraph AG[Google ADK multi-agent system]
+            ROOT[Concierge]
+            LIST[Listing copilot]
+            TRUST[Trust & compliance]
+            MATCH[Buyer matching]
+            CARE[Starter kit & care]
+            ROOT --> LIST & TRUST & MATCH & CARE
+        end
+        CORE[Tools + safety rules + trust score]
+        AG --> CORE
+        API --> CORE
     end
-    
-    subgraph "Data & Logistics"
-        CloudRun --> Firestore[Google Cloud Firestore / Managed DB]
-        CloudRun --> CloudStorage[Google Cloud Storage - Media & Prescriptions]
-        CommerceAgent --> LogisticsAPI[Automated Courier Dispatch]
-    end
+    AG --> GEM[Gemini Flash]
+    CORE --> GEM
+    CORE --> FS[(Firestore)]
+    CORE --> GCS[(Cloud Storage)]
 ```
 
----
+| Layer | Technology |
+|---|---|
+| AI model | Gemini Flash (newest generally available version, set via configuration) |
+| Agent framework | Google Agent Development Kit (ADK), Python |
+| Runtime | Google Cloud Run |
+| Database | Firestore |
+| File storage | Cloud Storage (private bucket) |
+| Build / deploy | Cloud Build, Artifact Registry |
+| Quality | pytest unit tests, ADK evaluations, GitHub Actions |
 
-## 🚀 Key Innovation Highlights
+Full design: [docs/implementation/01-architecture.md](docs/implementation/01-architecture.md)
 
-- **Multimodal Veterinary Intelligence**: Upload an image of a pet's skin rash, lesion, or physical symptom to receive immediate severity triage, care instructions, and recommended specialists.
-- **Autonomous Tool-Calling Agents**: Agents independently query real-time pharmacy inventory, check cold-chain medication availability, and book verified telehealth consultations.
-- **Strict Compliance Gating**: Prevents automated dispatch of regulated Schedule H veterinary drugs without an AI-verified prescription.
-- **Cloud-Native Scalability**: 100% serverless microservices containerized for zero-cold-start performance on Google Cloud Run.
+## Safety and compliance by design
 
----
+**AI perceives and converses; code decides.**
 
-## 🛠️ Getting Started
+- Listings of protected Indian native species are **blocked in code**, whatever the model says.
+- Trust scores come from a transparent, deterministic formula. Every badge shows its reasons.
+- Dog listings need a State Animal Welfare Board registration number (checked against a *simulated* registry in this prototype).
+- Health observations are "signs to ask the seller about", never a diagnosis. No medicine or dosage advice.
+- Starter kits respect minimum cage sizes per species.
 
-### Prerequisites
-- Node.js 20+ / Docker
-- Google Cloud SDK (`gcloud`)
-- Gemini API Key / Google AI Studio Key
+Details: [docs/product/03-responsible-ai-and-safety.md](docs/product/03-responsible-ai-and-safety.md)
 
-### Local Development
-```bash
-# Clone the repository
-git clone https://github.com/sudarsan-22/petzonic-ai.git
-cd petzonic-ai
+## Simulated vs real
 
-# Install dependencies
-npm install
+This is a hackathon prototype. To be transparent:
 
-# Set environment variables
-cp .env.example .env
+| Component | In this prototype |
+|---|---|
+| Breeders, listings, accessories | **Synthetic**: fictional names and brands; generated or our own images |
+| Fair-price ranges | **Sample data** based on the founder's experience |
+| State Animal Welfare Board registry | **Simulated**, with clearly fake `SIM-` numbers |
+| Protected / CITES species lists | Curated from public sources (cited in the data files). Not legal advice. |
+| Enquiries and cart | **Demo only**: no breeder is contacted, no payment is taken |
+| AI extraction, screening, matching, care plans | **Real**: live Gemini calls |
+| Trust score, species blocking, welfare rules | **Real**: enforced in code and covered by tests |
 
-# Run local development server
-npm run dev
-```
+PetZonic AI is not a veterinary service and does not sell animals or products.
 
----
+## Getting started
 
-## 📄 License
-This project is licensed under the MIT License — see the LICENSE file for details.
+Setup and deployment are documented step by step in [docs/implementation/05-gcp-setup-and-deployment.md](docs/implementation/05-gcp-setup-and-deployment.md). Local run commands will be added here as the code lands.
+
+## Documentation
+
+All planning, design and submission docs are in [docs/](docs/README.md).
+
+## Roadmap
+
+These are future ideas and are **not** part of the current prototype:
+
+- List a pet by sending a WhatsApp message (WhatsApp Business Platform)
+- Integration with State Animal Welfare Board and PARIVESH records
+- Breeder score from buyer feedback and animal health after sale
+- Escrow-protected payments and health guarantees
+- Lifelong pet ID (leg ring / microchip), vet consultations, pharmacy
+- Tamil, Hindi and other regional-language interfaces
+
+## How it was built
+
+All code in this repository was written during the AI Builder Cup 2026 build window, by the team with the help of AI coding assistants. Every change is reviewed by the team. The running application uses only Google AI models (Gemini).
+
+## Team
+
+- Sudarsan N (team lead; 5 years as a bird breeder and broker)
+- Shreya Azad
+
+## License
+
+MIT. See [LICENSE](LICENSE). Third-party assets are listed in [ATTRIBUTIONS.md](ATTRIBUTIONS.md).

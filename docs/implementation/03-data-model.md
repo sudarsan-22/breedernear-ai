@@ -1,0 +1,126 @@
+# Data Model
+
+Firestore (Native mode, location `asia-south1`). **All data is synthetic**: fictional breeders, listings, products and registries.
+
+## Collections
+
+### `breeders/{breeder_id}`
+
+```json
+{
+  "id": "BRD-CBE-001",
+  "display_name": "Karthik's Aviary",
+  "district": "coimbatore",
+  "locality": "Saibaba Colony",
+  "species_bred": ["lovebird", "budgerigar", "cockatiel"],
+  "years_experience": 5,
+  "sawb_registration_no": null,
+  "simulated": true
+}
+```
+
+Seed about 12 breeders across Coimbatore, Tiruppur, Erode, Salem, Madurai, Chennai and Bengaluru: birds, dogs and cats. Include one dog breeder **without** a SAWB number and one with a number not in the registry, to demonstrate CAUTION.
+
+### `listings/{listing_id}`
+
+```json
+{
+  "id": "LST-0007",
+  "breeder_id": "BRD-CBE-001",
+  "status": "PUBLISHED",
+  "visibility": "public",
+  "owner_guest_id": null,
+  "draft": { "...ListingDraft..." },
+  "photos": [{"upload_id": "UPL_a1", "image_path": "/img/listings/LST-0007-1.webp", "phash": "c3a1f0..."}],
+  "screening": { "...Screening..." },
+  "trust_level": "TRUSTED",
+  "trust_score": 90,
+  "species_key": "lovebird",
+  "district": "coimbatore",
+  "price_inr": 1800,
+  "created_at": "..."
+}
+```
+
+`status` is one of `DRAFT`, `PUBLISHED`, `BLOCKED`. `visibility` is `public` for curated seed listings and `owner_only` for every guest-created listing (sandboxing, rule R33). Guest listings carry `owner_guest_id`. Top-level `species_key`, `district`, `price_inr` and `trust_level` are copied out of `draft` and `screening` for querying.
+
+Composite index: `species_key` + `status` + `price_inr`.
+
+Seed about 40 listings, including deliberate demo cases:
+
+| Case | Expected |
+|---|---|
+| Healthy budgie pair, fair price, clear photo | TRUSTED |
+| Lovebird pair priced at 30% of the range minimum, "full advance, courier only" | CAUTION (price + scam language) |
+| Cockatiel listing reusing another listing's photo | CAUTION (duplicate photo) |
+| Labrador litter, no SAWB number | CAUTION |
+| "Indian ringneck / pachai kili" listing | BLOCKED (never shown to buyers) |
+| Munia listing with unnaturally bright colour | BLOCKED (protected) and dye flagged |
+
+### `drafts/{draft_id}`
+
+Unpublished `ListingDraft` + `upload_ids` + `breeder_id`. Deleted on publish.
+
+### `enquiries/{enquiry_id}`
+
+```json
+{ "listing_id": "LST-0007", "breeder_id": "BRD-CBE-001", "guest_id": "...", "message": "...", "demo": true, "created_at": "..." }
+```
+
+### `products/{product_id}` (accessories catalogue)
+
+```json
+{
+  "id": "PRD-CAGE-012",
+  "name": "Roomy Flight Cage 76×46×92 cm",
+  "brand": "Featherhaven",
+  "species": ["lovebird", "cockatiel", "budgerigar"],
+  "category": "cage",
+  "dimensions_cm": [76, 46, 92],
+  "price_inr": 3499,
+  "stock": 15,
+  "image": "/img/products/PRD-CAGE-012.webp",
+  "description": "..."
+}
+```
+
+Fictional brands only (e.g. Featherhaven, Tailwise, PawNest, Whiskerwell). Seed about 50 products: cages, perches, feeders, seed/pellet food, cuttlebone, nest boxes, dog beds, collars, puppy food, cat litter, carriers.
+
+### `guests/{guest_id}/cart/current`
+
+Demo cart: `{"items": [{"product_id": "...", "quantity": 1}], "updated_at": "..."}`
+
+### Reference data (seeded, read-only)
+
+| Collection | Contents |
+|---|---|
+| `price_ranges/{species_key}` | `{ "species_key": "lovebird", "variety_ranges": {"default": [1200, 2500], "lutino": [1500, 3000]}, "unit": "pair", "sample_data": true }` |
+| `districts/{key}` | `{ "name": "Coimbatore", "state": "TN", "lat": 11.0168, "lng": 76.9558 }` |
+| `species/{key}` | Care facts used by rules: group, typical lifespan, min cage size (cm) per count, noise level, beginner-friendly, CITES flag |
+| `sawb_registry_sample/{reg_no}` | Simulated: `{ "registration_no": "SIM-TNAWB-DB-0042", "name": "...", "state": "TN", "valid_until": "2027-03-31", "simulated": true }` |
+
+Protected and CITES species lists are **files**, versioned in git so changes are reviewable: `data/seed/protected_species.json` and `data/seed/cites_species.json`. Each entry has common names, scientific name, Tamil and Hindi names where known, synonyms, and a `source` field.
+
+**All price ranges are sample data** and are labelled so in the UI ("based on sample market data"). Base them on the founder's experience; don't present them as official market prices.
+
+## Cloud Storage
+
+Bucket `gs://<PROJECT_ID>-petzonic-uploads` (`asia-south1`, uniform access, **not public**).
+
+- Path: `uploads/{guest_id}/{upload_id}.{ext}`; metadata `kind` = `listing_photo` | `external_listing`
+- Lifecycle: delete after 30 days
+- Accepted: `image/jpeg`, `image/png`, `image/webp`, `image/heic`, max 5 MB each, validated server-side
+- Not served back from the bucket. Seeded listing images are static files in `web/img/listings/`.
+
+## Seed files and assets
+
+| File | Contents | Created by |
+|---|---|---|
+| `data/seed/breeders.json`, `listings.json`, `products.json` | Synthetic records | Us (Gemini-assisted drafting, human-reviewed) |
+| `data/seed/price_ranges.json`, `districts.json`, `species.json` | Reference data | Us (founder's experience; labelled sample) |
+| `data/seed/protected_species.json`, `cites_species.json` | Species lists with `source` per entry | Us, from official schedules/CITES lists |
+| `data/seed/sawb_registry_sample.json` | ~10 fake registrations (`SIM-` prefix) | Us |
+| `web/img/listings/*`, `web/img/products/*` | Images | Generated with a Gemini image model, or our own photos. Recorded in `ATTRIBUTIONS.md`. |
+| `data/samples/*` | Demo/eval photos (healthy pair, dyed-looking bird, duplicate, screenshot of a "scam" post we write ourselves) | Us |
+
+`scripts/seed_firestore.py` loads the seed files idempotently and computes pHashes for the seeded listing images.

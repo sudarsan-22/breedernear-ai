@@ -6,7 +6,7 @@ from google.adk.cli.fast_api import get_fast_api_app
 
 from app.api import router
 from app.gatekeeper import Gatekeeper
-from app.ratelimit import rate_limit_middleware
+from app.ratelimit import RateLimit
 from breedernear_core.config import get_settings
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -19,7 +19,7 @@ app: FastAPI = get_fast_api_app(
     max_llm_calls=get_settings().max_llm_calls_per_run,
 )
 
-app.middleware("http")(rate_limit_middleware)
+app.add_middleware(RateLimit)
 app.add_middleware(Gatekeeper)                # only the ADK routes the app uses, behind login
 app.include_router(router)
 

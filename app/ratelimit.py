@@ -9,7 +9,6 @@ import re
 import time
 from collections import defaultdict, deque
 
-from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from breedernear_core.config import get_settings
@@ -51,19 +50,28 @@ def is_limited(method: str, path: str) -> bool:
     return any(method == m and pattern.match(path) for m, pattern in LIMITED)
 
 
-def client_ip(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for", "")
-    return forwarded.split(",")[0].strip() or (request.client.host if request.client else "unknown")
+def client_ip(headers: dict[str, str], client: tuple | None) -> str:
+    forwarded = headers.get("x-forwarded-for", "")
+    return forwarded.split(",")[0].strip() or (client[0] if client else "unknown")
 
 
-async def rate_limit_middleware(request: Request, call_next):
-    if is_limited(request.method, request.url.path):
-        settings = get_settings()
-        auth = request.headers.get("authorization", "")
-        guest = hashlib.sha256(auth.encode()).hexdigest() if auth else ""
-        allowed = limiter.allow(f"ip:{client_ip(request)}", settings.rate_limit_per_ip_hour)
-        if allowed and guest:
-            allowed = limiter.allow(f"guest:{guest}", settings.rate_limit_per_hour)
-        if not allowed:
-            return JSONResponse(status_code=429, content={"detail": MESSAGE})
-    return await call_next(request)
+class RateLimit:
+    """Plain ASGI middleware (no BaseHTTPMiddleware), so streamed AI replies pass through untouched."""
+
+    def __init__(self, app) -> None:
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http" and is_limited(scope["method"], scope["path"]):
+            settings = get_settings()
+            headers = {k.decode().lower(): v.decode() for k, v in scope.get("headers", [])}
+            auth = headers.get("authorization", "")
+            session = hashlib.sha256(auth.encode()).hexdigest() if auth else ""
+            ip = client_ip(headers, scope.get("client"))
+            allowed = limiter.allow(f"ip:{ip}", settings.rate_limit_per_ip_hour)
+            if allowed and session:
+                allowed = limiter.allow(f"guest:{session}", settings.rate_limit_per_hour)
+            if not allowed:
+                await JSONResponse(status_code=429, content={"detail": MESSAGE})(scope, receive, send)
+                return
+        await self.app(scope, receive, send)

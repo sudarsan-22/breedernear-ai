@@ -178,7 +178,7 @@ Start at **100** and apply:
 | Possible dye or disguise | −30 |
 | Visible health signs (each, max 2) | −15 |
 | Dog without SAWB no. / SAWB no. not in registry | −25 / −30 |
-| CITES species without PARIVESH ID | −20 |
+| CITES species without PARIVESH ID | −25 (major, so capped at CAUTION) |
 | Poor photo quality / stock-looking image | −10 |
 | Photo doesn't match the stated species | −15 |
 

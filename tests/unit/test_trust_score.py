@@ -89,10 +89,12 @@ def test_cites_species_without_parivesh_is_caution():
     s = screen(ScreeningInputs(draft=draft(species_common="Fischer's lovebird", variety=None),
                                raw_text="fischers lovebird pair", price_range=(1500, 3500)))
     assert "parivesh" in names(s)
+    assert s.trust_level == "CAUTION"
     with_id = screen(ScreeningInputs(
         draft=draft(species_common="Fischer's lovebird", variety=None, parivesh_registration_id="X1"),
         raw_text="fischers lovebird pair", price_range=(1500, 3500)))
     assert "parivesh" not in names(with_id)
+    assert with_id.trust_level == "TRUSTED"
 
 
 def test_injection_text_cannot_change_the_decision():

@@ -103,7 +103,8 @@ def screen(inputs: ScreeningInputs) -> Screening:
     # 7. CITES exotics need PARIVESH registration.
     cites = find_cites(inputs.raw_text, d.species_common, d.species_scientific or "", d.variety or "")
     if cites and not d.parivesh_registration_id:
-        checks.append(Check(name="parivesh", result="warn", penalty=20,
+        # Major penalty: a CITES species without a registration is capped at CAUTION.
+        checks.append(Check(name="parivesh", result="warn", penalty=MAJOR_PENALTY,
                             detail=f"{cites[0].common_name} is CITES-listed: possession and transfer "
                                    "must be registered on PARIVESH 2.0. No registration ID given."))
         questions.append("Ask for the PARIVESH registration of the bird and its parents.")

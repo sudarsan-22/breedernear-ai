@@ -23,7 +23,7 @@ Every risk below has a status. **✅ Resolved** = done and checked. **🔧 Built
 | R6 | Copyright: real brands or others' images | ✅ Resolved (policy) | [ATTRIBUTIONS.md](../../ATTRIBUTIONS.md) policy: fictional brands, our own/generated images, every third-party asset logged before commit | Shreya | ongoing |
 | R7 | Team emails or phone numbers in the public repo | ✅ Resolved | Docs contain names only; checked 9 Oct | — | — |
 | R8 | Ineligible member (student) | 👤 Owner action | Both confirmed working professionals (9 Oct). **Still to confirm: neither is enrolled in a part-time course.** | Both | 11 Oct |
-| R9 | ID / employment proof requested and not ready | 👤 Owner action | Keep a government ID and an employment letter or payslip ready for each member | Both | 11 Oct |
+| R9 | ID / employment proof requested and not ready | 👤 Owner action | Keep a government ID and an employment letter or payslip ready for each member. ✅ Government IDs ready for both (10 Oct). **Still to confirm: employment letter or payslip for each.** | Both | 11 Oct |
 | R10 | Leaving the official channel | 👤 Owner action (Sudarsan ✅ joined 10 Oct; Shreya pending) | Both join the [Discord](https://discord.gg/x5GRzJbKpa) and stay in it; check email and dashboard daily | Both | 10 Oct |
 | R11 | Pre-existing code (fresh-code rule) | 🔧 Built-in | All code written fresh in this repo; first commit 23 Sep is inside the window. **Commit and push every day**, and never squash history. | Both | daily |
 | R12 | Shallow "prompt in, text out" AI (40% criterion) | 🔧 Built-in | Multi-agent ADK design, multimodal, tools, schemas, code guardrails, evals ([agent design](../implementation/02-agent-design.md)) | Sudarsan | 14 Oct |

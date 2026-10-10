@@ -10,7 +10,7 @@
 |---|---|---|
 | 10 Oct | Sudarsan | ✅ R25 clarification email (organisers replied: startups allowed) · R39 paste the submission-form fields · R10 join Discord (✅ Sudarsan; Shreya pending) |
 | 11 Oct | Both | ✅ R8 no course · ✅ R9 ID + employment proof ready · ✅ R29 employment contracts checked (all confirmed 10 Oct) · R28 re-read T&C |
-| 12 Oct | Both | R30 sign the team agreement · ✅ R32 old org profile private (9 Oct) · ✅ R37 name check (10 Oct) |
+| 12 Oct | Both | R30 team agreement (optional, handled privately by the team) · ✅ R32 old org profile private (9 Oct) · ✅ R37 name check (10 Oct) |
 | 15 Oct | Both | R41 passport validity · R28 re-read T&C |
 | 17–18 Oct | Both | R38 consents for anyone or any animals filmed · R28 re-read T&C before submitting |
 

@@ -7,7 +7,7 @@ Use this from **16 Oct** onward. Every box must be ticked before pressing Submit
 ## A. Eligibility (do once, by 11 Oct)
 
 - [x] Both members are working professionals employed at organisations (confirmed 9 Oct)
-- [ ] Both members confirmed: 21+, not enrolled in any course (full- or part-time), living in India
+- [x] Both members confirmed: 21+, not enrolled in any course (full- or part-time), living in India (confirmed 10 Oct)
 - [ ] ID and employment proof ready for both members
 - [ ] Neither member is on any other AI Builder Cup team
 - [x] Team stays at 2 members (Sudarsan N, Shreya Azad); no 3rd/4th member (decided 9 Oct)

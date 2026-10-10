@@ -4,7 +4,7 @@ import pytest
 from PIL import Image, ImageDraw
 
 from breedernear_core import deps
-from breedernear_core.schemas import ListingDraft, PhotoScreen
+from breedernear_core.schemas import CarePlan, ListingDraft, Phase, PhotoScreen
 from breedernear_core.services.store import MemoryStore
 from breedernear_core.services.uploads import MemoryUploads
 
@@ -19,6 +19,14 @@ class FakeVision:
             missing_fields=["health_notes"], confidence=0.9)
         self.photo = PhotoScreen(species_guess="Peach-faced lovebird", species_guess_confidence=0.9)
         self.extract_calls: list[tuple[str, int]] = []
+        self.plan = CarePlan(
+            species="Budgerigar", diet=["Seed mix with fresh greens", "Never avocado or chocolate"],
+            daily_routine=["Fresh water every morning"],
+            phases=[Phase(title="Days 0-2: Settling in", steps=["Keep the cage in a quiet, shaded room"]),
+                    Phase(title="Days 3-7: Building routine", steps=["Talk softly near the cage"]),
+                    Phase(title="Days 8-14: Bonding and checks", steps=["Offer millet from your hand"])],
+            see_vet_if=["Fluffed up for hours", "Not eating for a day", "Breathing with tail bobbing"])
+        self.care_calls: list[str] = []
 
     def extract_listing(self, text, images):
         self.extract_calls.append((text, len(images)))
@@ -26,6 +34,10 @@ class FakeVision:
 
     def screen_photos(self, images):
         return self.photo
+
+    def write_care_plan(self, facts):
+        self.care_calls.append(facts)
+        return self.plan
 
 
 def make_image(seed: int) -> bytes:

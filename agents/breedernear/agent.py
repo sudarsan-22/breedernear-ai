@@ -1,6 +1,7 @@
 from google.adk.agents import LlmAgent
 
 from breedernear_core.config import get_settings
+from breedernear_core.tools.care import add_to_cart, build_starter_kit, care_plan, view_cart
 from breedernear_core.tools.listing import (
     check_external_listing,
     extract_listing,
@@ -16,7 +17,13 @@ from breedernear_core.tools.match import (
     search_listings,
 )
 
-from .prompts import CONCIERGE_INSTRUCTION, LISTING_INSTRUCTION, MATCH_INSTRUCTION, TRUST_INSTRUCTION
+from .prompts import (
+    CARE_INSTRUCTION,
+    CONCIERGE_INSTRUCTION,
+    LISTING_INSTRUCTION,
+    MATCH_INSTRUCTION,
+    TRUST_INSTRUCTION,
+)
 
 MODEL = get_settings().breedernear_model
 
@@ -47,10 +54,19 @@ match_agent = LlmAgent(
     tools=[recommend_species, search_listings, get_listing, create_enquiry],
 )
 
+care_agent = LlmAgent(
+    name="care_agent",
+    model=MODEL,
+    description="Builds a personalised starter kit and a first-14-days care plan for a newly chosen pet, "
+                "and manages the demo cart.",
+    instruction=CARE_INSTRUCTION,
+    tools=[build_starter_kit, care_plan, add_to_cart, view_cart],
+)
+
 root_agent = LlmAgent(
     name="breedernear_concierge",
     model=MODEL,
     description="Greets users, detects whether they are buying or breeding, and routes them.",
     instruction=CONCIERGE_INSTRUCTION,
-    sub_agents=[listing_agent, trust_agent, match_agent],
+    sub_agents=[listing_agent, trust_agent, match_agent, care_agent],
 )

@@ -84,7 +84,7 @@ Unpublished `ListingDraft` + `upload_ids` + `breeder_id`. Deleted on publish.
 }
 ```
 
-Fictional brands only (e.g. Featherhaven, Tailwise, PawNest, Whiskerwell). Seed about 50 products: cages, perches, feeders, seed/pellet food, cuttlebone, nest boxes, dog beds, collars, puppy food, cat litter, carriers.
+Fictional brands only: Featherhaven, Tailnook, PawNest, Whiskerwell. Each name was web-searched on 10 Oct and no pet brand with that name was found ("Tailwise" was dropped because it is a real dog-breeder marketplace). Re-check before adding a new brand name. No medicines are sold. Seed about 50 products: cages, perches, feeders, seed/pellet food, cuttlebone, nest boxes, dog beds, collars, puppy food, cat litter, carriers.
 
 ### `guests/{guest_id}/cart/current`
 

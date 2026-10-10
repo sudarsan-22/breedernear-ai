@@ -58,6 +58,16 @@ def test_listings_endpoint_errors_are_400(seeded):
     assert r.status_code == 400
 
 
-def test_agent_tree_has_listing_trust_and_match_agents():
+def test_cart_endpoints(fakes):
+    r = client.post("/api/cart/items", headers=HEADERS, json={"product_id": "PRD-FOOD-001", "quantity": 2})
+    assert r.status_code == 200 and r.json()["total_inr"] == 498
+    assert client.get("/api/cart", headers=HEADERS).json()["items"][0]["quantity"] == 2
+    assert client.delete("/api/cart/items/PRD-FOOD-001", headers=HEADERS).json()["items"] == []
+    r = client.post("/api/cart/items", headers=HEADERS, json={"product_id": "PRD-NOPE"})
+    assert r.status_code == 400
+
+
+def test_agent_tree_has_all_sub_agents():
     from agents.breedernear.agent import root_agent
-    assert {a.name for a in root_agent.sub_agents} == {"listing_agent", "trust_agent", "match_agent"}
+    assert {a.name for a in root_agent.sub_agents} == {
+        "listing_agent", "trust_agent", "match_agent", "care_agent"}

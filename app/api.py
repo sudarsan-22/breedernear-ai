@@ -1,7 +1,7 @@
 from fastapi import APIRouter, File, Form, Header, HTTPException, UploadFile
 from pydantic import BaseModel
 
-from breedernear_core import deps, match_service
+from breedernear_core import care_service, deps, match_service
 from breedernear_core import listing_service as svc
 from breedernear_core.config import get_settings
 from breedernear_core.services.uploads import ALLOWED_KINDS, ALLOWED_TYPES
@@ -20,6 +20,11 @@ def _call(fn, *args) -> dict:
         return fn(*args)
     except svc.ListingError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+class CartItemIn(BaseModel):
+    product_id: str
+    quantity: int = 1
 
 
 class EnquiryIn(BaseModel):
@@ -83,3 +88,18 @@ def listing(listing_id: str, x_guest_id: str | None = Header(default=None)) -> d
 @router.post("/enquiries")
 def enquiries(body: EnquiryIn, x_guest_id: str | None = Header(default=None)) -> dict:
     return _call(match_service.create_enquiry, _guest(x_guest_id), body.listing_id, body.message)
+
+
+@router.get("/cart")
+def cart(x_guest_id: str | None = Header(default=None)) -> dict:
+    return _call(care_service.view_cart, _guest(x_guest_id))
+
+
+@router.post("/cart/items")
+def cart_add(body: CartItemIn, x_guest_id: str | None = Header(default=None)) -> dict:
+    return _call(care_service.add_to_cart, _guest(x_guest_id), [body.product_id], body.quantity)
+
+
+@router.delete("/cart/items/{product_id}")
+def cart_remove(product_id: str, x_guest_id: str | None = Header(default=None)) -> dict:
+    return _call(care_service.remove_from_cart, _guest(x_guest_id), product_id)

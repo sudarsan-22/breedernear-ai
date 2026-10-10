@@ -1,4 +1,4 @@
-"""Persistence for drafts, listings and enquiries.
+"""Persistence for drafts, listings, enquiries and demo carts.
 
 Firestore in the cloud, in-memory for tests and local runs.
 """
@@ -16,6 +16,8 @@ class Store(Protocol):
     def all_listings(self) -> list[dict]: ...
     def save_enquiry(self, enquiry_id: str, data: dict) -> None: ...
     def all_enquiries(self) -> list[dict]: ...
+    def save_cart(self, guest_id: str, data: dict) -> None: ...
+    def get_cart(self, guest_id: str) -> dict | None: ...
 
 
 class MemoryStore:
@@ -23,6 +25,7 @@ class MemoryStore:
         self.drafts: dict[str, dict] = {}
         self.listings: dict[str, dict] = {}
         self.enquiries: dict[str, dict] = {}
+        self.carts: dict[str, dict] = {}
 
     def save_draft(self, draft_id: str, data: dict) -> None:
         self.drafts[draft_id] = copy.deepcopy(data)
@@ -47,6 +50,12 @@ class MemoryStore:
 
     def all_enquiries(self) -> list[dict]:
         return [copy.deepcopy(v) for v in self.enquiries.values()]
+
+    def save_cart(self, guest_id: str, data: dict) -> None:
+        self.carts[guest_id] = copy.deepcopy(data)
+
+    def get_cart(self, guest_id: str) -> dict | None:
+        return copy.deepcopy(self.carts.get(guest_id))
 
 
 class FirestoreStore:
@@ -80,3 +89,10 @@ class FirestoreStore:
 
     def all_enquiries(self) -> list[dict]:
         return [d.to_dict() for d in self._db.collection("enquiries").stream()]
+
+    def save_cart(self, guest_id: str, data: dict) -> None:
+        self._db.collection("carts").document(guest_id).set(data)
+
+    def get_cart(self, guest_id: str) -> dict | None:
+        snap = self._db.collection("carts").document(guest_id).get()
+        return snap.to_dict() if snap.exists else None

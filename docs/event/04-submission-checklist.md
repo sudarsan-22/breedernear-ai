@@ -42,6 +42,7 @@ Use this from **16 Oct** onward. Every box must be ticked before pressing Submit
 
 ## D. Demo video
 
+- [x] Video built 10 Oct: `~/Downloads/BreederNear-AI-demo.mp4`, 2:38, 1080p ([script](../submission/02-demo-video-script.md))
 - [ ] Duration **≤ 2:55** (strictly under 3:00), checked on the *uploaded* file
 - [ ] Uploaded to YouTube as **Unlisted or Public** (or Drive with "Anyone with the link: Viewer")
 - [ ] Link opens in incognito while logged out

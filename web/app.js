@@ -7,6 +7,10 @@
 
 const APP = "breedernear";
 const MAX_PHOTOS = 4;
+// Served by Cloud Run: same-origin calls. Served by Firebase Hosting (static files only): call the Cloud Run
+// API directly, because Hosting can't stream the AI's replies (see web/config.js and firebase.json).
+const API_BASE = /(\.run\.app|^localhost|^127\.0\.0\.1)$/.test(location.hostname) ? "" : (window.BREEDERNEAR_API_BASE || "");
+const url = (path) => API_BASE + path;
 
 // ---------------------------------------------------------------- storage & identity
 const memory = {};
@@ -121,7 +125,7 @@ function authHeaders() {
   return { "X-Device-Id": DEVICE, ...(auth.token ? { Authorization: `Bearer ${auth.token}` } : {}) };
 }
 async function api(path, options = {}) {
-  const res = await fetch(path, { ...options, headers: { "Content-Type": "application/json", ...authHeaders(), ...(options.headers || {}) } });
+  const res = await fetch(url(path), { ...options, headers: { "Content-Type": "application/json", ...authHeaders(), ...(options.headers || {}) } });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
     const err = new Error(typeof body.detail === "string" ? body.detail : "Something went wrong. Please try again.");
@@ -149,7 +153,7 @@ async function uploadPhotos(photos, kind) {
   for (const { file } of photos) {
     const form = new FormData();
     form.append("file", await shrink(file)); form.append("kind", kind);
-    const res = await fetch("/api/uploads", { method: "POST", headers: authHeaders(), body: form });
+    const res = await fetch(url("/api/uploads"), { method: "POST", headers: authHeaders(), body: form });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(body.detail || "Couldn't upload the photo.");
     ids.push(body.upload_id);
@@ -1042,7 +1046,7 @@ async function createSession() {
   chat.session = s.id; store.set(chatKey(), s.id);
 }
 async function runSse(text, turn) {
-  const res = await fetch("/run_sse", { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() },
+  const res = await fetch(url("/run_sse"), { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ app_name: APP, user_id: auth.user.id, session_id: chat.session, streaming: true, new_message: { role: "user", parts: [{ text }] } }) });
   if (!res.ok) { const e = new Error(`run ${res.status}`); e.status = res.status; throw e; }
   const reader = res.body.getReader(), decoder = new TextDecoder();
@@ -1253,7 +1257,7 @@ function signedOut(message) {
   if (message) toast(message);
 }
 async function logout({ quiet = false, then } = {}) {
-  try { await fetch("/api/auth/logout", { method: "POST", headers: authHeaders() }); } catch { /* signing out locally anyway */ }
+  try { await fetch(url("/api/auth/logout"), { method: "POST", headers: authHeaders() }); } catch { /* signing out locally anyway */ }
   signedOut(quiet ? null : "Logged out");
   then?.();
 }

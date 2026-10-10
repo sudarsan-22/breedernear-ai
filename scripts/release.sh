@@ -26,6 +26,9 @@ URL="$(gcloud run services describe "$SERVICE" --project "$PROJECT_ID" --region 
 REVISION="$(gcloud run services describe "$SERVICE" --project "$PROJECT_ID" --region "$REGION" \
   --format='value(status.latestReadyRevisionName)')"
 
+echo "== 2b/5 Firebase Hosting (web app)"
+if scripts/deploy_hosting.sh; then HOSTING="ok"; else HOSTING="FAILED"; echo "!! Firebase Hosting deploy failed; the Cloud Run URL still works." >&2; fi
+
 echo "== 3/5 live smoke test"
 SMOKE="$(PYTHONPATH=. python scripts/smoke_test.py "$URL" | tee /dev/stderr | tail -1)"
 
@@ -34,5 +37,5 @@ GOOGLE_CLOUD_PROJECT="$PROJECT_ID" PYTHONPATH=. python scripts/seed_firestore.py
 
 echo "== 5/5 record"
 LOG=docs/submission/03-release-log.md
-echo "| $(date '+%Y-%m-%d %H:%M %Z') | \`$SHA\` | \`$REVISION\` | $MIN_INSTANCES | $SMOKE |" >> "$LOG"
+echo "| $(date '+%Y-%m-%d %H:%M %Z') | \`$SHA\` | \`$REVISION\` | $MIN_INSTANCES | $SMOKE | $HOSTING |" >> "$LOG"
 echo "Released $REVISION ($SHA). Logged in $LOG; commit that file."

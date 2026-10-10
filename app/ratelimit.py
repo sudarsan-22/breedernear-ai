@@ -11,6 +11,7 @@ from collections import defaultdict, deque
 
 from fastapi.responses import JSONResponse
 
+from app.cors import cors_headers
 from breedernear_core.config import get_settings
 
 WINDOW_SECONDS = 3600
@@ -73,6 +74,8 @@ class RateLimit:
             if allowed and session:
                 allowed = limiter.allow(f"guest:{session}", settings.rate_limit_per_hour)
             if not allowed:
-                await JSONResponse(status_code=429, content={"detail": MESSAGE})(scope, receive, send)
+                cors = {k.decode(): v.decode() for k, v in cors_headers(scope)}
+                response = JSONResponse(status_code=429, content={"detail": MESSAGE}, headers=cors)
+                await response(scope, receive, send)
                 return
         await self.app(scope, receive, send)

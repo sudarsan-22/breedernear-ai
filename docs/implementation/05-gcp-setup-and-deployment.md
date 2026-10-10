@@ -166,6 +166,18 @@ Write the known-good revision name into the [submission checklist](../event/04-s
 gcloud run services logs read breedernear --region $REGION --limit 100
 ```
 
+## 9b. Firebase Hosting (web app)
+
+One-time, by a project owner: open the [Firebase console](https://console.firebase.google.com/), choose **Add project**, select the existing Google Cloud project `breedernear-ai-2026`, accept the Firebase terms, and turn **off** Google Analytics (not needed). The Firebase Management and Hosting APIs are already enabled (10 Oct).
+
+Then deploy the static web app (uses your gcloud Application Default Credentials; Node.js 18+):
+
+```bash
+PROJECT_ID=breedernear-ai-2026 scripts/deploy_hosting.sh   # npx firebase-tools deploy --only hosting
+```
+
+`firebase.json` serves `web/` with no-cache HTML/JS/CSS (no build step, so files keep their names) and one-day caching for images. `scripts/release.sh` deploys Hosting after Cloud Run, so both always ship the same `web/`. Deploy Cloud Run first: Hosting's page calls the Cloud Run API, which must already allow the Hosting origins.
+
 ## 10. Deploy early, deploy often
 
 - **Day 1:** deploy a "hello" version that answers one Gemini call. That proves billing, APIs, IAM and the model ID all work.

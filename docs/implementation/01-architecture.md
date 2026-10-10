@@ -13,8 +13,9 @@
 
 ```mermaid
 flowchart TD
-    B[Breeder<br/>phone browser] -->|HTTPS| CR
-    U[Buyer<br/>phone / laptop] -->|HTTPS| CR
+    B[Seller<br/>phone browser] -->|HTTPS| FH
+    U[Buyer<br/>phone / laptop] -->|HTTPS| FH
+    FH[Firebase Hosting<br/>static web app, Google CDN<br/>breedernear-ai-2026.web.app] -->|"/api, /run_sse (CORS)"| CR
 
     subgraph CR[Cloud Run service: breedernear, asia-south1]
         WEB[Static web UI: three tabs<br/>Pets · Local Breeders + My farm · BreederNear AI]
@@ -44,6 +45,10 @@ flowchart TD
     CR --> LOG[Cloud Logging]
     CB[Cloud Build + Artifact Registry] -.->|gcloud run deploy --source| CR
 ```
+
+### Why the web app is on Firebase Hosting but the API calls go straight to Cloud Run
+
+Firebase Hosting serves the static files (`web/`) from Google's CDN, so pages and photos load fast anywhere. It does **not** proxy the API: Hosting's Cloud Run rewrites buffer responses and stop after 60 seconds, which would break the streamed AI replies. Instead the page reads the Cloud Run URL from `web/config.js` and calls it directly. Cloud Run allows exactly the two Hosting origins (`cors_origins` in settings, passed to ADK, which keeps refusing every other cross-origin request). The same app is still served by Cloud Run itself, where all calls are same-origin.
 
 ## Flow 1: breeder lists in under a minute
 

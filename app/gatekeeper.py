@@ -10,6 +10,7 @@ import re
 
 from anyio import to_thread
 
+from app.cors import cors_headers
 from breedernear_core import accounts
 
 APP = "breedernear"
@@ -20,9 +21,10 @@ CLOSED_PREFIXES = ("/apps/", "/run", "/agent-identity", "/list-apps", "/version"
 MAX_BODY = 1_000_000
 
 
-async def _respond(send, status: int, detail: str) -> None:
+async def _respond(scope, send, status: int, detail: str) -> None:
     body = json.dumps({"detail": detail}).encode()
-    headers = [(b"content-type", b"application/json"), (b"content-length", str(len(body)).encode())]
+    headers = [(b"content-type", b"application/json"), (b"content-length", str(len(body)).encode()),
+               *cors_headers(scope)]
     await send({"type": "http.response.start", "status": status, "headers": headers})
     await send({"type": "http.response.body", "body": body})
 
@@ -72,12 +74,15 @@ class Gatekeeper:
         session_match, run_match = SESSION_PATH.match(path), RUN_PATH.match(path)
         if not (session_match or run_match):
             if path.startswith(CLOSED_PREFIXES):
-                await _respond(send, 404, "Not found.")
+                await _respond(scope, send, 404, "Not found.")
                 return
             await self.app(scope, receive, send)               # /api/* and static files
             return
+        if method == "OPTIONS":                                 # CORS preflight: no token, answered by CORS
+            await self.app(scope, receive, send)
+            return
         if (run_match and method != "POST") or (session_match and method not in ("GET", "POST")):
-            await _respond(send, 404, "Not found.")
+            await _respond(scope, send, 404, "Not found.")
             return
 
         headers = {k.decode().lower(): v.decode() for k, v in scope.get("headers", [])}
@@ -86,17 +91,17 @@ class Gatekeeper:
         try:
             user = await to_thread.run_sync(accounts.authenticate, token)
         except accounts.AccountError as e:
-            await _respond(send, e.status, str(e))
+            await _respond(scope, send, e.status, str(e))
             return
 
         try:
             body = await _read_body(receive)
         except ValueError:
-            await _respond(send, 413, "Request too large.")
+            await _respond(scope, send, 413, "Request too large.")
             return
         if session_match:
             if session_match.group(1) != user["id"]:
-                await _respond(send, 403, "Not your session.")
+                await _respond(scope, send, 403, "Not your session.")
                 return
             if method == "POST" and not session_match.group(2):
                 data = json.loads(body or b"{}")
@@ -111,9 +116,9 @@ class Gatekeeper:
             try:
                 data = json.loads(body or b"{}")
             except json.JSONDecodeError:
-                await _respond(send, 400, "Invalid request.")
+                await _respond(scope, send, 400, "Invalid request.")
                 return
             if data.get("user_id") != user["id"] or data.get("app_name") != APP:
-                await _respond(send, 403, "Not your session.")
+                await _respond(scope, send, 403, "Not your session.")
                 return
         await self.app(scope, _replay(body, receive), send)

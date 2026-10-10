@@ -89,8 +89,9 @@ Everything works by tapping; the AI does the hard parts on every screen. Chat is
 
 ```mermaid
 flowchart TD
-    B[Breeder phone] -->|HTTPS| CR
-    U[Buyer] -->|HTTPS| CR
+    B[Seller phone] -->|HTTPS| FH
+    U[Buyer] -->|HTTPS| FH
+    FH[Firebase Hosting<br/>web app on Google's CDN] -->|API and streamed AI calls| CR
     subgraph CR[Cloud Run service]
         WEB[Web UI]
         API[FastAPI endpoints]
@@ -116,8 +117,9 @@ flowchart TD
 |---|---|
 | AI model | Gemini Flash (newest generally available version, set via configuration) |
 | Agent framework | Google Agent Development Kit (ADK), Python |
-| Runtime | Google Cloud Run |
-| Database | Firestore |
+| Web hosting | Firebase Hosting (static web app on Google's CDN); the same app is also served by Cloud Run |
+| Runtime | Google Cloud Run (API, ADK agents, streamed AI replies) |
+| Database | Firestore (accounts, listings, enquiries, carts) |
 | File storage | Cloud Storage (private bucket) |
 | Build / deploy | Cloud Build, Artifact Registry |
 | Quality | pytest unit tests, live agent evals (run 3×), photo-accuracy test, axe-core accessibility audit, GitHub Actions |

@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     max_upload_mb: int = 5
     max_llm_calls_per_run: int = 20
     git_sha: str = "dev"
+    # Browser origins allowed to call the API cross-origin: the Firebase Hosting site (static web app).
+    cors_origins: list[str] = ["https://breedernear-ai-2026.web.app",
+                               "https://breedernear-ai-2026.firebaseapp.com"]
 
     @field_validator("breedernear_model")
     @classmethod

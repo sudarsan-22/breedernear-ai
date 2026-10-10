@@ -32,4 +32,4 @@ These photos illustrate fictional sample listings and are labelled "Illustrative
 
 ## Software dependencies
 
-Open-source libraries are installed as dependencies (see `requirements.txt`) under their own licences and are not copied into this repository.
+Open-source libraries are installed as dependencies (see `requirements.txt`) under their own licences and are not copied into this repository. The Firebase CLI (`firebase-tools`, MIT) is run with `npx` at deploy time only (`scripts/deploy_hosting.sh`) and is not part of the app.

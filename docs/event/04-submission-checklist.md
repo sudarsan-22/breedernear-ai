@@ -52,23 +52,33 @@ Use this from **16 Oct** onward. Every box must be ticked before pressing Submit
 
 ## E. Deck (PDF)
 
-- [ ] Follows [../submission/01-pitch-deck-outline.md](../submission/01-pitch-deck-outline.md)
+- [ ] Built on the **organisers' template** (Google Slides → File → Download → PPTX; keep its slide order and headings), content from [../submission/01-pitch-deck-outline.md](../submission/01-pitch-deck-outline.md)
 - [ ] Includes **solution architecture** and **business case** (both are T&C requirements)
 - [ ] Theme "Retail & Commerce" stated on the title slide
 - [ ] Explains theme alignment, problem, how the solution addresses it, scalability/production path, and a short user guide
 - [ ] Every statistic has a source in a footnote; nothing invented
 - [ ] Simulated parts are labelled; roadmap items are labelled "Roadmap"
 - [ ] Contains live URL, GitHub URL, video URL
-- [ ] Exported as **PDF**; file size accepted by the portal; text readable when zoomed out
+- [ ] Exported as **PDF, ≤ 5 MB**; text readable when zoomed out
 - [ ] All in English
 
 ## F. Submission form
 
-- [ ] Correct theme / problem statement selected: **Retail & Commerce**
+The "Prototype Submission" module (read 10 Oct). Every field is required; nothing says it can be edited after Submit, so treat Submit as final.
+
+| Field | Limit | Our answer |
+|---|---|---|
+| Prototype Link Deployed on GCP or Cloud Run | URL | `https://breedernear-655711985039.asia-south1.run.app` |
+| Final Prototype PPT/Deck converted into PDF | **PDF, up to 5 MB**; must use the organisers' template (R47) | `BreederNear-AI-deck.pdf` |
+| GitHub Repository Link (Public Access) | URL with `https://` | `https://github.com/sudarsan-22/breedernear-ai` |
+| Demo Video Link (up to 3 minutes) | URL | YouTube (Unlisted) |
+| Brief Description of Your Solution (how we use Google services) | **1024 characters**; must cover Firebase, Firestore, Cloud Run and Gemini (R46) | [../submission/04-brief-description.md](../submission/04-brief-description.md) |
+
 - [ ] Live URL pasted and clicked from the form preview
 - [ ] GitHub URL pasted and clicked
 - [ ] Video URL pasted and clicked
-- [ ] Deck PDF uploaded
+- [ ] Deck PDF uploaded (≤ 5 MB, on the template)
+- [ ] Brief description pasted; counter shows ≤ 1024
 - [ ] All text fields in English, proofread
 - [ ] **Submitted.** Screenshot of the confirmation saved, and the confirmation email received
 

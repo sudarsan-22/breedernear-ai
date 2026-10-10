@@ -17,6 +17,9 @@ app: FastAPI = get_fast_api_app(
     web=False,
     use_local_storage=False,
     max_llm_calls=get_settings().max_llm_calls_per_run,
+    # The web app on Firebase Hosting calls this API cross-origin; ADK adds CORS for exactly these origins
+    # and keeps blocking every other cross-origin request.
+    allow_origins=get_settings().cors_origins,
 )
 
 app.add_middleware(RateLimit)

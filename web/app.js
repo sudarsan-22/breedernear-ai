@@ -548,6 +548,7 @@ async function viewPets() {
     chipRow,
     h("div", { class: "controls" }, h("label", { class: "switch" }, trusted, h("span", { class: "track", "aria-hidden": "true" }), "Trusted only"), cap),
     count, grid, disclaimer()));
+  chipRow.querySelector('[aria-pressed="true"]')?.scrollIntoView({ inline: "center", block: "nearest" });
   load();
 }
 

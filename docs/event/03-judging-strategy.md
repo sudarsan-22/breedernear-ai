@@ -15,9 +15,9 @@ How BreederNear AI earns marks against each criterion. Weights come from T&C: Ju
 | Vision for safety | Species check, dye/disguise detection, visible health signs, stock-photo detection | Trust card reasons |
 | Tool calling over real data | Firestore-backed tools: search with distance, price ranges, registries, products | Activity panel; `breedernear_core/tools/` |
 | Structured, reliable outputs | `ListingDraft`, `PhotoScreen`, `CarePlan` schemas, Pydantic-validated | Code; deck slide 8 |
-| Robustness and guardrails | Trust score, protected-species block, welfare rules and scam rules are **deterministic code**. The LLM can't override them (eval E12 proves it). | Demo: blocked listing |
+| Robustness and guardrails | Trust score, protected-species block, welfare rules and scam rules are **deterministic code**. The LLM can't override them (eval E12 proves it). ADK callbacks on every agent replace any reply with a drug dose or that presents a protected species as tradable, even mid-stream. | Demo: blocked listing |
 | Classic + AI combined | Perceptual hashing for reused photos, haversine distance, rule engines alongside Gemini | Deck slide 9 |
-| Evaluation | 16 live agent eval cases run 3× (48/48), photo-accuracy test (8/8 protected blocked, 0/37 false alarms), axe-core accessibility audit, 221 unit tests in CI | README "Measured quality"; deck slide 10 |
+| Evaluation | 18 live agent eval cases run 3× (54/54), photo-accuracy test (8/8 protected blocked, 0/37 false alarms), axe-core accessibility audit, 249 unit tests in CI | README "Measured quality"; deck slide 10 |
 | Google Cloud depth | Cloud Run, Gemini via Agent Platform, ADK, Firestore, Cloud Storage, Cloud Build, Cloud Logging | Architecture slide |
 | Scalability | Stateless Cloud Run, serverless DB, config-driven model, scale-up table | Deck slide 12 |
 

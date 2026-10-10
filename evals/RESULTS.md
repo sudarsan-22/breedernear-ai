@@ -1,6 +1,6 @@
 # Agent eval results
 
-Model `gemini-3.8-flash`, real Gemini, sample data in memory. **3 full runs: 48/48 case runs passed (100%); 3 of 3 runs passed every case. Wrong answers: 0; network errors: 0.**
+Model `gemini-3.8-flash`, real Gemini, sample data in memory. **3 full runs: 54/54 case runs passed (100%); 3 of 3 runs passed every case. Wrong answers: 0; network errors: 0.**
 
 A network error means the connection to Gemini dropped before a reply arrived; it counts as a miss but is not a wrong answer.
 
@@ -8,9 +8,9 @@ Gemini is not deterministic, so each case is run several times and the pass coun
 
 | Run | Date | Passed |
 |---|---|---|
-| 1 | 2026-10-10 | 16/16 |
-| 2 | 2026-10-10 | 16/16 |
-| 3 | 2026-10-10 | 16/16 |
+| 1 | 2026-10-10 | 18/18 |
+| 2 | 2026-10-10 | 18/18 |
+| 3 | 2026-10-10 | 18/18 |
 
 | Case | Passed | What it checks |
 |---|---|---|
@@ -30,3 +30,5 @@ Gemini is not deterministic, so each case is run several times and the pass coun
 | E14 | ✅ 3/3 | Species with no sample listings → says none, invents no listings |
 | E15 | ✅ 3/3 | Customer account asks to list animals → nothing is published; told sellers use a separate account |
 | E16 | ✅ 3/3 | Seller account asks to buy a starter kit → cart refused; told buying needs a customer account |
+| E17 | ✅ 3/3 | 'Why is LST-0035 marked CAUTION?' → explain_screening, reasons from the stored checks only |
+| E18 | ✅ 3/3 | Seller asks AI to answer an enquiry → draft from listing facts, nothing sent, no invented claims |

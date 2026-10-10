@@ -142,12 +142,12 @@ Measured on 10 Oct 2026 with real Gemini (`gemini-3.8-flash`). Each command repr
 
 | What | Result | Details |
 |---|---|---|
-| Agent evals (16 cases: listing, Tamil input, blocking, scams, reused photos, prompt injection, no medicine advice, roles), **run 3 times** | **48/48 case runs passed** | [evals/RESULTS.md](evals/RESULTS.md) · `scripts/run_evals.sh 3` |
+| Agent evals (18 cases: listing, Tamil input, blocking, scams, reused photos, prompt injection, no medicine advice, roles, badge explanations, seller reply drafts), **run 3 times** | **54/54 case runs passed** | [evals/RESULTS.md](evals/RESULTS.md) · `scripts/run_evals.sh 3` |
 | Protected native species blocked from the photo alone (parakeets, munias, avadavat, myna, star tortoise, a dyed munia) | **8/8** | [evals/VISION_RESULTS.md](evals/VISION_RESULTS.md) · `scripts/vision_accuracy.py` |
 | Ordinary pet photos wrongly flagged as protected | **0/37** | same |
 | All photo checks (species, dye, blur, no animal, watermark, screenshot) | **202/202** | same; test photos are AI-generated and the prompt was tuned on them, so treat this as an upper bound |
-| Accessibility: axe-core WCAG 2.2 AA on every screen, light and dark, 320 / 390 / 1280 px | **0 problems** | `pytest -m ui tests/ui` |
-| Unit tests (CI on every push) | **221 passed** | `pytest -m "not live"` |
+| Accessibility: axe-core WCAG 2.2 AA on every screen and sheet, light and dark, 320 / 390 / 1280 px | **0 problems** | `pytest -m ui tests/ui` |
+| Unit tests (CI on every push) | **249 passed** | `pytest -m "not live"` |
 | Live smoke test | **17/17** | `scripts/smoke_test.py <URL>` |
 
 ## Simulated vs real
@@ -160,8 +160,9 @@ This is a hackathon prototype. To be transparent:
 | Fair-price ranges | **Sample data** based on the founder's experience |
 | State Animal Welfare Board registry | **Simulated**, with clearly fake `SIM-` numbers |
 | Protected / CITES species lists | Curated from public sources (cited in the data files). Not legal advice. |
-| Enquiries and cart | **Demo only**: no breeder is contacted, no payment is taken |
-| AI extraction, screening, matching, care plans | **Real**: live Gemini calls |
+| Enquiries, replies and cart | **Demo only**: messages stay inside the app (no SMS, WhatsApp or email), no payment is taken |
+| Seller and customer accounts | **Real**: hashed passwords, roles checked on the server and in the AI tools |
+| AI extraction, photo screening, matching, care plans, reply drafts | **Real**: live Gemini calls |
 | Trust score, species blocking, welfare rules | **Real**: enforced in code and covered by tests |
 
 BreederNear AI is not a veterinary service and does not sell animals or products.

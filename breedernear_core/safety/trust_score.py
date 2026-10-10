@@ -25,6 +25,13 @@ class ScreeningInputs:
     sawb_status: str | None = None           # "valid" | "expired" | "unknown" | "missing" (dogs)
 
 
+def photo_shows_protected(photo: PhotoScreen) -> bool:
+    """The photo alone is enough to block: the model flags a protected species, or names one."""
+    return bool((photo.possibly_protected_native_species
+                 and photo.species_guess_confidence >= PROTECTED_VISION_CONFIDENCE)
+                or find_protected(photo.species_guess))
+
+
 def screen(inputs: ScreeningInputs) -> Screening:
     d, photo = inputs.draft, inputs.photo
     checks: list[Check] = []
@@ -34,8 +41,7 @@ def screen(inputs: ScreeningInputs) -> Screening:
     # Uses the breeder's own words and extracted species fields, not the model-written summary.
     protected = find_protected(inputs.raw_text, d.species_common, d.species_scientific or "",
                                d.variety or "")
-    vision_protected = (photo is not None and photo.possibly_protected_native_species
-                        and photo.species_guess_confidence >= PROTECTED_VISION_CONFIDENCE)
+    vision_protected = photo is not None and photo_shows_protected(photo)
     if photo is not None:
         protected += find_protected(photo.species_guess)
     if protected or vision_protected:

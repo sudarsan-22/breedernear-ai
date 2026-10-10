@@ -1,0 +1,109 @@
+{
+  "about": "Hard cases for scripts/vision_accuracy.py. Images are generated (scripts/generate_vision_samples.py). 'expect' lists only what the case tests; omitted fields are not scored. The sample listing photos in web/img/listings/ are added automatically as the domestic (should-pass) set.",
+  "cases": [
+    {
+      "id": "protected-rose-ringed-adult",
+      "group": "protected",
+      "prompt": "One adult green rose-ringed parakeet with a red hooked beak and a thin black-and-rose neck ring, inside a small rusty wire cage hung on a balcony. {REAL}",
+      "expect": {
+        "protected": true
+      }
+    },
+    {
+      "id": "protected-rose-ringed-chicks",
+      "group": "protected",
+      "prompt": "Three young rose-ringed parakeet chicks with short green feathers and pale pink beaks, huddled in a cardboard box lined with newspaper, as sold at a street pet market. {REAL}",
+      "expect": {
+        "protected": true
+      }
+    },
+    {
+      "id": "protected-alexandrine",
+      "group": "protected",
+      "prompt": "One Alexandrine parakeet: large green parrot with a big red beak and a maroon patch on each shoulder, perched in a small cage. {REAL}",
+      "expect": {
+        "protected": true
+      }
+    },
+    {
+      "id": "protected-scaly-munia",
+      "group": "protected",
+      "prompt": "Four scaly-breasted munias: small brown finches with dark scaly-patterned white chests, crowded in a small bamboo cage. {REAL}",
+      "expect": {
+        "protected": true
+      }
+    },
+    {
+      "id": "protected-red-avadavat",
+      "group": "protected",
+      "prompt": "Two male red avadavats: tiny bright red finches with small white spots on the wings and red beaks, in a small cage. {REAL}",
+      "expect": {
+        "protected": true
+      }
+    },
+    {
+      "id": "protected-myna",
+      "group": "protected",
+      "prompt": "One common myna: brown bird with a black head, yellow beak and yellow skin patch behind the eye, inside a cage. {REAL}",
+      "expect": {
+        "protected": true
+      }
+    },
+    {
+      "id": "protected-star-tortoise",
+      "group": "protected",
+      "prompt": "Two small Indian star tortoises with black shells patterned with yellow star-shaped radiating lines, in a plastic tub. {REAL}",
+      "expect": {
+        "protected": true
+      }
+    },
+    {
+      "id": "protected-dyed-munia",
+      "group": "protected",
+      "prompt": "Several small munia finches whose feathers have been artificially dyed bright pink and green with uneven patchy colour and stains, crowded in a small cage at a roadside market. {REAL}",
+      "expect": {
+        "protected": true,
+        "dye": true
+      }
+    },
+    {
+      "id": "quality-blurry",
+      "group": "quality",
+      "prompt": "A very blurry, dark, badly out-of-focus night photo of two budgerigars in a cage, heavy motion blur and grain, the birds barely recognisable. {REAL}",
+      "expect": {
+        "quality": "poor",
+        "protected": false
+      }
+    },
+    {
+      "id": "quality-no-animal",
+      "group": "quality",
+      "prompt": "An empty powder-coated bird cage with seed and water cups and wooden perches on a balcony; no birds or animals anywhere. {REAL}",
+      "expect": {
+        "quality": "not_animal",
+        "protected": false
+      }
+    },
+    {
+      "id": "stock-watermark",
+      "group": "stock",
+      "expect": {
+        "stock": true,
+        "protected": false,
+        "species_any": [
+          "cockatiel"
+        ]
+      },
+      "source": "web/img/listings/LST-0003.webp",
+      "note": "Made by scripts/generate_vision_samples.py: a sample listing photo with a repeated diagonal 'STOCK PREVIEW' watermark stamped on it (the image model declines to draw watermarks)."
+    },
+    {
+      "id": "scam-post-screenshot",
+      "group": "stock",
+      "prompt": "A mobile phone screenshot of a social media sale post in a generic chat app (no real app logos): a photo of a green parrot with a red beak, and under it the caption 'Talking parrot for sale, only Rs 500, pay advance on UPI, delivery all over India, hurry'. Flat screenshot, status bar at the top.",
+      "expect": {
+        "stock": true
+      }
+    }
+  ]
+}

@@ -18,7 +18,7 @@ How BreederNear AI earns marks against each criterion. Weights come from T&C: Ju
 | Robustness and guardrails | Trust score, protected-species block, welfare rules and scam rules are **deterministic code**. The LLM can't override them (eval E12 proves it). ADK callbacks on every agent replace any reply with a drug dose or that presents a protected species as tradable, even mid-stream. | Demo: blocked listing |
 | Classic + AI combined | Perceptual hashing for reused photos, haversine distance, rule engines alongside Gemini | Deck slide 9 |
 | Evaluation | 18 live agent eval cases run 3× (54/54), photo-accuracy test (8/8 protected blocked, 0/37 false alarms), axe-core accessibility audit, 249 unit tests in CI | README "Measured quality"; deck slide 10 |
-| Google Cloud depth | Cloud Run, Gemini via Agent Platform, ADK, Firestore, Cloud Storage, Cloud Build, Cloud Logging | Architecture slide |
+| Google Cloud depth | Firebase Hosting, Cloud Run, Gemini via Agent Platform, ADK, Firestore, Cloud Storage, Cloud Build, Cloud Logging | Architecture slide |
 | Scalability | Stateless Cloud Run, serverless DB, config-driven model, scale-up table | Deck slide 12 |
 
 ## Problem Alignment & Impact: 25%
@@ -42,7 +42,7 @@ What existing pet marketplaces and classifieds don't do:
 
 ## User Experience & Solution Design: 10% (plus the Best UI/UX prize)
 
-- **Zero friction:** no login; a first-visit welcome card explains the three tabs; "Try as Priya / Karthik" demo buttons.
+- **Low friction:** separate customer and seller accounts, but judges tap **Demo customer · Priya** or **Demo seller · Karthik** on the login screen and land in a lived-in account with preloaded data.
 - **Not "just a chatbot":** every core job (browse, contact, sell, check a post, starter kit) works by tapping in the Pets and Local Breeders tabs, with AI built into those screens; the multi-agent chat is the third tab.
 - **Phone-first breeder flow:** camera upload, one message, one Publish tap.
 - **Explainable trust:** every badge expands into ✅ / ⚠️ / ⛔ reasons and questions to ask the seller.

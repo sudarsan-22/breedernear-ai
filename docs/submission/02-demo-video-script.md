@@ -1,29 +1,31 @@
 # Demo Video Script
 
-**Hard limit:** strictly under 3:00 (T&C: Deliverables). **Target:** 2:40. **Never exceed 2:55.**
-**Format:** screen recording of the **live deployed URL** (show the address bar), English voice-over by the founder, captions on, 1080p.
-**Upload:** YouTube, Unlisted or Public. Test the link in incognito while logged out.
+**Length:** 2:38 (the form says "up to 3 minutes"; the rules penalise only videos that run over). **Format:** 1920×1080, real screen recordings of the live app at `https://breedernear-ai-2026.web.app` (address bar shown), English voice-over, captions burned in plus an `.srt` file.
 
-Record breeder scenes on a phone (or a phone-sized browser window) and buyer scenes on a laptop. Use the demo identities and the sample assets in `data/samples/`, which are proven to work.
+**How it was made:** `scripts/build_video.py` records every scene live in Chromium with the two demo accounts (nothing is mocked), synthesises the narration with Google Cloud Text-to-Speech (voice `en-IN-Chirp3-HD-Kore`), fits each recording to its narration (waits for Gemini are sped up; every final result is held for 2 s at normal speed) and joins everything with ffmpeg. Rebuild after any UI change, then reset the demo data (`scripts/seed_firestore.py`).
 
-| Time | Scene | On screen | Voice-over (draft) |
+The narration is in the third person ("our founder…"). To use a team member's own voice instead, record the same lines over the video; the scene timings are in the `.srt` file.
+
+| # | Scene | Screen | Narration |
 |---|---|---|---|
-| 0:00–0:20 | **Founder hook** | Founder on camera or a title card: "The breeder is 50 metres away." | "For five years I bred and sold birds in Coimbatore. Every week I watched new customers walk into a shop and overpay, while a breeder on the same street sold healthier birds for less. They just couldn't find each other." |
-| 0:20–0:30 | **Intro** | BreederNear AI with its three tabs (Pets · Local Breeders · BreederNear AI), URL visible | "BreederNear AI is one app for buying and selling pets directly between neighbours: browse pets, meet local breeders at farm prices, or just ask the AI. Gemini agents on Google Cloud. Retail and Commerce theme." |
-| 0:30–1:00 | **Seller app** | Phone: login screen → "Demo seller · Karthik" → seller Dashboard → "Sell a pet with AI" → 2 lovebird photos + mixed Tamil-English message → **✨ Fill with AI** fills the form, fair-price bar → Publish → ✅ TRUSTED, reasons | "Breeders post like they do on WhatsApp: photos and a quick message, even in Tamil. Gemini fills in the listing form and suggests a fair price. One tap to publish, and every listing is screened first." |
-| 1:00–1:15 | **Blocked** | Sell form offering "pachai kili" (a native parakeet) → ⛔ BLOCKED with explanation | "Protected Indian birds are illegal to trade. BreederNear blocks them in code, so no prompt can talk it into publishing one." |
-| 1:15–1:45 | **Buyer: Pets + Local Breeders** | Laptop: "Try as Priya" → quiz (flat, 8-year-old, ₹3000) → budgie cards with trust badges, distance and fair-price bar → Local Breeders: Palladam Pet Birds, in her district | "Buyers can tap through a four-question quiz or just browse. Trusted breeders nearby come first, every card shows whether the price is fair, and you buy direct from the farm, without a broker." |
-| 1:45–2:05 | **AI tab + starter kit** | AI tab: "I'll take the budgie pair, what do I need?" → activity panel shows agents and tools → kit cards with total → care plan with "see a vet if" | "Or ask the assistant. Five ADK agents work together: here the care agent builds a starter kit with a cage big enough for a pair, plus a two-week care plan." |
-| 2:05–2:25 | **Is this post safe?** | Pets › "Check a post": upload the sample WhatsApp-style scam screenshot → ⚠️ CAUTION: price 70% below range, "full advance, courier only", questions to ask | "And for posts seen elsewhere, buyers can check them first. BreederNear spots the warning signs before anyone pays." |
-| 2:25–2:40 | **Architecture and close** | Architecture diagram → activity panel → logo + URL | "Five ADK agents on Cloud Run with Gemini, Firestore and Cloud Storage, tested with evals. BreederNear AI: find the breeder next door, and trust what you buy." |
+| 1 | Title card | `/` | Buying a pet in India usually happens in WhatsApp groups, with no checks at all. Our founder spent five years as a bird breeder in Coimbatore, watching buyers overpay in shops while healthy birds waited a street away. |
+| 2 | Login: one tap on Demo customer · Priya | `/` | BreederNear AI connects buyers with trusted local breeders. It runs on Google Cloud: Gemini agents built with the Agent Development Kit on Cloud Run, with Firestore and Firebase Hosting. This is the live app. We log in as our demo buyer, Priya, in Tiruppur. |
+| 3 | Pets near Tiruppur → open a listing → trust checks | `/#pets` | Trusted pets nearby come first, and every card shows the distance and whether the price is fair. Open a listing to see why it is trusted: each check, the health notes, and the questions to ask the breeder. |
+| 4 | Starter kit (welfare-sized) → 14-day care plan → “See a vet if” | `/#pets` | Tap Starter kit. The cage is sized for the animals, never smaller. Gemini writes a fourteen-day care plan with the warning signs that need a vet, and it never suggests medicine doses. |
+| 5 | “Which pet suits me?” → best match | `/#pets` | Not sure which pet fits? Which pet suits me takes a few taps, and rules in code match species to your home, family, time and budget. |
+| 6 | Local Breeders directory → breeder page | `/#breeders` | Local Breeders is the direct-from-farm directory: breeders near you, what they breed, and how much you can trust them. Buy straight from the farm, without a broker. |
+| 7 | “Is this post safe?”: paste a scam-style post → CAUTION with reasons | `/#pets` | Most pets are still sold in WhatsApp groups. Paste any post into Is this post safe. Gemini reads it, and our rules flag a price far below the market, a demand for full advance payment, and courier-only delivery. Nothing is stored. |
+| 8 | AI tab: family, flat, ₹3,000 → species and listing cards | `/#ai` | Prefer to talk? BreederNear AI is five Gemini agents that understand English and Tamil. The buyer guide recommends pets that suit a flat and a young child, using the same tools as the screens. |
+| 9 | Seller dashboard (Karthik) | `/#dashboard` | Now the seller side. Karthik's dashboard shows his live listings, buyer enquiries, listing views and trust status at a glance. |
+| 10 | Sell: photo + Tamil message → Fill with AI → Publish → TRUSTED 100 | `/#sell` | A breeder posts the way they do on WhatsApp: a photo and a quick message in Tamil. Gemini fills in the listing form. Karthik checks it and publishes, and every listing is screened first. This one is trusted, with the reasons shown. |
+| 11 | Sell a rose-ringed parakeet → BLOCKED in code | `/#sell` | Now try to sell native rose-ringed parakeet chicks. The listing is blocked. Trading protected Indian birds is illegal, and this decision is made in code, so no prompt can talk the AI into it. |
+| 12 | Enquiries → Reply → Draft with AI | `/#enquiries` | When a buyer asks a question, Gemini drafts a reply from the listing's facts only, and flags what only the seller can answer. Karthik edits it and sends it. |
+| 13 | Architecture slide from the deck | `/` | Under the hood: five agents on Cloud Run, Gemini on Vertex AI, Firestore and Firebase Hosting. In testing, every protected species photo was blocked and all fifty-four agent test runs passed. BreederNear AI: find the trusted breeder next door. |
 
-## Recording checklist
+## Upload checklist
 
-- [ ] App warmed up (open it once before recording)
-- [ ] Clean guest session; notifications off; bookmarks bar hidden; readable zoom
-- [ ] Quiet room; voice-over synced
-- [ ] Captions added and corrected
-- [ ] No real personal data, real brands, real breeders' names, or others' photos visible
-- [ ] Every feature shown is live and working
-- [ ] Duration checked on the **uploaded** video: ≤ 2:55
-- [ ] Link tested in incognito while logged out
+- [ ] Watch the whole file once; check the sound
+- [ ] YouTube → Upload → title "BreederNear AI: find the trusted breeder next door (AI Builder Cup 2026)" → visibility **Unlisted**
+- [ ] Optional: Subtitles → upload `BreederNear-AI-demo.srt` (captions are already burned in)
+- [ ] Open the link in a private window while logged out; it plays
+- [ ] Put the link in the deck (`VIDEO_URL` in `scripts/build_deck.py`, then rebuild), the README and the submission form

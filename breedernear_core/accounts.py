@@ -178,6 +178,12 @@ def demo(role: str, device_id: str | None) -> tuple[str, dict]:
         raise AccountError("Unknown demo account.")
     device = _device(device_id)
     store = deps.get_store()
+    from breedernear_core.default_accounts import DEFAULT_LOGINS
+
+    default_id = store.login_owner(DEFAULT_LOGINS[role])
+    default_user = store.get_user(default_id) if default_id else None
+    if default_user:                                   # the preloaded default account
+        return _start_session(default_user, device, remember=False), public(default_user)
     key = f"demo:{role}:{device}"
     existing = store.login_owner(key)
     user = store.get_user(existing) if existing else None
@@ -230,6 +236,9 @@ def logout(token: str | None) -> None:
 def update_profile(user: dict, fields: dict) -> dict:
     store = deps.get_store()
     stored = store.get_user(user["id"])
+    if stored.get("default") and ({"name", "farm"} & set(fields)):
+        raise AccountError("The default demo account's name and farm can't be changed. "
+                           "Sign up to try editing.", 403)
     if "name" in fields:
         name = str(fields["name"]).strip()[:60]
         if len(name) < 2:
@@ -249,6 +258,8 @@ def update_profile(user: dict, fields: dict) -> dict:
 
 def delete_account(user: dict) -> None:
     """Remove the account, its sessions and its own listings (privacy: 'Delete my account')."""
+    if user.get("default"):
+        raise AccountError("The default demo accounts can't be deleted. Sign up to try this.", 403)
     store = deps.get_store()
     for listing in store.all_listings():
         if listing.get("owner_user_id") == user["id"]:

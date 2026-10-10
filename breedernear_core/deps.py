@@ -20,6 +20,8 @@ def get_store() -> Store:
             _store = MemoryStore()
             for listing in seed_listings():
                 _store.save_listing(listing["id"], listing)
+            from breedernear_core.default_accounts import seed_default_accounts
+            seed_default_accounts(_store)
     return _store
 
 

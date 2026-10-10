@@ -39,7 +39,7 @@ Decided 10 Oct (idea from the founder's earlier PetZonic product; fresh code). *
 | Verification | — | Instead of KYC (Aadhaar/PAN are **not** collected): a dog-breeder registration number checked against the simulated registry gives a "Verified breeder (simulated registry)" badge |
 
 - Login: email or mobile + password, compared with a salted scrypt hash stored in Firestore. No SMS, no third-party identity provider.
-- **Judges never need to sign up:** "Demo customer (Priya)" and "Demo seller (Karthik)" create a fresh, private demo account with one tap.
+- **Judges never need to sign up:** "Demo customer (Priya)" and "Demo seller (Karthik)" sign in with one tap to two **default accounts with preloaded data** (`priya.customer@example.com` and `karthik.seller@example.com`, password `demo12345`, also shown on the login screen). The seller owns the sample breeder Karthik's Aviary (4 listings, views, 4 enquiries); the customer has 2 sent enquiries and a cart. They are protected (no delete, rename or removal of sample listings) and reset by `scripts/seed_firestore.py` (`breedernear_core/default_accounts.py`). If they don't exist (e.g. in unit tests), a private per-device demo account is created instead.
 - **Same-device sandbox (R33):** a seller's listings are visible to the seller and to accounts signed in on the same device, never to strangers. A judge can play both sides in one browser.
 - Roles are enforced on the server for every API call and inside the agents' tools.
 - Privacy: only name, email or mobile, and district are stored; passwords only as hashes; "Delete my account" removes the account and its sessions. The login screen says not to reuse an important password in this prototype.

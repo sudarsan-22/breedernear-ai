@@ -20,6 +20,15 @@ Our founder spent five years as a bird breeder and broker in Coimbatore, India. 
 - **Buyers can't tell good sellers from bad.** Scams are common, and protected native birds are still traded illegally, sometimes dyed to disguise them.
 - **Breeders lose hours every day** to manual selling: repeating answers, confirming stock, negotiating.
 
+## Try it: demo accounts with preloaded data
+
+| Account | Login | Password | What's already there |
+|---|---|---|---|
+| Customer | `priya.customer@example.com` | `demo12345` | District Tiruppur, 2 enquiries sent, a budgie starter kit in the cart |
+| Seller | `karthik.seller@example.com` | `demo12345` | Karthik's Aviary (Coimbatore): 4 listings with photos (2 live, 1 paused, 1 sold), views, 4 buyer enquiries |
+
+Or tap **Demo customer** / **Demo seller** on the login screen. These are shared demo accounts with sample data only; they can't be deleted or renamed, and their sample listings can't be removed.
+
 ## One app, two kinds of account
 
 Customers and sellers have **separate accounts** (email or mobile + password, or one-tap demo accounts for judges). Customers get the buyer app; sellers get a seller dashboard. The server checks the role on every request, including inside the AI agents' tools.

@@ -837,13 +837,15 @@ async function viewFarm() {
   const save = h("button", { class: "btn primary block", type: "button" }, "Save farm profile");
   save.addEventListener("click", async () => {
     save.disabled = true;
-    try { auth.user = (await api("/api/auth/me", { method: "PATCH", body: JSON.stringify({ farm: form.values, district: district.value }) })).user; toast("Farm profile saved"); route(); }
+    const body = u.default ? { district: district.value } : { farm: form.values, district: district.value };
+    try { auth.user = (await api("/api/auth/me", { method: "PATCH", body: JSON.stringify(body) })).user; toast(u.default ? "District saved" : "Farm profile saved"); route(); }
     catch (e) { toast(e.message); save.disabled = false; }
   });
   main.replaceChildren(h("div", { class: "view" },
     hero("Seller account", "Farm", "How buyers see your farm on BreederNear."),
     h("div", { class: "card", style: "display:flex;gap:14px;align-items:center;margin-bottom:16px" }, avatar(u.farm?.farm_name || u.name, "avatar lg"),
       h("div", {}, h("b", { style: "font-size:19px" }, u.farm?.farm_name || "Your farm"), h("div", { class: "muted small" }, `${u.name} · ${u.login || "demo account"}`), h("div", { style: "margin-top:6px" }, verifyTag(u.farm)))),
+    u.default ? h("div", { class: "callout info", style: "margin-bottom:12px" }, "This is the shared demo seller. Farm details are fixed; sign up to create your own farm.") : null,
     form.el, h("div", { class: "h-sub" }, "District"), district, h("div", { style: "height:16px" }), save,
     accountActions(), disclaimer()));
 }
@@ -851,7 +853,8 @@ async function viewFarm() {
 function accountActions() {
   return h("div", { style: "display:grid;gap:8px;margin-top:22px" },
     h("button", { class: "btn secondary block", type: "button", onclick: () => logout() }, "Log out"),
-    h("button", { class: "btn plain block", type: "button", style: "color:var(--bad)", onclick: deleteAccount }, "Delete my account"),
+    auth.user?.default ? h("p", { class: "muted small", style: "text-align:center;margin:0" }, "This shared demo account is reset regularly and can't be deleted.")
+      : h("button", { class: "btn plain block", type: "button", style: "color:var(--bad)", onclick: deleteAccount }, "Delete my account"),
     h("p", { class: "muted small", style: "text-align:center;margin:4px 0 0" }, "We store only your name, email or mobile and district. Passwords are stored as secure hashes."));
 }
 
@@ -1122,7 +1125,9 @@ function viewAuth(mode = "login", role = "customer") {
     h("div", { style: "display:grid;gap:8px" },
       h("button", { class: "btn secondary block", type: "button", onclick: () => demoLogin("customer") }, icon("paw"), "Demo customer · Priya"),
       h("button", { class: "btn secondary block", type: "button", onclick: () => demoLogin("seller") }, icon("shop"), "Demo seller · Karthik")),
-    h("p", { class: "muted small", style: "text-align:center;margin:10px 0 0" }, "Demo accounts are private to you and need no sign-up."));
+    h("div", { class: "callout info", style: "margin-top:12px;font-size:14px" }, h("b", {}, "Demo logins (preloaded data)"),
+      h("div", {}, "Customer: priya.customer@example.com"), h("div", {}, "Seller: karthik.seller@example.com"),
+      h("div", {}, "Password for both: demo12345")));
   if (mode === "login") {
     const pw = passwordField("auth-password", "current-password");
     const submit = h("button", { class: "btn primary block", type: "submit" }, "Log in");
@@ -1197,11 +1202,9 @@ async function demoLogin(role) {
     await finishLogin(await api("/api/auth/demo", { method: "POST", body: JSON.stringify({ role }) }), false);
     if (role === "seller") {
       Object.assign(sell, { text: "4 jodi lutino lovebird, 5 maasam, oru jodi 1800 rubai. Saibaba Colony, Kovai. Healthy, parents on site." });
-      toast("Demo seller: tap “Sell a pet with AI” to try the listing assistant");
+      toast("Welcome, Karthik! Try “Sell a pet with AI”");
     } else {
-      state.filters = { species: "bird", trusted: false, max: "" };
-      route();
-      setTimeout(() => quizSheet({ animal_group: "bird", home_type: "flat", has_young_children: true, first_time_owner: true, time_per_day_minutes: 30, noise_ok: true, budget_inr: 3000 }), 300);
+      toast("Welcome, Priya! Your cart and enquiries are preloaded");
     }
   } catch (e) { toast(e.message); }
 }

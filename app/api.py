@@ -165,7 +165,7 @@ def logout(authorization: str | None = Header(default=None)) -> dict:
 
 @router.delete("/auth/me")
 def delete_me(user: dict = Depends(current_user)) -> dict:
-    accounts.delete_account(user)
+    _call(accounts.delete_account, user)
     return {"status": "ok"}
 
 

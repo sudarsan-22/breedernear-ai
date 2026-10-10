@@ -208,7 +208,8 @@ def set_listing_status(owner_id: str, listing_id: str, status: str) -> dict:
 
 
 def delete_listing(owner_id: str, listing_id: str) -> dict:
-    _own_listing(owner_id, listing_id)
+    if _own_listing(owner_id, listing_id).get("simulated"):
+        raise ListingError("Sample listings can't be removed. Use Pause or Mark sold instead.")
     deps.get_store().delete_listing(listing_id)
     return {"status": "ok", "deleted": listing_id}
 

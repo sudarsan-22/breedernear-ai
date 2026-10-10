@@ -53,6 +53,7 @@ Use this from **16 Oct** onward. Every box must be ticked before pressing Submit
 
 ## E. Deck (PDF)
 
+- [x] Draft built 10 Oct: `docs/submission/BreederNear-AI-deck.pdf` (1.4 MB); video link still to add
 - [ ] Built on the **organisers' template** (Google Slides → File → Download → PPTX; keep its slide order and headings), content from [../submission/01-pitch-deck-outline.md](../submission/01-pitch-deck-outline.md)
 - [ ] Includes **solution architecture** and **business case** (both are T&C requirements)
 - [ ] Theme "Retail & Commerce" stated on the title slide

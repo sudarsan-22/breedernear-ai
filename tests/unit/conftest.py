@@ -75,3 +75,13 @@ def reset_rate_limit():
     limiter.reset()
     yield
     limiter.reset()
+
+
+DEVICE = "3f2b9c1e-7a4d-4e8b-9c0a-1234567890ab"
+
+
+def auth_headers(client, role: str, device: str = DEVICE) -> dict:
+    """Sign in with a fresh demo account and return the Authorization header."""
+    r = client.post("/api/auth/demo", json={"role": role}, headers={"X-Device-Id": device})
+    assert r.status_code == 200, r.text
+    return {"Authorization": f"Bearer {r.json()['token']}"}

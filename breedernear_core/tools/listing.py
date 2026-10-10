@@ -2,6 +2,7 @@
 
 from google.adk.tools import ToolContext
 
+from breedernear_core import accounts
 from breedernear_core import listing_service as svc
 
 DRAFT_KEY = "draft_listing_id"
@@ -12,6 +13,17 @@ def _safe(fn, *args) -> dict:
         return fn(*args)
     except svc.ListingError as e:
         return {"status": "error", "message": str(e)}
+    except accounts.AccountError as e:
+        return {"status": "error", "message": str(e)}
+
+
+def role_error(tool_context: ToolContext, role: str) -> dict | None:
+    """Check the caller's real role from the database (never trust the conversation)."""
+    try:
+        accounts.require_role(accounts.get_user(tool_context.user_id), role)
+    except accounts.AccountError as e:
+        return {"status": "error", "role_required": role, "message": str(e)}
+    return None
 
 
 def extract_listing(text: str, upload_ids: list[str], tool_context: ToolContext) -> dict:
@@ -21,6 +33,8 @@ def extract_listing(text: str, upload_ids: list[str], tool_context: ToolContext)
         text: The breeder's message exactly as written (any language).
         upload_ids: IDs of the uploaded photos from the [attachments upload_ids=...] note. May be empty.
     """
+    if denied := role_error(tool_context, "seller"):
+        return denied
     result = _safe(svc.extract_listing, tool_context.user_id, text, upload_ids)
     if result.get("status") == "ok":
         tool_context.state[DRAFT_KEY] = result["draft_id"]
@@ -34,6 +48,8 @@ def update_draft(field: str, value: str, tool_context: ToolContext) -> dict:
         field: The draft field to change.
         value: The new value, as text.
     """
+    if denied := role_error(tool_context, "seller"):
+        return denied
     draft_id = tool_context.state.get(DRAFT_KEY)
     if not draft_id:
         return {"status": "error", "message": "There is no draft yet. Describe the animals first."}
@@ -42,10 +58,12 @@ def update_draft(field: str, value: str, tool_context: ToolContext) -> dict:
 
 def publish_listing(tool_context: ToolContext) -> dict:
     """Run the trust and compliance screening on the current draft and publish it if allowed."""
+    if denied := role_error(tool_context, "seller"):
+        return denied
     draft_id = tool_context.state.get(DRAFT_KEY)
     if not draft_id:
         return {"status": "error", "message": "There is no draft to publish yet."}
-    result = _safe(svc.publish_listing, tool_context.user_id, draft_id)
+    result = _safe(svc.publish_listing, tool_context.user_id, draft_id, tool_context.state.get("device_id"))
     if result.get("status") == "ok":
         tool_context.state[DRAFT_KEY] = None
     return result
@@ -53,6 +71,8 @@ def publish_listing(tool_context: ToolContext) -> dict:
 
 def my_listings(tool_context: ToolContext) -> dict:
     """List this breeder's listings with their trust level."""
+    if denied := role_error(tool_context, "seller"):
+        return denied
     return _safe(svc.my_listings, tool_context.user_id)
 
 

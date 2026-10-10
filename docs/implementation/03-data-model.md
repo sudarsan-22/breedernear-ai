@@ -4,6 +4,22 @@ Firestore (Native mode, location `asia-south1`). **All data is synthetic**: fict
 
 ## Collections
 
+### `users/{user_id}` (accounts, added 10 Oct)
+
+```json
+{ "id": "USR_8f2c…", "role": "seller", "name": "Karthik", "login": "karthik@example.com", "login_type": "email",
+  "password_hash": "scrypt$16384$8$1$<salt-b64>$<hash-b64>", "district": "coimbatore", "device_id": "<uuid>",
+  "demo": false, "created_at": "...",
+  "farm": { "farm_name": "Karthik's Aviary", "seller_type": "home_breeder", "locality": "Saibaba Colony",
+            "species": ["lovebird", "budgerigar"], "sawb_registration_no": null, "verification": "not_required" } }
+```
+
+- `login_index/{normalized login}` → `{ "user_id": ... }`, created with a create-if-absent write so two accounts can't share an email or mobile.
+- `auth_sessions/{sha256(token)}` → `{ "user_id", "role", "device_id", "expires_at" }`. The token itself is never stored.
+- Mobile numbers are normalised to `+91XXXXXXXXXX`; emails to lower case.
+- Demo accounts (`demo: true`) have no password and expire with their session.
+- A seller's listings carry `owner_user_id` and `device_id`; they are visible to the owner and to any account signed in with the same `device_id` (same-device sandbox, R33).
+
 ### `breeders/{breeder_id}`
 
 ```json
@@ -29,7 +45,7 @@ Seed about 12 breeders across Coimbatore, Tiruppur, Erode, Salem, Madurai, Chenn
   "breeder_id": "BRD-CBE-001",
   "status": "PUBLISHED",
   "visibility": "public",
-  "owner_guest_id": null,
+  "owner_user_id": null,
   "draft": { "...ListingDraft..." },
   "photos": ["img/listings/LST-0007.webp"],
   "photo_hashes": ["c3a1f0..."],
@@ -43,7 +59,7 @@ Seed about 12 breeders across Coimbatore, Tiruppur, Erode, Salem, Madurai, Chenn
 }
 ```
 
-`status` is one of `DRAFT`, `PUBLISHED`, `BLOCKED`. `visibility` is `public` for curated seed listings and `owner_only` for every guest-created listing (sandboxing, rule R33). Guest listings carry `owner_guest_id`. Top-level `species_key`, `district`, `price_inr` and `trust_level` are copied out of `draft` and `screening` for querying.
+`status` is one of `DRAFT`, `PUBLISHED`, `BLOCKED`. `visibility` is `public` for curated seed listings and `owner_only` for every guest-created listing (sandboxing, rule R33). Guest listings carry `owner_user_id`. Top-level `species_key`, `district`, `price_inr` and `trust_level` are copied out of `draft` and `screening` for querying.
 
 Composite index: `species_key` + `status` + `price_inr`.
 

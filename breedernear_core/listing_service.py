@@ -131,7 +131,7 @@ def _screen(guest_id: str, draft: ListingDraft, raw_text: str, upload_ids: list[
     return screening, hashes
 
 
-def publish_listing(guest_id: str, draft_id: str) -> dict:
+def publish_listing(guest_id: str, draft_id: str, device_id: str | None = None) -> dict:
     record = _own_draft(guest_id, draft_id)
     draft = ListingDraft.model_validate(record["draft"])
     screening, hashes = _screen(guest_id, draft, record["raw_text"], record["upload_ids"])
@@ -139,8 +139,10 @@ def publish_listing(guest_id: str, draft_id: str) -> dict:
     status = "BLOCKED" if screening.trust_level == "BLOCKED" else "PUBLISHED"
     deps.get_store().save_listing(listing_id, {
         "id": listing_id,
-        "owner_guest_id": guest_id,
-        "visibility": "owner_only",       # guest listings are sandboxed (rule R33)
+        "owner_user_id": guest_id,
+        "device_id": device_id,           # visible to the owner and same-device accounts only (rule R33)
+        "visibility": "owner_only",
+        "views": 0,
         "status": status,
         "draft": draft.model_dump(),
         "raw_text": record["raw_text"],
@@ -170,11 +172,59 @@ def check_external_listing(guest_id: str, text: str, upload_ids: list[str]) -> d
 
 
 def my_listings(guest_id: str) -> dict:
-    mine = [lst for lst in deps.get_store().all_listings() if lst.get("owner_guest_id") == guest_id]
+    mine = [lst for lst in deps.get_store().all_listings() if lst.get("owner_user_id") == guest_id]
     mine.sort(key=lambda x: x.get("created_at", ""), reverse=True)
     return {"status": "ok", "listings": [
         {"listing_id": x["id"], "species": x["draft"]["species_common"], "variety": x["draft"].get("variety"),
-         "price_inr": x.get("price_inr"), "status": x["status"], "trust_level": x["trust_level"],
-         "trust_score": x["trust_score"]}
+         "price_inr": x.get("price_inr"), "unit": x["draft"].get("unit"), "status": x["status"],
+         "trust_level": x["trust_level"], "trust_score": x["trust_score"], "views": x.get("views", 0),
+         "photo": (x.get("photos") or [None])[0], "created_at": x.get("created_at")}
         for x in mine
     ]}
+
+
+SELLER_STATUSES = {"PUBLISHED", "PAUSED", "SOLD"}
+
+
+def _own_listing(owner_id: str, listing_id: str) -> dict:
+    listing = deps.get_store().get_listing(listing_id)
+    if listing is None or listing.get("owner_user_id") != owner_id:
+        raise ListingError("That listing was not found.")
+    return listing
+
+
+def set_listing_status(owner_id: str, listing_id: str, status: str) -> dict:
+    """Pause, resume or mark sold. BLOCKED listings can never be published."""
+    if status not in SELLER_STATUSES:
+        raise ListingError("Status must be PUBLISHED, PAUSED or SOLD.")
+    listing = _own_listing(owner_id, listing_id)
+    if listing["status"] == "BLOCKED":
+        raise ListingError("This listing was blocked by the trust check and can't be published.")
+    listing["status"] = status
+    deps.get_store().save_listing(listing_id, listing)
+    return {"status": "ok", "listing_id": listing_id, "listing_status": status}
+
+
+def delete_listing(owner_id: str, listing_id: str) -> dict:
+    _own_listing(owner_id, listing_id)
+    deps.get_store().delete_listing(listing_id)
+    return {"status": "ok", "deleted": listing_id}
+
+
+def seller_dashboard(owner_id: str) -> dict:
+    listings = my_listings(owner_id)["listings"]
+    received = [e for e in deps.get_store().all_enquiries() if e.get("listing_owner_user_id") == owner_id]
+    received.sort(key=lambda e: e["created_at"], reverse=True)
+    count = lambda status: sum(x["status"] == status for x in listings)  # noqa: E731
+    activity = sorted(
+        [{"at": x["created_at"], "text": f"Listed {x['species']}" + (" (blocked by trust check)"
+                                                                     if x["status"] == "BLOCKED" else "")}
+         for x in listings if x.get("created_at")]
+        + [{"at": e["created_at"], "text": f"New enquiry on {e['listing_id']}"} for e in received],
+        key=lambda a: a["at"], reverse=True)[:6]
+    return {"status": "ok",
+            "counts": {"active": count("PUBLISHED"), "paused": count("PAUSED"), "sold": count("SOLD"),
+                       "blocked": count("BLOCKED"), "enquiries": len(received),
+                       "views": sum(x["views"] for x in listings)},
+            "trusted": sum(x["trust_level"] == "TRUSTED" for x in listings if x["status"] == "PUBLISHED"),
+            "recent_activity": activity}

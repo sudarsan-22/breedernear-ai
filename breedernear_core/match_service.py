@@ -4,6 +4,7 @@ Filtering, ranking and visibility are decided here in code; the agent only expla
 """
 
 import uuid
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
 from breedernear_core import deps
@@ -116,10 +117,25 @@ def _species_keys(query: str) -> set[str]:
     return keys
 
 
-def _visible(listing: dict, guest_id: str) -> bool:
+@dataclass(frozen=True)
+class Viewer:
+    """Who is looking: the signed-in user and the device they use (same-device sandbox, rule R33)."""
+
+    user_id: str
+    device_id: str | None = None
+
+
+def as_viewer(viewer: "Viewer | str") -> Viewer:
+    return viewer if isinstance(viewer, Viewer) else Viewer(str(viewer))
+
+
+def _visible(listing: dict, guest_id: "Viewer | str") -> bool:
     if listing.get("status") != "PUBLISHED":
         return False
-    return listing.get("visibility") == "public" or listing.get("owner_guest_id") == guest_id
+    viewer = as_viewer(guest_id)
+    if listing.get("visibility") == "public" or listing.get("owner_user_id") == viewer.user_id:
+        return True
+    return bool(viewer.device_id) and listing.get("device_id") == viewer.device_id
 
 
 def _price_position(listing: dict) -> str:
@@ -176,7 +192,7 @@ def _card(listing: dict, guest_id: str, km: float | None) -> dict:
         "trust_level": listing["trust_level"],
         "trust_score": listing["trust_score"],
         "warnings": warnings,
-        "is_yours": listing.get("owner_guest_id") == guest_id,
+        "is_yours": listing.get("owner_user_id") == as_viewer(guest_id).user_id,
         "sample_data": bool(listing.get("simulated")),
     }
 
@@ -267,6 +283,9 @@ def _visible_listing(guest_id: str, listing_id: str) -> dict:
 
 def get_listing(guest_id: str, listing_id: str) -> dict:
     listing = _visible_listing(guest_id, listing_id)
+    if listing.get("owner_user_id") and listing["owner_user_id"] != as_viewer(guest_id).user_id:
+        listing["views"] = listing.get("views", 0) + 1          # seller dashboard insight
+        deps.get_store().save_listing(listing_id, listing)
     breeder = breeders().get(listing.get("breeder_id") or "")
     return {
         "status": "ok",
@@ -288,15 +307,16 @@ def create_enquiry(guest_id: str, listing_id: str, message: str) -> dict:
         raise ListingError(f"Please keep the message under {MAX_ENQUIRY_CHARS} characters.")
     listing = _visible_listing(guest_id, listing_id)
     store = deps.get_store()
-    if sum(e["guest_id"] == guest_id for e in store.all_enquiries()) >= MAX_ENQUIRIES_PER_GUEST:
+    buyer = as_viewer(guest_id).user_id
+    if sum(e.get("buyer_user_id") == buyer for e in store.all_enquiries()) >= MAX_ENQUIRIES_PER_GUEST:
         raise ListingError("You have sent the maximum number of demo enquiries.")
     enquiry_id = f"ENQ_{uuid.uuid4().hex[:10]}"
     store.save_enquiry(enquiry_id, {
         "id": enquiry_id,
         "listing_id": listing_id,
         "breeder_id": listing.get("breeder_id"),
-        "listing_owner_guest_id": listing.get("owner_guest_id"),
-        "guest_id": guest_id,
+        "listing_owner_user_id": listing.get("owner_user_id"),
+        "buyer_user_id": buyer,
         "message": message,
         "demo": True,
         "created_at": _now(),
@@ -308,8 +328,19 @@ def create_enquiry(guest_id: str, listing_id: str, message: str) -> dict:
 
 def my_enquiries(guest_id: str) -> dict:
     """Enquiries received on this guest's own listings (the breeder inbox)."""
-    received = [e for e in deps.get_store().all_enquiries() if e.get("listing_owner_guest_id") == guest_id]
+    owner = as_viewer(guest_id).user_id
+    received = [e for e in deps.get_store().all_enquiries() if e.get("listing_owner_user_id") == owner]
     received.sort(key=lambda e: e["created_at"], reverse=True)
     return {"status": "ok", "enquiries": [
         {"enquiry_id": e["id"], "listing_id": e["listing_id"], "message": e["message"],
          "created_at": e["created_at"]} for e in received]}
+
+
+def sent_enquiries(guest_id: str) -> dict:
+    """Enquiries this customer has sent."""
+    buyer = as_viewer(guest_id).user_id
+    sent = [e for e in deps.get_store().all_enquiries() if e.get("buyer_user_id") == buyer]
+    sent.sort(key=lambda e: e["created_at"], reverse=True)
+    return {"status": "ok", "enquiries": [
+        {"enquiry_id": e["id"], "listing_id": e["listing_id"], "message": e["message"],
+         "created_at": e["created_at"]} for e in sent]}

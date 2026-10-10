@@ -20,7 +20,6 @@ def test_web_ui_is_served_with_disclaimer():
     assert "Not veterinary advice" in response.text
 
 
-def test_adk_agent_is_registered():
-    response = client.get("/list-apps")
-    assert response.status_code == 200
-    assert "breedernear" in response.json()
+def test_adk_agent_loads():
+    from agents.breedernear.agent import root_agent
+    assert root_agent.name == "breedernear_concierge"

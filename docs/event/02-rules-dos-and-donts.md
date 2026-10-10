@@ -142,6 +142,7 @@ Record of what was wrong and how it was fixed:
 | 🟡 | A judge opens the link and waits through a cold start, or gets an error | `--min-instances=1` from 17 Oct to the end of evaluation |
 | 🟡 | Strangers abuse the public endpoint and burn the Gemini quota or budget | Per-guest rate limit, 5 MB upload cap, capped `--max-instances` (1 while sessions are in-memory), budget alert |
 | 🟡 | A judge has to sign up or log in | **No login.** Guest session is created automatically. "Try as Priya (buyer)" / "Try as Karthik (breeder)" buttons preload demo identities. |
+| 🟡 | Login added (10 Oct) makes judges sign up, or exposes passwords | One-tap demo customer / seller accounts (no sign-up); passwords stored only as salted scrypt hashes; login rate-limited; generic errors; sessions expire; "Delete my account"; screen note not to reuse an important password |
 | 🟡 | A new user or judge doesn't discover the features, or sees the app as "just a chatbot" | Three always-visible tabs (Pets · Local Breeders · BreederNear AI); first-visit welcome card; every core job works by tapping, with AI inside those screens; chat is optional (decided 10 Oct). Test with someone who hasn't seen the app. |
 | 🟡 | We push a broken change after submitting | Freeze `main` after submission. Redeploys only for critical fixes, and only after the smoke test. Keep the last good revision's name so we can roll back with one command. |
 

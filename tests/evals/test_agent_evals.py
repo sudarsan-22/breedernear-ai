@@ -54,7 +54,7 @@ def test_e04_protected_blocked(harness):
     t, guest = harness.chat(["pachai kili kunjugal virpanaikku, 2 for ₹800. Publish pannunga"], "breeder")
     assert t.last("publish_listing")["listing_status"] == "BLOCKED"
     assert t.text.strip()
-    mine = [x for x in harness.store.all_listings() if x.get("owner_guest_id") == guest]
+    mine = [x for x in harness.store.all_listings() if x.get("owner_user_id") == guest]
     assert mine and all(x["status"] == "BLOCKED" for x in mine)
 
 

@@ -40,6 +40,13 @@ SSE events carry an `author` (agent) and `content.parts` (`text`, `function_call
 | Method & path | Body / params | Returns | Used by | AI? |
 |---|---|---|---|---|
 | `GET /api/health` | — | `{"status":"ok","model":"...","version":"<git sha>"}` | Smoke test | — |
+| `POST /api/auth/signup` | `{role, name, login (email or mobile), password, district, remember, farm?}`; header `X-Device-Id` | `{token, user}` | Sign-up screen | — |
+| `POST /api/auth/login` | `{login, password, remember}`; header `X-Device-Id` | `{token, user}`; 401 "Wrong email/mobile or password" | Login screen | — |
+| `POST /api/auth/demo` | `{role}` (`customer` or `seller`); header `X-Device-Id` | Fresh private demo account + token | Demo buttons | — |
+| `GET /api/auth/me`, `POST /api/auth/logout`, `DELETE /api/auth/me` | `Authorization: Bearer <token>` | Profile / logout / delete account | Account, Farm profile | — |
+| `PATCH /api/auth/me` | profile fields (name, district; seller: farm fields) | Updated profile | Profile edit | — |
+| `GET /api/seller/dashboard` | seller token | Counts (active, paused, sold, blocked listings; enquiries; views), verification status, recent activity | Seller dashboard | — |
+| `PATCH /api/seller/listings/{id}` / `DELETE` | `{status: "PUBLISHED" | "PAUSED" | "SOLD"}` | Updated listing / removed | My listings | — |
 | `POST /api/uploads` | multipart `file`, `kind`; header `X-Guest-Id` | `{"upload_id":"UPL_…"}` | Sell form, safety check, chat | — |
 | `GET /api/pets` | `district`, `species` (optional; `all`), `max_price`, `trusted_only`, `limit` | Published listings near the district: public + the caller's own, never BLOCKED; sorted TRUSTED → CAUTION, then distance, then newest | **Pets** tab grid | — |
 | `GET /api/listings/{id}` | — | Listing card + checks + questions + breeder | Listing page | — |
@@ -57,6 +64,8 @@ SSE events carry an `author` (agent) and `content.parts` (`text`, `function_call
 | `GET /api/starter-kit` | `species`, `count` | Kit items with welfare-sized cage + total | Listing page | Rules |
 | `GET /api/care-plan` | `species`, `age_months` | 14-day plan + vet signs + disclaimer | Listing page | **Gemini** |
 | `GET /api/cart`, `POST /api/cart/items`, `DELETE /api/cart/items/{id}` | — | Cart | Cart drawer | — |
+
+**Auth:** every `/api` route except health, meta and auth requires `Authorization: Bearer <token>`. Role checks: seller-only routes (`/api/sell/*`, `/api/seller/*`, `/api/breeder/*`, `listing_photo` uploads) and customer-only routes (`/api/cart*`, `POST /api/enquiries`) return 403 for the wrong role. The ADK runtime (`/run`, `/run_sse`, `/apps/...`) also requires the token, and the `user_id` in the path or body must be the token's user. Agent tools check the role again (`listing_agent` tools need a seller; `match_agent`/`care_agent` enquiry and cart tools need a customer).
 
 All functions behind these routes are the same ones the agents' tools call (`listing_service`, `match_service`, `care_service`, plus a small `directory_service` for breeders). Errors return 400 with a human-readable `detail`.
 

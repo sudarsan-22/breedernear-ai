@@ -26,6 +26,24 @@ Buying and selling happen in the **same app**. A new user must be able to comple
 
 "Direct Farm" means buying straight from the breeder at the farm price, with no broker markup. This is the problem in the founder story.
 
+## Accounts: separate customer and seller logins
+
+Decided 10 Oct (idea from the founder's earlier PetZonic product; fresh code). **One account has one role.**
+
+| | Customer account | Seller account |
+|---|---|---|
+| Sign up | Name, email **or** Indian mobile number, password, district | Same, plus farm name, seller type (home breeder / kennel / farm), area, species bred, dog-breeder registration no. (optional) |
+| App | 🐾 Pets · 🏡 Local Breeders · ✨ AI · 👤 Account | 📊 Dashboard · 📋 Listings · ✉️ Enquiries · ✨ AI · 🏡 Farm profile |
+| Can | Browse, check posts, quiz, contact breeders, starter kit, cart | List with AI, manage listings (pause, mark sold, delete), read enquiries, see views and trust status |
+| Cannot | Sell (a "Become a seller" link explains that sellers use a separate account) | Use the cart or buyer screens |
+| Verification | — | Instead of KYC (Aadhaar/PAN are **not** collected): a dog-breeder registration number checked against the simulated registry gives a "Verified breeder (simulated registry)" badge |
+
+- Login: email or mobile + password, compared with a salted scrypt hash stored in Firestore. No SMS, no third-party identity provider.
+- **Judges never need to sign up:** "Demo customer (Priya)" and "Demo seller (Karthik)" create a fresh, private demo account with one tap.
+- **Same-device sandbox (R33):** a seller's listings are visible to the seller and to accounts signed in on the same device, never to strangers. A judge can play both sides in one browser.
+- Roles are enforced on the server for every API call and inside the agents' tools.
+- Privacy: only name, email or mobile, and district are stored; passwords only as hashes; "Delete my account" removes the account and its sessions. The login screen says not to reuse an important password in this prototype.
+
 ## Feature list
 
 | ID | Feature | Scope |
@@ -36,6 +54,7 @@ Buying and selling happen in the **same app**. A new user must be able to comple
 | F3b | **"Is this post safe?":** a buyer uploads a screenshot or pastes a listing seen on WhatsApp/Instagram/Facebook and gets the same screening (form in Pets, or chat) | **MVP**: reuses the F2 + F3 pipeline |
 | F4 | **Buyer matching:** Pets tab grid with filters (species, district, max price, trusted only) and listing pages; "Which pet suits me?" quiz; the same in chat via the match agent | **MVP** |
 | F12 | **Local Breeders (Direct Farm):** breeder directory by district, breeder pages with their pets for sale | **MVP** |
+| F13 | **Accounts:** separate customer and seller sign-up and login (email or mobile + password), one-tap demo accounts, seller dashboard, role enforcement | **MVP** (added 10 Oct) |
 | F5 | **Starter kit & care plan** for the chosen pet (accessories catalogue + first-14-days plan + vet warning signs) | **MVP** |
 | F6 | **Buyer enquiry** to the breeder (demo: saved and shown in the breeder's inbox; no payment) | **MVP** |
 | F7 | Agent activity panel ("which agent and tool ran") in the AI tab | **MVP**: cheap, shows technical depth |

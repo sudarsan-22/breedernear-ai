@@ -19,4 +19,4 @@ select = ["E", "F", "I", "B", "UP"]
 
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI dependency markers are meant to be used as argument defaults.
-extend-immutable-calls = ["fastapi.File", "fastapi.Form", "fastapi.Header"]
+extend-immutable-calls = ["fastapi.File", "fastapi.Form", "fastapi.Header", "fastapi.Depends"]

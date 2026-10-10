@@ -60,7 +60,7 @@ def seed_listings(photo_hash: Callable[[str], str | None] = _photo_hash) -> list
             "id": item["id"],
             "breeder_id": breeder["id"],
             "breeder_name": breeder["display_name"],
-            "owner_guest_id": None,
+            "owner_user_id": None,
             "visibility": "public",
             "status": "BLOCKED" if screening.trust_level == "BLOCKED" else "PUBLISHED",
             "draft": draft.model_dump(),

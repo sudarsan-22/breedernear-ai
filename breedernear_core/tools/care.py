@@ -3,7 +3,7 @@
 from google.adk.tools import ToolContext
 
 from breedernear_core import care_service as svc
-from breedernear_core.tools.listing import _safe
+from breedernear_core.tools.listing import _safe, role_error
 
 
 def build_starter_kit(species: str, count: int, tool_context: ToolContext) -> dict:
@@ -32,9 +32,13 @@ def add_to_cart(product_ids: list[str], tool_context: ToolContext) -> dict:
     Args:
         product_ids: Product IDs from the starter kit, e.g. ["PRD-CAGE-002"].
     """
+    if denied := role_error(tool_context, "customer"):
+        return denied
     return _safe(svc.add_to_cart, tool_context.user_id, product_ids)
 
 
 def view_cart(tool_context: ToolContext) -> dict:
     """Show the buyer's demo cart with the total."""
+    if denied := role_error(tool_context, "customer"):
+        return denied
     return _safe(svc.view_cart, tool_context.user_id)

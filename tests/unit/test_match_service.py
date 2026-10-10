@@ -98,7 +98,7 @@ def test_no_nearby_results_offers_further_away(seeded):
 
 def _own_listing(store, owner, listing_id="LST_own"):
     store.save_listing(listing_id, {
-        "id": listing_id, "owner_guest_id": owner, "visibility": "owner_only", "status": "PUBLISHED",
+        "id": listing_id, "owner_user_id": owner, "visibility": "owner_only", "status": "PUBLISHED",
         "draft": {"species_common": "Budgerigar", "variety": None, "district": "tiruppur"},
         "screening": {"checks": [], "questions_to_ask_seller": []}, "trust_level": "TRUSTED",
         "trust_score": 100, "species_key": "budgerigar", "district": "tiruppur", "price_inr": 450})

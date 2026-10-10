@@ -1,3 +1,4 @@
+from conftest import auth_headers
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -21,7 +22,7 @@ def test_only_ai_routes_are_limited():
 
 
 def test_guest_gets_429_with_friendly_message_after_limit(fakes):
-    headers = {"X-Guest-Id": "bbbbbbbb-7a4d-4e8b-9c0a-1234567890ab"}
+    headers = auth_headers(client, "customer")
     for _ in range(get_settings().rate_limit_per_hour):
         assert client.post("/api/check", headers=headers, json={"text": "budgie pair 600"}).status_code == 200
     r = client.post("/api/check", headers=headers, json={"text": "budgie pair 600"})

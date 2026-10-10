@@ -1,9 +1,10 @@
 """In-memory sliding-window rate limit for every route that calls Gemini.
 
-Per guest ID (X-Guest-Id header) and per client IP. In memory is enough while Cloud Run runs a single
-instance (max-instances 1); the limit resets if the instance restarts.
+Per signed-in session (Authorization header, hashed) and per client IP. In memory is enough while
+Cloud Run runs a single instance (max-instances 1); the limit resets if the instance restarts.
 """
 
+import hashlib
 import re
 import time
 from collections import defaultdict, deque
@@ -20,6 +21,7 @@ LIMITED = [
     ("POST", re.compile(r"^/api/sell/drafts/[^/]+/publish$")),
     ("POST", re.compile(r"^/api/check$")),
     ("GET", re.compile(r"^/api/care-plan$")),
+    ("POST", re.compile(r"^/api/auth/(login|signup|demo)$")),      # slows password guessing
 ]
 MESSAGE = "You've used BreederNear a lot in the last hour. Please wait a few minutes and try again."
 
@@ -57,7 +59,8 @@ def client_ip(request: Request) -> str:
 async def rate_limit_middleware(request: Request, call_next):
     if is_limited(request.method, request.url.path):
         settings = get_settings()
-        guest = request.headers.get("x-guest-id", "")[:64]
+        auth = request.headers.get("authorization", "")
+        guest = hashlib.sha256(auth.encode()).hexdigest() if auth else ""
         allowed = limiter.allow(f"ip:{client_ip(request)}", settings.rate_limit_per_ip_hour)
         if allowed and guest:
             allowed = limiter.allow(f"guest:{guest}", settings.rate_limit_per_hour)

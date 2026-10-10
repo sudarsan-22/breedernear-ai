@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from google.adk.cli.fast_api import get_fast_api_app
 
 from app.api import router
+from app.gatekeeper import Gatekeeper
 from app.ratelimit import rate_limit_middleware
 from breedernear_core.config import get_settings
 
@@ -19,6 +20,7 @@ app: FastAPI = get_fast_api_app(
 )
 
 app.middleware("http")(rate_limit_middleware)
+app.add_middleware(Gatekeeper)                # only the ADK routes the app uses, behind login
 app.include_router(router)
 
 # Static web UI, mounted last so it never shadows /api or ADK routes.

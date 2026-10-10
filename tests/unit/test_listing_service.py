@@ -67,7 +67,7 @@ def test_publish_clean_listing_is_trusted_and_sandboxed(fakes):
     assert result["listing_status"] == "PUBLISHED"
     assert result["screening"]["trust_level"] == "TRUSTED"
     saved = store.get_listing(result["listing_id"])
-    assert saved["visibility"] == "owner_only" and saved["owner_guest_id"] == GUEST
+    assert saved["visibility"] == "owner_only" and saved["owner_user_id"] == GUEST
     assert saved["species_key"] == "lovebird_peach_faced"
     assert store.get_draft(draft_id) is None
 

@@ -23,7 +23,7 @@ Use this from **16 Oct** onward. Every box must be ticked before pressing Submit
 - [ ] Customer app (Pets, Local Breeders, AI, Account) and seller app (Dashboard, Listings, Enquiries, AI, Farm) work by tapping and in the AI tab
 - [ ] Every step of the smoke test passes, see [../implementation/06-testing-and-evaluation.md](../implementation/06-testing-and-evaluation.md#4-pre-submission-smoke-test)
 - [ ] `--min-instances=1` set (no cold start for judges): `MIN_INSTANCES=1 scripts/release.sh` on 17 Oct
-- [ ] Budget alert configured (✅ ₹1,000/month, checked 10 Oct); credits or billing are valid until at least 4 Dec
+- [x] Budget alert configured (₹1,000/month); free-trial credit valid until 9 Jan 2027, after the 4 Dec end of judging (checked 10 Oct)
 - [ ] Model is **not** `gemini-2.x`; it is set via `BREEDERNEAR_MODEL`
 - [ ] "Prototype — sample breeders, listings and products. No payments. Not veterinary advice." visible in the UI footer
 - [ ] Revision name of this known-good deployment written down for rollback: `________________`
@@ -68,7 +68,7 @@ The "Prototype Submission" module (read 10 Oct). Every field is required; nothin
 
 | Field | Limit | Our answer |
 |---|---|---|
-| Prototype Link Deployed on GCP or Cloud Run | URL | `https://breedernear-655711985039.asia-south1.run.app` |
+| Prototype Link Deployed on GCP or Cloud Run | URL | `https://breedernear-655711985039.asia-south1.run.app` (Cloud Run, as the field asks; the Firebase Hosting URL `https://breedernear-ai-2026.web.app` is in the README and deck) |
 | Final Prototype PPT/Deck converted into PDF | **PDF, up to 5 MB**; must use the organisers' template (R47) | `BreederNear-AI-deck.pdf` |
 | GitHub Repository Link (Public Access) | URL with `https://` | `https://github.com/sudarsan-22/breedernear-ai` |
 | Demo Video Link (up to 3 minutes) | URL | YouTube (Unlisted) |

@@ -4,7 +4,7 @@
 
 **Google Cloud AI Builder Cup 2026 (JAPAC) · Theme: Retail & Commerce**
 
-**Live demo:** https://breedernear-655711985039.asia-south1.run.app · demo video: added at submission (18 Oct 2026)
+**Live demo:** https://breedernear-ai-2026.web.app (Firebase Hosting) or https://breedernear-655711985039.asia-south1.run.app (Cloud Run) · demo video: added at submission (18 Oct 2026)
 
 > This README describes only what is built. Future ideas are listed under [Roadmap](#roadmap).
 

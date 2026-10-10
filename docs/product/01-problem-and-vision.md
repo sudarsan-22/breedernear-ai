@@ -35,6 +35,19 @@ What he saw, again and again:
 | **Priya, first-time pet buyer in Tiruppur (demand side)** | Find out which pet suits her family, then find a trustworthy breeder nearby at a fair price. Avoid scams and illegal or sick animals. Know exactly what to buy on day one. |
 | **Pet-shop and marketplace operators (business side)** | Trusted, structured listings; automated fraud and compliance screening; more conversions with less support work |
 
+## The market today (checked 10 Oct 2026)
+
+What we can say truthfully in the deck and video:
+
+- **The biggest classifieds site stopped live-animal listings.** OLX India now lists pets and any other live animal as not allowed, after animal-welfare groups and the Animal Welfare Board of India raised concerns about unregistered sellers ([OLX policy](https://help.olx.in/hc/en-us/articles/10910969828637-Items-Services-not-allowed-on-OLX), [Deccan Herald](https://www.deccanherald.com/business/olx-india-has-removed-all-animal-listings-from-its-website-peta-india-880590.html), [Business Standard](https://www.business-standard.com/article/companies/peta-india-sends-letters-to-olx-quikr-to-ban-online-sale-of-pets-118071901216_1.html)).
+- **Large pet platforms focus on food, accessories and services**, not on connecting buyers with breeders.
+- **So the live-animal trade moved to WhatsApp, Facebook and Instagram groups**, with no checks at all (founder's experience).
+- **Some online pet-selling sites do exist**, mostly single kennels or dog-focused sites, e.g. GoodPaws, Puppiezo, Book My Puppy and some bird sellers ([ThePrint list](https://theprint.in/ani-press-releases/top-10-best-websites-to-buy-puppies-in-india/2762963/), [GoodPaws](https://goodpaws.in/), [Nearby Pets India](https://nearby-petstore.in/)). They describe their own sellers as verified; we found no independent checks.
+
+**Our claim:** no platform we found checks every listing for wildlife-law, registration, price-scam and reused-photo problems before it goes live, or lets buyers check a post they saw in a group. **Never say "no one sells pets online" or "first ever"**: the sites above exist, and the T&C forbid false claims.
+
+**Why this is also our compliance story:** the main reason OLX stopped was unregistered sellers. BreederNear builds the checks in: dog listings need a State Animal Welfare Board registration number, protected species are blocked in code, and handover is in person ("courier only" is flagged as a scam sign). For a real launch we would also need the platform-level registrations required by India's pet-trade rules; that is a roadmap item, not something this prototype claims.
+
 ## Solution: BreederNear AI
 
 An AI agent system that connects breeders and buyers **directly, safely and fairly**:

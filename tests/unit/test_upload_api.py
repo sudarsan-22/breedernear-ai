@@ -42,6 +42,22 @@ def test_breeder_listings_endpoint(fakes):
     assert r.status_code == 200 and r.json()["listings"] == []
 
 
-def test_agent_tree_has_listing_and_trust_agents():
+def test_listings_and_enquiries_endpoints(seeded):
+    r = client.get("/api/listings", headers=HEADERS, params={"species": "budgie", "district": "Tiruppur"})
+    assert r.status_code == 200 and r.json()["results"]
+    listing_id = r.json()["results"][0]["listing_id"]
+    assert client.get(f"/api/listings/{listing_id}", headers=HEADERS).status_code == 200
+    assert client.get("/api/listings/LST-0037", headers=HEADERS).status_code == 404
+    r = client.post("/api/enquiries", headers=HEADERS, json={"listing_id": listing_id, "message": "Hi"})
+    assert r.status_code == 200 and r.json()["enquiry_id"].startswith("ENQ_")
+    assert client.get("/api/breeder/enquiries", headers=HEADERS).json() == {"status": "ok", "enquiries": []}
+
+
+def test_listings_endpoint_errors_are_400(seeded):
+    r = client.get("/api/listings", headers=HEADERS, params={"species": "budgie", "district": "Atlantis"})
+    assert r.status_code == 400
+
+
+def test_agent_tree_has_listing_trust_and_match_agents():
     from agents.breedernear.agent import root_agent
-    assert {a.name for a in root_agent.sub_agents} == {"listing_agent", "trust_agent"}
+    assert {a.name for a in root_agent.sub_agents} == {"listing_agent", "trust_agent", "match_agent"}

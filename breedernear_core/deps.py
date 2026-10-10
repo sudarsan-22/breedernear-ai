@@ -1,5 +1,6 @@
 """Chooses real Google Cloud services or in-memory fakes. Tests replace them with set_deps()."""
 
+from breedernear_core.catalog import seed_listings
 from breedernear_core.config import get_settings
 from breedernear_core.services.store import FirestoreStore, MemoryStore, Store
 from breedernear_core.services.uploads import GcsUploads, MemoryUploads, UploadStore
@@ -13,7 +14,12 @@ _vision: Vision | None = None
 def get_store() -> Store:
     global _store
     if _store is None:
-        _store = FirestoreStore() if get_settings().breedernear_backend == "gcp" else MemoryStore()
+        if get_settings().breedernear_backend == "gcp":
+            _store = FirestoreStore()    # seeded once with scripts/seed_firestore.py
+        else:
+            _store = MemoryStore()
+            for listing in seed_listings():
+                _store.save_listing(listing["id"], listing)
     return _store
 
 

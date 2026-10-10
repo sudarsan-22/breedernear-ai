@@ -48,7 +48,7 @@ It runs on **Cloud Run** with **Firestore** and **Cloud Storage**. The idea come
 | Team formation (closes 11 Oct) | Done: 2 members (Sudarsan N, lead; Shreya Azad), both working professionals; final |
 | "Prompt your jersey" activity | Done |
 | Documentation | ✅ This folder |
-| Prototype | Live: listing copilot (photos + English/Tamil text → screened listing), trust check for external posts, code-enforced BLOCKED for protected species (10 Oct). Next: buyer matching, starter kit, web UI |
+| Prototype | Live: listing copilot (photos + English/Tamil text → screened listing), trust check for external posts, code-enforced BLOCKED for protected species (10 Oct). Buyer matching live (species shortlist by rules, nearby trusted listings, demo enquiries; 40 sample listings in Firestore). Next: starter kit and care plan, web UI |
 | Deployment | ✅ Live on Cloud Run: https://breedernear-655711985039.asia-south1.run.app (10 Oct) |
 | Deck / video | Not started |
 | Submission | Not started |

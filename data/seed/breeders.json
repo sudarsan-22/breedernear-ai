@@ -1,0 +1,22 @@
+{
+  "_about": "SIMULATED breeders for the prototype. All names are fictional; SAWB numbers use the SIM- prefix from sawb_registry_sample.json.",
+  "simulated": true,
+  "breeders": [
+    {"id": "BRD-CBE-001", "display_name": "Karthik's Aviary", "district": "coimbatore", "locality": "Saibaba Colony", "species_bred": ["budgerigar", "lovebird_peach_faced", "cockatiel"], "years_experience": 5, "sawb_registration_no": null, "simulated": true},
+    {"id": "BRD-CBE-002", "display_name": "Kovai Paws Kennel", "district": "coimbatore", "locality": "Vadavalli", "species_bred": ["labrador"], "years_experience": 8, "sawb_registration_no": "SIM-TNAWB-DB-0042", "simulated": true},
+    {"id": "BRD-TPR-001", "display_name": "Noyyal Finch House", "district": "tiruppur", "locality": "Avinashi Road", "species_bred": ["zebra_finch", "society_finch", "budgerigar"], "years_experience": 4, "sawb_registration_no": null, "simulated": true},
+    {"id": "BRD-TPR-002", "display_name": "Palladam Pet Birds", "district": "tiruppur", "locality": "Palladam", "species_bred": ["budgerigar", "lovebird_peach_faced", "cockatiel"], "years_experience": 6, "sawb_registration_no": null, "simulated": true},
+    {"id": "BRD-ERD-001", "display_name": "Bhavani Lovebird Farm", "district": "erode", "locality": "Bhavani", "species_bred": ["lovebird_peach_faced", "lovebird_fischers", "budgerigar"], "years_experience": 7, "sawb_registration_no": null, "simulated": true},
+    {"id": "BRD-SLM-001", "display_name": "Salem Golden Labs", "district": "salem", "locality": "Hasthampatti", "species_bred": ["labrador"], "years_experience": 9, "sawb_registration_no": "SIM-TNAWB-DB-0107", "simulated": true},
+    {"id": "BRD-SLM-002", "display_name": "Yercaud Road Aviary", "district": "salem", "locality": "Fairlands", "species_bred": ["cockatiel", "canary"], "years_experience": 5, "sawb_registration_no": null, "simulated": true},
+    {"id": "BRD-MDU-001", "display_name": "Madurai Beagle House", "district": "madurai", "locality": "Anna Nagar", "species_bred": ["beagle"], "years_experience": 6, "sawb_registration_no": "SIM-TNAWB-DB-0233", "simulated": true},
+    {"id": "BRD-MDU-002", "display_name": "Vaigai Feathers", "district": "madurai", "locality": "KK Nagar", "species_bred": ["budgerigar", "canary", "zebra_finch"], "years_experience": 3, "sawb_registration_no": null, "simulated": true},
+    {"id": "BRD-CHN-001", "display_name": "Velachery Cattery", "district": "chennai", "locality": "Velachery", "species_bred": ["persian_cat"], "years_experience": 5, "sawb_registration_no": null, "simulated": true},
+    {"id": "BRD-CHN-002", "display_name": "Adyar Bird Corner", "district": "chennai", "locality": "Adyar", "species_bred": ["budgerigar", "cockatiel", "lovebird_peach_faced"], "years_experience": 4, "sawb_registration_no": null, "simulated": true},
+    {"id": "BRD-BLR-001", "display_name": "Bengaluru Shih Tzu Home", "district": "bengaluru", "locality": "HSR Layout", "species_bred": ["shih_tzu"], "years_experience": 6, "sawb_registration_no": "SIM-KAAWB-DB-0019", "simulated": true},
+    {"id": "BRD-KRR-001", "display_name": "Karur Pet Puppies", "district": "karur", "locality": "Thanthonimalai", "species_bred": ["labrador"], "years_experience": 2, "sawb_registration_no": null, "simulated": true},
+    {"id": "BRD-DGL-001", "display_name": "Dindigul Doggies", "district": "dindigul", "locality": "Begambur", "species_bred": ["beagle"], "years_experience": 2, "sawb_registration_no": "TNAWB-DB-7781", "simulated": true},
+    {"id": "BRD-NMK-001", "display_name": "Quick Pets Namakkal", "district": "namakkal", "locality": "Mohanur Road", "species_bred": ["lovebird_peach_faced", "budgerigar"], "years_experience": 1, "sawb_registration_no": null, "simulated": true},
+    {"id": "BRD-TRY-001", "display_name": "Rockfort Birds", "district": "tiruchirappalli", "locality": "Srirangam", "species_bred": ["budgerigar", "canary"], "years_experience": 3, "sawb_registration_no": null, "simulated": true}
+  ]
+}

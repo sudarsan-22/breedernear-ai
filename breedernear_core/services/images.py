@@ -11,7 +11,7 @@ def dhash(image_bytes: bytes, size: int = 8) -> str:
     """64-bit difference hash as 16 hex chars. Robust to resizing and recompression."""
     with Image.open(io.BytesIO(image_bytes)) as img:
         gray = ImageOps.exif_transpose(img).convert("L").resize((size + 1, size), Image.LANCZOS)
-        px = list(gray.getdata())
+        px = list(gray.get_flattened_data())
     bits = 0
     for row in range(size):
         for col in range(size):

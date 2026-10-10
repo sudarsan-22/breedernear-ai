@@ -90,16 +90,18 @@ Fictional brands only (e.g. Featherhaven, Tailwise, PawNest, Whiskerwell). Seed 
 
 Demo cart: `{"items": [{"product_id": "...", "quantity": 1}], "updated_at": "..."}`
 
-### Reference data (seeded, read-only)
+### Reference data (versioned JSON files, read-only)
 
-| Collection | Contents |
+Reference data is read from `data/seed/` at runtime rather than Firestore, so every change is reviewable in git and the deployed rules always match the code.
+
+| File | Contents |
 |---|---|
-| `price_ranges/{species_key}` | `{ "species_key": "lovebird", "variety_ranges": {"default": [1200, 2500], "lutino": [1500, 3000]}, "unit": "pair", "sample_data": true }` |
-| `districts/{key}` | `{ "name": "Coimbatore", "state": "TN", "lat": 11.0168, "lng": 76.9558 }` |
-| `species/{key}` | Care facts used by rules: group, typical lifespan, min cage size (cm) per count, noise level, beginner-friendly, CITES flag |
-| `sawb_registry_sample/{reg_no}` | Simulated: `{ "registration_no": "SIM-TNAWB-DB-0042", "name": "...", "state": "TN", "valid_until": "2027-03-31", "simulated": true }` |
+| `price_ranges.json` | Per species: `unit` and `varieties` (`{"default": [1200, 2500], "lutino": [1500, 3000]}`); flagged `confirmed_by_founder: false` until reviewed |
+| `districts.json` | District centroids (`{"key": "coimbatore", "name": "Coimbatore", "state": "TN", "lat": 11.0168, "lng": 76.9558}`) and aliases (Kovai, Tirupur, Trichy…) |
+| `species.json` | Care facts used by rules: group, lifespan, min cage size per pair, noise, beginner- and kid-friendly, hands-on, space needed, daily minutes, watch-outs |
+| `sawb_registry_sample.json` | Simulated: `{ "registration_no": "SIM-TNAWB-DB-0042", "name": "...", "state": "TN", "valid_until": "2027-03-31" }` |
 
-Protected and CITES species lists are **files**, versioned in git so changes are reviewable: `data/seed/protected_species.json` and `data/seed/cites_species.json`. Each entry has common names, scientific name, Tamil and Hindi names where known, synonyms, and a `source` field.
+Protected and CITES species lists are files too: `data/seed/protected_species.json` and `data/seed/cites_species.json`. Each entry has common names, scientific name, Tamil and Hindi names where known, synonyms, and a `source` field.
 
 **All price ranges are sample data** and are labelled so in the UI ("based on sample market data"). Base them on the founder's experience; don't present them as official market prices.
 
@@ -123,4 +125,4 @@ Bucket `gs://<PROJECT_ID>-breedernear-uploads` (`asia-south1`, uniform access, *
 | `web/img/listings/*`, `web/img/products/*` | Images | Generated with a Gemini image model, or our own photos. Recorded in `ATTRIBUTIONS.md`. |
 | `data/samples/*` | Demo/eval photos (healthy pair, dyed-looking bird, duplicate, screenshot of a "scam" post we write ourselves) | Us |
 
-`scripts/seed_firestore.py` loads the seed files idempotently and computes pHashes for the seeded listing images.
+`scripts/seed_firestore.py` loads the seed files idempotently. Screening for sample listings is computed by the same trust code as guest listings (`breedernear_core/catalog.py`), including pHashes of seeded listing images once they exist; re-run the script after changing trust rules. Local runs (`BREEDERNEAR_BACKEND=memory`) load the same sample data in memory.

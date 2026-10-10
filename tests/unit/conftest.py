@@ -45,3 +45,13 @@ def fakes():
     deps.set_deps(store=store, uploads=uploads, vision=vision)
     yield store, uploads, vision
     deps.set_deps()
+
+
+@pytest.fixture
+def seeded(fakes):
+    """The fakes, with the curated sample listings loaded into the store."""
+    from breedernear_core.catalog import seed_listings
+    store = fakes[0]
+    for listing in seed_listings():
+        store.save_listing(listing["id"], listing)
+    return fakes

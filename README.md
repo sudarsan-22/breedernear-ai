@@ -107,9 +107,10 @@ pip install -r requirements-dev.txt
 cp .env.example .env                  # then fill in your project ID (or GOOGLE_API_KEY)
 gcloud auth application-default login # not needed if you use GOOGLE_API_KEY
 
-uvicorn app.main:app --reload --port 8080   # web app + API: http://localhost:8080
+uvicorn app.main:app --reload --port 8080   # web app + API: http://localhost:8080 (sample data in memory)
 PYTHONPATH=. adk web agents                 # ADK developer UI for testing agents
 ruff check . && pytest -m "not live"        # lint + unit tests
+GOOGLE_CLOUD_PROJECT=<your-project> PYTHONPATH=. python scripts/seed_firestore.py  # sample data (cloud only)
 PROJECT_ID=<your-project> scripts/deploy.sh # deploy to Cloud Run
 ```
 

@@ -105,7 +105,8 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env    # then edit
 
-python scripts/seed_firestore.py            # seed breeders, listings, products, reference data, simulated registry
+GOOGLE_CLOUD_PROJECT=<id> PYTHONPATH=. python scripts/seed_firestore.py  # cloud: seed sample breeders and listings
+                                            # (local runs load the same sample data in memory automatically)
 
 adk web agents                              # ADK dev UI: test agents and tools in isolation
 uvicorn app.main:app --reload --port 8080   # full app: http://localhost:8080

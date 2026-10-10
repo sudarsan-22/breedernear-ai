@@ -53,7 +53,7 @@
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Organisers consider the entry part of the earlier PetZonic project | Low–Medium | **Disqualification** | Fresh code only; written clarification from the organisers (R25); deck presents the founder's experience, not the old platform |
+| Organisers consider the entry part of the earlier PetZonic project | Low (organisers confirmed startups are allowed, 10 Oct) | **Disqualification** | Fresh code only; written clarification from the organisers received (R25); deck presents the founder's experience, not the old platform |
 | Billing/credits not ready | Medium | Blocks deploy | Do it first on day 1 |
 | Model ID wrong or unavailable | Medium | Blocks AI | Day-1 hello-world; `GOOGLE_CLOUD_LOCATION=global`; model in an env var |
 | ADK API differs from docs | Medium | Slows dev | Pin the version; check `adk --help` and the installed source |

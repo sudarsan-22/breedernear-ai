@@ -41,7 +41,7 @@ Risk IDs (R#) refer to the [risk tracker](02-rules-dos-and-donts.md#risk-tracker
 |---|---|---|
 | Built **primarily on Google Cloud**; primarily competing clouds disqualified | Cloud Run, Gemini, ADK, Firestore, Cloud Storage. **No** AWS/Azure/Vercel/Supabase. **No non-Google AI model APIs at runtime** (R35). | 🔧 |
 | **Fresh code and original assets** created during the official timeline | New repo (first commit 23 Sep, inside the window); daily commits; nothing copied from the earlier PetZonic platform (R11, R25) | 🔧 |
-| Pre-existing products, ongoing projects or pre-launch code disqualified | R25: ideas only; organiser clarification email disclosing petzonic.co; earlier-platform repos made private on 9 Oct (R32) | 👤 |
+| Pre-existing products, ongoing projects or pre-launch code disqualified | R25: ideas only; organisers confirmed in writing on 10 Oct that startups and existing ideas are allowed if the prototype follows the guidelines (petzonic.co was disclosed); earlier-platform repos made private on 9 Oct (R32) | ✅ |
 | (a) working deployed live URL | Cloud Run (R16, R17) | 👤 |
 | (b) demo video **under 3 minutes** | Target 2:40, max 2:55 (R18) | 👤 |
 | (c) **public GitHub repository** | Already public (R23) | ✅ |
@@ -177,6 +177,7 @@ Risk IDs (R#) refer to the [risk tracker](02-rules-dos-and-donts.md#risk-tracker
 |---|---|---|---|
 | 9 Oct 2026 | Sudarsan | Section numbering changed between two reads the same day; content unchanged | Switched all citations to section names |
 | 10 Oct 2026 | Sudarsan | Discord #rules, #faq, #announcements read | Added R44 (community rules) and R45 (no confirmed credits) |
+| 10 Oct 2026 | Sudarsan | Organiser reply to the R25 eligibility email | R25 resolved; deck may mention the startup background |
 | 11 Oct | | | |
 | 15 Oct | | | |
 | 17 Oct | | | |

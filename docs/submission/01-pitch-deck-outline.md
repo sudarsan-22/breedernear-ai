@@ -2,7 +2,7 @@
 
 The T&C (Deliverables) require the deck to cover **solution architecture and the business case**. The session asked for: theme alignment, the problem, how the solution addresses it, scalability/production path, and a user guide. Aim for **13–15 slides** in English, readable when zoomed out (body text ≥ 18 pt). Build in Google Slides and export to PDF.
 
-**Present the founder's domain experience. Don't present the earlier PetZonic platform's features, screenshots or traction** (rule R25). Everything shown must come from this hackathon build.
+**The organisers confirmed (10 Oct, R25) that the deck and video may mention the startup background and founder journey.** Use that for the problem and team story, but don't present the earlier PetZonic platform's features, screenshots or traction as part of the entry. Everything demoed must come from this hackathon build.
 
 | # | Slide | Content | Criterion |
 |---|---|---|---|

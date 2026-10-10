@@ -51,6 +51,8 @@ def test_search_sorts_trusted_first_then_distance_then_price(seeded):
     assert len(r["results"]) <= 4
     first = r["results"][0]
     assert first["district"] == "tiruppur" and first["price_inr"] == 500
+    assert first["distance"] == "in your district"
+    assert r["results"][2]["distance"].startswith("about ")
 
 
 def test_search_never_returns_blocked_listings(seeded):

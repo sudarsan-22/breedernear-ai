@@ -135,6 +135,12 @@ def _price_position(listing: dict) -> str:
     return "within the usual range"
 
 
+def _distance_label(km: float | None) -> str | None:
+    if km is None:
+        return None
+    return "in your district" if km < 5 else f"about {round(km)} km away"
+
+
 def _card(listing: dict, guest_id: str, km: float | None) -> dict:
     d = listing["draft"]
     warnings = [c["detail"] for c in listing["screening"]["checks"] if c["result"] in ("warn", "block")]
@@ -150,6 +156,7 @@ def _card(listing: dict, guest_id: str, km: float | None) -> dict:
         "district": listing.get("district"),
         "locality": d.get("locality"),
         "distance_km": round(km) if km is not None else None,
+        "distance": _distance_label(km),
         "breeder": listing.get("breeder_name") or "You (your own listing)",
         "trust_level": listing["trust_level"],
         "trust_score": listing["trust_score"],

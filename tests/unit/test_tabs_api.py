@@ -86,7 +86,9 @@ def test_same_device_sandbox_for_seller_listings(fakes):
     ]
     same_device = auth_headers(client, "customer", device=DEVICE)
     other_device = auth_headers(client, "customer", device="aaaaaaaa-1111-4e8b-9c0a-1234567890ab")
-    assert client.get(f"/api/listings/{listing_id}", headers=same_device).status_code == 200
+    seen = client.get(f"/api/listings/{listing_id}", headers=same_device)
+    assert seen.status_code == 200 and seen.json()["listing"]["breeder"] == "Karthik's Demo Aviary"
+    assert not seen.json()["listing"]["is_yours"]
     assert client.get(f"/api/listings/{listing_id}", headers=other_device).status_code == 404
     client.post(
         "/api/enquiries", headers=same_device, json={"listing_id": listing_id, "message": "Available?"}

@@ -113,10 +113,15 @@ def test_sessions_expire_and_logout(fakes):
         accounts.authenticate(token)
 
 
-def test_demo_accounts_are_fresh_and_private(fakes):
+def test_demo_accounts_are_private_per_device_and_reused(fakes):
     _, a = accounts.demo("seller", DEVICE)
-    _, b = accounts.demo("seller", DEVICE)
-    assert a["id"] != b["id"] and a["demo"] and a["farm"]["farm_name"]
+    _, again = accounts.demo("seller", DEVICE)
+    _, other = accounts.demo("seller", "bbbbbbbb-1111-4e8b-9c0a-1234567890ab")
+    _, buyer = accounts.demo("customer", DEVICE)
+    assert a["id"] == again["id"] and a["id"] != other["id"] and buyer["role"] == "customer"
+    assert a["demo"] and a["farm"]["farm_name"]
+    with pytest.raises(AccountError):  # no password login into demo accounts
+        accounts.login(a["login"], "anything-at-all", DEVICE)
 
 
 def test_delete_account_removes_everything(fakes):

@@ -20,13 +20,27 @@ Our founder spent five years as a bird breeder and broker in Coimbatore, India. 
 - **Buyers can't tell good sellers from bad.** Scams are common, and protected native birds are still traded illegally, sometimes dyed to disguise them.
 - **Breeders lose hours every day** to manual selling: repeating answers, confirming stock, negotiating.
 
-## One app, both sides, three tabs
+## One app, two kinds of account
+
+Customers and sellers have **separate accounts** (email or mobile + password, or one-tap demo accounts for judges). Customers get the buyer app; sellers get a seller dashboard. The server checks the role on every request, including inside the AI agents' tools.
+
+## The customer app
 
 | Tab | For | What you can do |
 |---|---|---|
 | 🐾 **Pets** | Buyers | Browse pets for sale near you, filter by species, price and trust; open a listing to see every trust check; contact the breeder; get a starter kit and care plan; take a quick "Which pet suits me?" quiz; check a post you saw on WhatsApp |
-| 🏡 **Local Breeders** | Buyers and sellers | **Direct Farm:** meet breeders near you and buy at the farm price, with no broker markup. **My farm:** sell your animals: add photos and a quick message, tap "✨ Fill with AI", check the form, publish with a trust check; see your listings and buyer enquiries |
-| ✨ **BreederNear AI** | Anyone | Ask in English or Tamil. Five Gemini agents find a pet, write a listing, check a post or plan the first two weeks, and show what they did |
+| 🏡 **Local Breeders** | Buyers | **Direct Farm:** meet breeders near you and buy at the farm price, with no broker markup |
+| ✨ **BreederNear AI** | Buyers | Ask in English or Tamil. Five Gemini agents find a pet, check a post or plan the first two weeks, and show what they did |
+| 👤 **Account** | Buyers | Cart, enquiries sent, district, log out, delete account |
+
+## The seller app
+
+| Tab | What sellers can do |
+|---|---|
+| 📊 **Dashboard** | Live listings, buyer enquiries, listing views, trust status, verification badge, recent activity, "Sell a pet with AI" |
+| 📋 **Listings** | Add photos and a quick message (English or Tamil), tap "✨ Fill with AI", check the form, publish with a trust check; pause, mark sold or remove |
+| ✉️ **Enquiries** | Messages from buyers |
+| ✨ **AI** · 🏡 **Farm** | The listing assistant by chat; farm profile and dog-breeder registration |
 
 Everything works by tapping; the AI does the hard parts on every screen. Chat is there when you'd rather just ask.
 

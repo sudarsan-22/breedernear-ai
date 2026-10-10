@@ -75,6 +75,39 @@ Every route that calls Gemini (`/run_sse`, `/run`, `POST /api/sell/drafts`, `...
 
 Plain HTML, CSS and JavaScript. No build step. **Mobile-first**: breeders and most buyers use phones.
 
+### Accounts and the two apps (added 10 Oct)
+
+Signed-out users see the **login screen** (layout idea from the founder's earlier PetZonic product; fresh code and Meadow styling):
+
+```
+┌──────────────────────────────────┐
+│            [🐾]                   │
+│        Welcome back               │
+│ ┌ [ Log in | Sign up ] ─────────┐ │
+│ │ Email or mobile number        │ │
+│ │ Password                 [👁]  │ │
+│ │ [✓] Remember me  Forgot pwd?  │ │
+│ │ [        Log in        ]      │ │
+│ │ Don't have an account? Sign up│ │
+│ │ ── OR TRY THE DEMO ──         │ │
+│ │ [ Demo customer · Priya ]     │ │
+│ │ [ Demo seller · Karthik ]     │ │
+│ └───────────────────────────────┘ │
+└──────────────────────────────────┘
+```
+
+- **Sign up:** "I want to: Buy pets | Sell pets", name, email or mobile, password (eye toggle, 8+ characters), district; sellers also give farm name, type (home / kennel / farm), area, species bred and, for dogs, the registration number.
+- **Remember me:** token kept in localStorage (30 days); otherwise sessionStorage (until the browser closes, server session 24 h).
+- **Forgot password:** honest sheet: not available without an email/SMS service; create a new account or use a demo.
+- **Demo buttons:** one private demo customer and one demo seller per device, reused when switching, so a judge can play both sides.
+
+| Customer app (bottom tabs) | Seller app (bottom tabs) |
+|---|---|
+| 🐾 Pets · 🏡 Local Breeders · ✨ BreederNear AI · 👤 Account | 📊 Dashboard · 📋 Listings · ✉️ Enquiries · ✨ AI · 🏡 Farm |
+| Account: profile, district, cart, enquiries sent, "Want to sell? Sellers use a separate account", log out, delete account | Dashboard: greeting, verification badge, "Sell a pet with AI", live listings / enquiries / views / trusted counts, recent activity. Listings: filter by status; Pause, Resume, Mark sold, View, Remove. Sell: the AI-filled form. Farm: edit farm profile and registration; log out; delete account |
+
+The sections below describe the customer tabs; "My farm" is replaced by the seller app.
+
 ### Navigation: three tabs
 
 Bottom tab bar on phones, top tabs on wider screens. The header shows the brand, a **📍 district picker** (remembered; default Coimbatore) and the **🛒 cart**.

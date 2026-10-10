@@ -183,7 +183,7 @@ def _card(listing: dict, guest_id: str, km: float | None) -> dict:
         "locality": d.get("locality"),
         "distance_km": round(km) if km is not None else None,
         "distance": _distance_label(km),
-        "breeder": listing.get("breeder_name") or "You (your own listing)",
+        "breeder": listing.get("breeder_name") or "Local seller",
         "breeder_id": listing.get("breeder_id"),
         "species_key": listing.get("species_key"),
         "animal_group": d.get("animal_group"),

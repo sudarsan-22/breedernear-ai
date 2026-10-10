@@ -131,7 +131,8 @@ def _screen(guest_id: str, draft: ListingDraft, raw_text: str, upload_ids: list[
     return screening, hashes
 
 
-def publish_listing(guest_id: str, draft_id: str, device_id: str | None = None) -> dict:
+def publish_listing(guest_id: str, draft_id: str, device_id: str | None = None,
+                    seller_name: str | None = None) -> dict:
     record = _own_draft(guest_id, draft_id)
     draft = ListingDraft.model_validate(record["draft"])
     screening, hashes = _screen(guest_id, draft, record["raw_text"], record["upload_ids"])
@@ -140,6 +141,7 @@ def publish_listing(guest_id: str, draft_id: str, device_id: str | None = None) 
     deps.get_store().save_listing(listing_id, {
         "id": listing_id,
         "owner_user_id": guest_id,
+        "breeder_name": seller_name,
         "device_id": device_id,           # visible to the owner and same-device accounts only (rule R33)
         "visibility": "owner_only",
         "views": 0,
@@ -216,11 +218,13 @@ def seller_dashboard(owner_id: str) -> dict:
     received = [e for e in deps.get_store().all_enquiries() if e.get("listing_owner_user_id") == owner_id]
     received.sort(key=lambda e: e["created_at"], reverse=True)
     count = lambda status: sum(x["status"] == status for x in listings)  # noqa: E731
+    names = {x["listing_id"]: x["species"] for x in listings}
     activity = sorted(
         [{"at": x["created_at"], "text": f"Listed {x['species']}" + (" (blocked by trust check)"
                                                                      if x["status"] == "BLOCKED" else "")}
          for x in listings if x.get("created_at")]
-        + [{"at": e["created_at"], "text": f"New enquiry on {e['listing_id']}"} for e in received],
+        + [{"at": e["created_at"], "text": f"New enquiry about your {names.get(e['listing_id'], 'listing')}"}
+           for e in received],
         key=lambda a: a["at"], reverse=True)[:6]
     return {"status": "ok",
             "counts": {"active": count("PUBLISHED"), "paused": count("PAUSED"), "sold": count("SOLD"),

@@ -85,12 +85,12 @@ Add the CI badge to the README.
 1. `GET /api/health` → 200; the model is not `gemini-2.x`
 2. Create session → "hello" → reply streams
 3. `GET /api/pets?district=tiruppur` → results, none BLOCKED
-4. **First visit:** welcome card explains the three tabs; pick a district; dismiss; it doesn't come back
+4. **Accounts:** sign up as a customer (email), log out, wrong password → generic error, log in again; customers can't open `#dashboard`. Demo seller and demo customer buttons work; switching between them keeps each one's data. Then the first-visit welcome card explains the tabs
 5. **Pets tab (no chat):** filter Budgies + trusted only → cards with badges, distance and fair-price bar → open a listing → checks + questions → **Contact breeder** form → "saved to inbox"
 6. **Starter kit:** on the listing page → kit cards + total + care plan with vet warning signs → Add all → cart count updates
 7. **Quiz:** "Which pet suits me?" → species options → "Show these pets" filters the grid
 8. **Safety check form:** paste the scam text / upload the scam screenshot → CAUTION + questions to ask
-9. **Local Breeders:** directory sorted by distance → breeder page → their pets. **My farm › Sell:** "Try as Karthik" → 2 photos + E01 text → "✨ Fill with AI" → edit a field → Publish → TRUSTED. Time it: ≤ 60 s. Enquiry from step 5 (on an own listing) shows in Enquiries.
+9. **Local Breeders:** directory sorted by distance → breeder page → their pets. **Seller app:** demo seller → Dashboard → "Sell a pet with AI" → 2 photos + E01 text → "✨ Fill with AI" → edit a field → Publish → TRUSTED (time it: ≤ 60 s) → Listings: Pause, Resume. Then demo customer on the same device finds the listing, sends an enquiry; back as the demo seller, it shows in Enquiries and the dashboard counts.
 10. **Blocked:** sell form with E04 text → BLOCKED with a polite explanation and legal alternatives
 11. **AI tab:** "Try as Priya" message → species cards → listing cards; activity panel works; Tamil renders; footer visible; fits at 375 px with no horizontal scroll
 

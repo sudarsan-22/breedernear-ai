@@ -307,4 +307,5 @@ def sell_edit(draft_id: str, body: dict, user: dict = Depends(seller)) -> dict:
 
 @router.post("/sell/drafts/{draft_id}/publish")
 def sell_publish(draft_id: str, user: dict = Depends(seller)) -> dict:
-    return _call(svc.publish_listing, user["id"], draft_id, user.get("session_device_id"))
+    farm_name = (user.get("farm") or {}).get("farm_name") or user["name"]
+    return _call(svc.publish_listing, user["id"], draft_id, user.get("session_device_id"), farm_name)

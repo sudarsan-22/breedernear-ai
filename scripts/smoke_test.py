@@ -13,13 +13,18 @@ import urllib.error
 import urllib.request
 import uuid
 
-GUEST = str(uuid.uuid4())
+DEVICE = str(uuid.uuid4())
+TOKEN: dict[str, str] = {}
 results: list[tuple[bool, str]] = []
 
 
-def call(base: str, method: str, path: str, body: dict | None = None, timeout: int = 60) -> tuple[int, dict]:
+def call(base: str, method: str, path: str, body: dict | None = None, timeout: int = 60,
+         as_role: str | None = "customer") -> tuple[int, dict]:
+    headers = {"Content-Type": "application/json", "X-Device-Id": DEVICE}
+    if as_role and as_role in TOKEN:
+        headers["Authorization"] = f"Bearer {TOKEN[as_role]}"
     req = urllib.request.Request(base + path, method=method, data=json.dumps(body).encode() if body else None,
-                                 headers={"Content-Type": "application/json", "X-Guest-Id": GUEST})
+                                 headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return r.status, json.loads(r.read() or b"{}")
@@ -44,6 +49,19 @@ def main(base: str, ai: bool) -> int:
         page = r.read().decode()
     check("BreederNear AI" in page and "Not veterinary advice" in page, "web app served with disclaimer")
 
+    status, _ = call(base, "GET", "/api/pets?district=tiruppur", as_role=None)
+    check(status == 401, "browsing needs login")
+    status, closed = call(base, "GET", "/list-apps", as_role=None)
+    check(status == 404, "unused ADK routes are closed")
+    for role in ("customer", "seller"):
+        status, demo = call(base, "POST", "/api/auth/demo", {"role": role}, as_role=None)
+        check(status == 200 and demo.get("user", {}).get("role") == role, f"demo {role} login")
+        TOKEN[role] = demo.get("token", "")
+    status, _ = call(base, "GET", "/api/seller/dashboard", as_role="customer")
+    check(status == 403, "customers can't open the seller dashboard")
+    status, dash = call(base, "GET", "/api/seller/dashboard", as_role="seller")
+    check(status == 200 and "counts" in dash, "seller dashboard loads")
+
     status, pets = call(base, "GET", "/api/pets?district=tiruppur")
     levels = {p["trust_level"] for p in pets.get("results", [])}
     check(status == 200 and pets.get("total", 0) >= 30, f"pets near Tiruppur: {pets.get('total')}")
@@ -62,11 +80,13 @@ def main(base: str, ai: bool) -> int:
     check(status == 200 and quiz["options"][0]["species_key"] == "budgerigar", "quiz suggests budgies first")
 
     if ai:
-        path = f"/apps/breedernear/users/{GUEST}/sessions"
+        status, me = call(base, "GET", "/api/auth/me")
+        user_id = me["user"]["id"]
+        path = f"/apps/breedernear/users/{user_id}/sessions"
         status, session = call(base, "POST", path, {"state": {"mode": ""}})
         check(status == 200, "agent session created")
         status, events = call(base, "POST", "/run", {
-            "app_name": "breedernear", "user_id": GUEST, "session_id": session.get("id"),
+            "app_name": "breedernear", "user_id": user_id, "session_id": session.get("id"),
             "new_message": {"role": "user", "parts": [{"text": "Hello! In one sentence, what can you do?"}]}},
             timeout=120)
         text = "".join(p.get("text", "") for e in (events if isinstance(events, list) else [])

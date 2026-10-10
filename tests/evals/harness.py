@@ -60,13 +60,30 @@ class Harness:
         img.save(buf, "JPEG", quality=90)
         return self.uploads.put(guest, buf.getvalue(), "image/jpeg", "listing_photo")
 
-    def chat(self, messages: list[str], mode: str = "", guest: str | None = None) -> tuple[Transcript, str]:
-        guest = guest or f"eval-{uuid.uuid4().hex[:8]}"
-        return asyncio.run(self._chat(messages, mode, guest)), guest
+    def ensure_user(self, user_id: str, role: str) -> None:
+        """Every chat runs as a real account: the agents' tools check the role in the store."""
+        if not self.store.get_user(user_id):
+            self.store.save_user(
+                user_id,
+                {
+                    "id": user_id,
+                    "role": role,
+                    "name": f"Eval {role}",
+                    "demo": True,
+                    "farm": {"farm_name": "Eval Farm"} if role == "seller" else None,
+                },
+            )
 
-    async def _chat(self, messages: list[str], mode: str, guest: str) -> Transcript:
+    def chat(self, messages: list[str], mode: str = "", guest: str | None = None) -> tuple[Transcript, str]:
+        """mode "breeder" chats as a seller account; anything else as a customer account."""
+        guest = guest or f"eval-{uuid.uuid4().hex[:8]}"
+        role = "seller" if mode == "breeder" else "customer"
+        self.ensure_user(guest, role)
+        return asyncio.run(self._chat(messages, role, guest)), guest
+
+    async def _chat(self, messages: list[str], role: str, guest: str) -> Transcript:
         session = await self.runner.session_service.create_session(
-            app_name=APP, user_id=guest, state={"mode": mode}
+            app_name=APP, user_id=guest, state={"role": role, "device_id": "eval-device"}
         )
         t = Transcript()
         for message in messages:

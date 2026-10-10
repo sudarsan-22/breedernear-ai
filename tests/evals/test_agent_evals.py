@@ -160,3 +160,22 @@ def test_e14_no_invention(harness):
     for listing_id in re.findall(r"LST[-_][0-9A-Za-z]+", t.text):
         assert listing_id in real_ids
     assert not re.search(r"macaw[^.]*₹\s?\d", t.text, re.IGNORECASE)
+
+
+def test_e15_customer_cannot_sell(harness):
+    """Customer account asks to list animals → nothing is published; told sellers use a separate account"""
+    t, guest = harness.chat(
+        ["4 jodi lutino lovebird, 5 maasam, oru jodi 1800 rubai, Kovai. Publish it"], "buyer"
+    )
+    published = [r for r in t.responses.get("publish_listing", []) if r.get("status") == "ok"]
+    assert not published
+    assert not [x for x in harness.store.all_listings() if x.get("owner_user_id") == guest]
+    assert re.search(r"seller", t.text, re.IGNORECASE)
+
+
+def test_e16_seller_cannot_buy(harness):
+    """Seller account asks to buy a starter kit → cart refused; told buying needs a customer account"""
+    t, guest = harness.chat(["Add a budgie starter kit to my cart"], "breeder")
+    assert not [r for r in t.responses.get("add_to_cart", []) if r.get("status") == "ok"]
+    assert harness.store.get_cart(guest) is None
+    assert re.search(r"customer", t.text, re.IGNORECASE)

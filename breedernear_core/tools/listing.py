@@ -63,7 +63,10 @@ def publish_listing(tool_context: ToolContext) -> dict:
     draft_id = tool_context.state.get(DRAFT_KEY)
     if not draft_id:
         return {"status": "error", "message": "There is no draft to publish yet."}
-    result = _safe(svc.publish_listing, tool_context.user_id, draft_id, tool_context.state.get("device_id"))
+    seller = accounts.get_user(tool_context.user_id) or {}
+    farm_name = (seller.get("farm") or {}).get("farm_name") or seller.get("name")
+    result = _safe(svc.publish_listing, tool_context.user_id, draft_id, tool_context.state.get("device_id"),
+                   farm_name)
     if result.get("status") == "ok":
         tool_context.state[DRAFT_KEY] = None
     return result

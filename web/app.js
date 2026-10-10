@@ -1,7 +1,9 @@
 "use strict";
 
-/* BreederNear AI web app: three tabs (Pets · Local Breeders + My farm · BreederNear AI).
-   The tabs call /api directly; the AI tab talks to the ADK agents. Both use the same service code. */
+/* BreederNear AI web app. Separate customer and seller accounts (one role per account):
+   customers get Pets · Local Breeders · BreederNear AI · Account; sellers get Dashboard · Listings ·
+   Enquiries · BreederNear AI · Farm. Screens call /api; the AI tab talks to the ADK agents. Both use the
+   same service code, and the server checks the role on every call. */
 
 const APP = "breedernear";
 const MAX_PHOTOS = 4;
@@ -20,11 +22,28 @@ function uuid() {
     return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
   });
 }
-const GUEST = (() => {
+// Device ID: identifies this browser for the same-device sandbox (rule R33). Not a login.
+const DEVICE = (() => {
   let id = store.get("breedernear_guest_id");
   if (!id || !/^[0-9a-f-]{36}$/i.test(id)) { id = uuid(); store.set("breedernear_guest_id", id); }
   return id;
 })();
+const auth = { token: null, user: null };
+function readToken() {
+  try { return localStorage.getItem("breedernear_token") || sessionStorage.getItem("breedernear_token"); }
+  catch { return memory.breedernear_token || null; }
+}
+function saveToken(token, remember) {
+  try {
+    localStorage.removeItem("breedernear_token"); sessionStorage.removeItem("breedernear_token");
+    (remember ? localStorage : sessionStorage).setItem("breedernear_token", token);
+  } catch { memory.breedernear_token = token; }
+}
+function clearToken() {
+  try { localStorage.removeItem("breedernear_token"); sessionStorage.removeItem("breedernear_token"); } catch { /* ignore */ }
+  delete memory.breedernear_token;
+}
+const isSeller = () => auth.user?.role === "seller";
 
 // ---------------------------------------------------------------- DOM helpers
 const $ = (id) => document.getElementById(id);
@@ -55,7 +74,11 @@ const ICONS = {
   shop: '<path d="M4 9l1.5-5h13L20 9"/><path d="M4 9v11h16V9"/><path d="M9.5 20v-5.5h5V20"/>',
   mail: '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/>',
   list: '<path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
-  chat: '<path d="M4 5h16v11H9l-5 4z"/>', search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/>',
+  user: '<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5"/>',
+  grid: '<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',
+  eye: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+  logout: '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>', search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
 };
 const icon = (name) => h("span", { html: `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`, style: "display:contents" });
 const inr = (n) => (n == null ? "—" : "₹" + Number(n).toLocaleString("en-IN"));
@@ -94,12 +117,17 @@ function md(text) {
 }
 
 // ---------------------------------------------------------------- API
+function authHeaders() {
+  return { "X-Device-Id": DEVICE, ...(auth.token ? { Authorization: `Bearer ${auth.token}` } : {}) };
+}
 async function api(path, options = {}) {
-  const res = await fetch(path, { ...options, headers: { "Content-Type": "application/json", "X-Guest-Id": GUEST, ...(options.headers || {}) } });
+  const res = await fetch(path, { ...options, headers: { "Content-Type": "application/json", ...authHeaders(), ...(options.headers || {}) } });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
     const err = new Error(typeof body.detail === "string" ? body.detail : "Something went wrong. Please try again.");
-    err.status = res.status; throw err;
+    err.status = res.status;
+    if (res.status === 401 && auth.token && !path.startsWith("/api/auth/")) { signedOut("Your session has ended. Please log in again."); }
+    throw err;
   }
   return body;
 }
@@ -121,7 +149,7 @@ async function uploadPhotos(photos, kind) {
   for (const { file } of photos) {
     const form = new FormData();
     form.append("file", await shrink(file)); form.append("kind", kind);
-    const res = await fetch("/api/uploads", { method: "POST", headers: { "X-Guest-Id": GUEST }, body: form });
+    const res = await fetch("/api/uploads", { method: "POST", headers: authHeaders(), body: form });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(body.detail || "Couldn't upload the photo.");
     ids.push(body.upload_id);
@@ -300,12 +328,14 @@ async function openListing(id, card) {
     h("div", { class: "h-sub" }, "Trust checks"), checksGroup(r.checks), questionsCallout(r.questions_to_ask_seller),
     h("p", { class: "disclaimer", style: "margin-top:18px" }, c.sample_data ? "Sample listing from a fictional breeder. Illustrative photo." : "Your own listing (visible only to you)."),
   ];
-  openSheet("Pet", content, [
-    h("button", { class: "btn primary block", type: "button", onclick: () => contactView(c, r) }, icon("mail"), "Contact breeder"),
-    h("div", { style: "display:grid;grid-template-columns:1fr 1fr;gap:8px" },
-      h("button", { class: "btn secondary", type: "button", onclick: () => kitView(c) }, "Starter kit"),
-      h("button", { class: "btn secondary", type: "button", onclick: () => askAI(`Tell me about listing ${c.listing_id}. Is it a good choice for a first-time owner?`) }, icon("sparkles"), "Ask AI")),
-  ]);
+  const actions = isSeller()
+    ? [c.is_yours ? h("button", { class: "btn secondary block", type: "button", onclick: () => { closeSheet(); go("listings"); } }, "Manage in Listings")
+        : h("p", { class: "muted small", style: "text-align:center;margin:0" }, "You're signed in as a seller. Buying uses a customer account.")]
+    : [h("button", { class: "btn primary block", type: "button", onclick: () => contactView(c, r) }, icon("mail"), "Contact breeder"),
+      h("div", { style: "display:grid;grid-template-columns:1fr 1fr;gap:8px" },
+        h("button", { class: "btn secondary", type: "button", onclick: () => kitView(c) }, "Starter kit"),
+        h("button", { class: "btn secondary", type: "button", onclick: () => askAI(`Tell me about listing ${c.listing_id}. Is it a good choice for a first-time owner?`) }, icon("sparkles"), "Ask AI"))];
+  openSheet("Pet", content, actions);
 }
 function backTo(fn) { return h("button", { class: "btn plain", type: "button", onclick: fn, style: "margin-left:-8px" }, icon("chevL"), "Back"); }
 
@@ -322,7 +352,6 @@ function contactView(c, r) {
           h("p", { class: "muted" }, `Saved to ${c.breeder}'s inbox. Demo only: no SMS or WhatsApp is sent.`)),
         h("div", { class: "callout warn" }, h("b", {}, "Stay safe"), "Visit and see the animal before paying. Never pay the full amount in advance."),
       ], [h("button", { class: "btn primary block", type: "button", onclick: closeSheet }, "Done")]);
-      refreshFarmCounts();
     } catch (e) { send.disabled = false; send.textContent = "Send enquiry"; toast(e.message); }
   });
   setSheet([backTo(() => openListing(c.listing_id, c)), h("h3", { style: "margin:6px 0 4px;font-size:24px" }, `Message ${c.breeder}`),
@@ -492,7 +521,9 @@ async function addToCart(ids) {
 
 // ---------------------------------------------------------------- views
 const main = $("main");
-const TABS = [["pets", "Pets", "paw"], ["breeders", "Local Breeders", "barn"], ["ai", "BreederNear AI", "sparkles"]];
+const CUSTOMER_TABS = [["pets", "Pets", "paw"], ["breeders", "Local Breeders", "barn"], ["ai", "BreederNear AI", "sparkles"], ["account", "Account", "user"]];
+const SELLER_TABS = [["dashboard", "Dashboard", "grid"], ["listings", "Listings", "list"], ["enquiries", "Enquiries", "mail"], ["ai", "AI", "sparkles"], ["farm", "Farm", "barn"]];
+const tabs = () => (isSeller() ? SELLER_TABS : CUSTOMER_TABS);
 
 function hero(eyebrow, title, subtitle) {
   return h("section", { class: "hero" }, h("p", { class: "eyebrow" }, eyebrow), h("h1", { class: "large-title" }, title), h("p", { class: "subtitle" }, subtitle));
@@ -507,15 +538,12 @@ function welcomeCard() {
   const card = h("section", { class: "welcome", "aria-labelledby": "welcome-title" },
     h("button", { class: "close", type: "button", "aria-label": "Close welcome", onclick: dismiss }, icon("x")),
     h("h2", { id: "welcome-title" }, "Welcome to BreederNear"),
-    h("p", { class: "muted", style: "margin:0" }, "Buy pets straight from trusted local breeders, at farm prices. Every listing is checked by AI and clear rules."),
+    h("p", { class: "muted", style: "margin:0" }, `Hi ${auth.user?.name || "there"}! Buy pets straight from trusted local breeders, at farm prices. Every listing is checked by AI and clear rules.`),
     h("div", { class: "steps" },
       step("paw", "Pets", "Browse healthy, legal pets near you", () => { dismiss(); window.scrollTo({ top: 400, behavior: "smooth" }); }),
-      step("barn", "Local Breeders", "Meet breeders, or sell your own pets", () => { dismiss(); go("breeders"); }),
+      step("barn", "Local Breeders", "Meet breeders near you, at farm prices", () => { dismiss(); go("breeders"); }),
       step("sparkles", "BreederNear AI", "Just ask, in English or Tamil", () => { dismiss(); go("ai"); })),
-    h("div", { class: "demo" }, h("span", { class: "muted small" }, "Your district"), select),
-    h("div", { class: "demo", style: "margin-top:10px" }, h("span", { class: "muted small" }, "Try the demo:"),
-      h("button", { class: "btn small secondary", type: "button", onclick: () => { dismiss(); demoPriya(); } }, "Priya, buyer"),
-      h("button", { class: "btn small secondary", type: "button", onclick: () => { dismiss(); demoKarthik(); } }, "Karthik, breeder")));
+    h("div", { class: "demo" }, h("span", { class: "muted small" }, "Your district"), select));
   return card;
 }
 
@@ -571,31 +599,115 @@ async function viewBreeders() {
   }
   main.replaceChildren(h("div", { class: "view" },
     hero("Direct Farm", "Local Breeders", "Buy straight from the breeder. Farm prices, no broker markup."),
-    h("button", { class: "seller-banner", type: "button", onclick: () => go("farm") },
-      h("span", { class: "ico" }, icon("shop")), h("span", { style: "flex:1" }, h("b", {}, "Are you a breeder?"), h("span", {}, "Open My farm: list your pets in a minute with AI.")), icon("chevR")),
+    h("button", { class: "seller-banner", type: "button", onclick: becomeSellerSheet },
+      h("span", { class: "ico" }, icon("shop")), h("span", { style: "flex:1" }, h("b", {}, "Are you a breeder?"), h("span", {}, "Sell on BreederNear with a seller account. AI writes your listing in a minute.")), icon("chevR")),
     chipRow, h("div", { style: "height:12px" }), list, disclaimer()));
   load();
 }
 
-// ---- My farm (seller side)
+// ---- Seller app: Dashboard · Listings · Enquiries · Farm, and the AI-filled sell form
 const sell = { photos: [], text: "", draftId: null, data: null, busy: "", result: null };
-async function refreshFarmCounts() {
-  try {
-    const [l, e] = await Promise.all([api("/api/breeder/listings"), api("/api/breeder/enquiries")]);
-    state.farmCounts = { listings: l.listings.length, enquiries: e.enquiries.length };
-  } catch { /* not critical */ }
+const SELLER_TYPES = [["home_breeder", "Home"], ["kennel", "Kennel"], ["farm", "Farm"]];
+const FARM_SPECIES = [["budgerigar", "Budgies"], ["lovebird", "Lovebirds"], ["cockatiel", "Cockatiels"], ["finch", "Finches"],
+  ["canary", "Canaries"], ["dog", "Dogs"], ["cat", "Cats"]];
+const VERIFY = {
+  verified: ["TRUSTED", "check", "Verified dog breeder (simulated registry)"],
+  missing: ["CAUTION", "warn", "Add your dog-breeder registration"],
+  not_found: ["CAUTION", "warn", "Registration not found (simulated registry)"],
+  expired: ["CAUTION", "warn", "Registration expired"],
+};
+function verifyTag(farm) {
+  const v = VERIFY[farm?.verification];
+  return v ? h("span", { class: `tag ${v[0]}` }, icon(v[1]), v[2]) : null;
 }
-async function viewFarm(sub = "sell") {
-  await refreshFarmCounts();
-  const pane = h("div");
-  const segs = [["sell", "Sell"], ["listings", `Listings${state.farmCounts.listings ? " · " + state.farmCounts.listings : ""}`], ["enquiries", `Enquiries${state.farmCounts.enquiries ? " · " + state.farmCounts.enquiries : ""}`]];
+function greeting() { const hr = new Date().getHours(); return hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening"; }
+function stat(label, value, ico, cls) {
+  return h("div", { class: "card", style: "padding:14px" }, h("span", { class: `ico ${cls}`, style: "width:34px;height:34px;border-radius:10px;display:grid;place-items:center;margin-bottom:8px" }, icon(ico)),
+    h("div", { style: "font-size:26px;font-weight:700;letter-spacing:-.02em" }, value), h("div", { class: "muted small" }, label));
+}
+const STATUS_WORD = { PUBLISHED: "Live", PAUSED: "Paused", SOLD: "Sold", BLOCKED: "Blocked" };
+
+async function viewDashboard() {
+  const body = h("div", {}, loading("Loading your farm…"));
   main.replaceChildren(h("div", { class: "view" },
-    h("a", { class: "link", href: "#breeders", style: "margin-top:14px" }, icon("chevL"), "Local Breeders"),
-    hero("For breeders", "My farm", "List your pets in a minute. AI fills the form, you check it, and every listing is screened."),
-    h("div", { class: "segmented", role: "group", "aria-label": "My farm sections", style: "margin-bottom:6px" },
-      segs.map(([k, label]) => h("button", { type: "button", "aria-pressed": String(k === sub), onclick: () => go(k === "sell" ? "farm" : `farm/${k}`) }, label))),
+    hero(auth.user.farm?.farm_name || "Your farm", `${greeting()}, ${auth.user.name.replace(/ \(demo\)$/, "")}`, "Here's how your farm is doing on BreederNear."),
+    body, disclaimer()));
+  let d;
+  try { d = await api("/api/seller/dashboard"); } catch (e) { body.replaceChildren(errorCallout(e)); return; }
+  const c = d.counts;
+  body.replaceChildren(...[
+    verifyTag(d.farm) ? h("div", { style: "margin:-4px 0 14px" }, verifyTag(d.farm)) : null,
+    h("button", { class: "btn primary block", type: "button", onclick: () => go("sell") }, icon("sparkles"), "Sell a pet with AI"),
+    h("div", { style: "display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0" },
+      stat("Live listings", c.active, "list", "green"), stat("Buyer enquiries", c.enquiries, "mail", "blue"),
+      stat("Listing views", c.views, "search", "amber"), stat("Trusted & live", d.trusted, "shield", "green")),
+    c.blocked ? h("div", { class: "callout bad", style: "margin-bottom:12px" }, `${c.blocked} listing${c.blocked > 1 ? "s were" : " was"} blocked by the trust check (protected species). Buyers never see blocked listings.`) : null,
+    d.farm?.verification === "missing" ? h("div", { class: "callout warn", style: "margin-bottom:12px" }, h("b", {}, "Add your registration"),
+      "Dog breeders must be registered with the State Animal Welfare Board. Add your number in Farm to earn the verified badge.",
+      h("div", { style: "margin-top:8px" }, h("button", { class: "btn small secondary", type: "button", onclick: () => go("farm") }, "Open Farm"))) : null,
+    h("div", { class: "h-sub" }, "Recent activity"),
+    d.recent_activity.length ? h("div", { class: "group" }, d.recent_activity.map((a) => h("div", { class: "list-row" },
+      h("div", { class: "grow" }, a.text), h("span", { class: "muted small" }, new Date(a.at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })))))
+      : empty("sparkles", "No activity yet", "List your first pet: add a photo and a quick message, and AI fills the form.",
+        h("button", { class: "btn small primary", type: "button", onclick: () => go("sell") }, "Sell a pet")),
+    h("div", { class: "callout info", style: "margin-top:16px" }, h("b", {}, "How trust works"),
+      "Every listing gets a trust check: AI reads your photos, and fixed rules check the species, price, wording and registrations. Fair prices and clear photos keep you Trusted.")].filter(Boolean));
+}
+
+async function viewSellerListings(filter = "all") {
+  const pane = h("div", {}, loading("Loading…"));
+  const segs = [["all", "All"], ["PUBLISHED", "Live"], ["PAUSED", "Paused"], ["SOLD", "Sold"], ["BLOCKED", "Blocked"]];
+  main.replaceChildren(h("div", { class: "view" },
+    hero("Your farm", "Listings", "Pause, mark sold or remove a listing anytime."),
+    h("button", { class: "btn primary block", type: "button", onclick: () => go("sell"), style: "margin-bottom:14px" }, icon("plus"), "New listing"),
+    h("div", { class: "segmented", role: "group", "aria-label": "Filter listings" }, segs.map(([k, label]) =>
+      h("button", { type: "button", "aria-pressed": String(k === filter), onclick: () => viewSellerListings(k) }, label))),
     pane, disclaimer()));
-  if (sub === "listings") farmListings(pane); else if (sub === "enquiries") farmEnquiries(pane); else renderSell(pane);
+  const r = await api("/api/seller/listings").catch((e) => { pane.replaceChildren(errorCallout(e)); return null; });
+  if (!r) return;
+  const rows = r.listings.filter((l) => filter === "all" || l.status === filter);
+  if (!rows.length) { pane.replaceChildren(empty("list", "Nothing here yet", filter === "all" ? "List your first pet with AI." : "No listings with this status.")); return; }
+  const act = async (l, status) => {
+    try { await api(`/api/seller/listings/${encodeURIComponent(l.listing_id)}`, { method: "PATCH", body: JSON.stringify({ status }) }); toast(status === "SOLD" ? "Marked as sold" : status === "PAUSED" ? "Paused: hidden from buyers" : "Live again"); viewSellerListings(filter); }
+    catch (e) { toast(e.message); }
+  };
+  const remove = async (l) => {
+    if (!confirm(`Remove this ${l.species} listing? This can't be undone.`)) return;
+    try { await api(`/api/seller/listings/${encodeURIComponent(l.listing_id)}`, { method: "DELETE" }); toast("Listing removed"); viewSellerListings(filter); }
+    catch (e) { toast(e.message); }
+  };
+  pane.replaceChildren(h("div", { class: "group", style: "margin-top:14px" }, rows.map((l) => h("div", { class: "list-row", style: "align-items:flex-start" },
+    h("div", { class: `media ${groupOf(l)}`, style: "width:64px;height:64px;aspect-ratio:auto;border-radius:12px;font-size:28px;flex:none", "aria-hidden": "true" }, emojiFor(l)),
+    h("div", { class: "grow" },
+      h("b", {}, [l.species, l.variety].filter(Boolean).join(" · ")),
+      h("div", { class: "muted small" }, `${inr(l.price_inr)} / ${unitWord(l.unit)} · ${STATUS_WORD[l.status] || l.status} · ${l.views} view${l.views === 1 ? "" : "s"}`),
+      h("div", { style: "margin:6px 0" }, tag(l.trust_level, l.trust_score)),
+      l.status === "BLOCKED" ? h("div", { class: "muted small" }, "Blocked by the trust check. Buyers never see it.")
+        : h("div", { style: "display:flex;gap:6px;flex-wrap:wrap" },
+          l.status === "PUBLISHED" ? h("button", { class: "btn small secondary", type: "button", onclick: () => act(l, "PAUSED") }, "Pause")
+            : h("button", { class: "btn small secondary", type: "button", onclick: () => act(l, "PUBLISHED") }, l.status === "SOLD" ? "Relist" : "Resume"),
+          l.status !== "SOLD" ? h("button", { class: "btn small secondary", type: "button", onclick: () => act(l, "SOLD") }, "Mark sold") : null,
+          h("button", { class: "btn small plain", type: "button", onclick: () => openListing(l.listing_id, l) }, "View"),
+          h("button", { class: "btn small plain", type: "button", style: "color:var(--bad)", onclick: () => remove(l) }, "Remove")))))));
+}
+
+async function viewSellerEnquiries() {
+  const pane = h("div", {}, loading("Loading…"));
+  main.replaceChildren(h("div", { class: "view" }, hero("Your farm", "Enquiries", "Messages from buyers about your listings."), pane, disclaimer()));
+  const r = await api("/api/seller/enquiries").catch(() => ({ enquiries: [] }));
+  pane.replaceChildren(r.enquiries.length ? h("div", { class: "group" }, r.enquiries.map((e) => h("div", { class: "list-row" },
+    h("span", { class: "ico green", style: "width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none" }, icon("mail")),
+    h("div", { class: "grow" }, h("div", {}, `“${e.message}”`), h("div", { class: "muted small" }, `${e.listing_id} · ${new Date(e.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`)))))
+    : empty("mail", "No enquiries yet", "When buyers contact you about a listing, their message shows here. Demo tip: on this device, log in as a demo customer, find your pet in Pets (tagged by your farm) and tap Contact."));
+}
+
+function viewSell() {
+  const pane = h("div");
+  main.replaceChildren(h("div", { class: "view" },
+    h("a", { class: "link", href: "#listings", style: "margin-top:14px" }, icon("chevL"), "Listings"),
+    hero("Sell with AI", "New listing", "Add photos and a quick message. AI fills the form, you check it, and every listing is screened."),
+    pane, disclaimer()));
+  renderSell(pane);
 }
 
 function renderSell(pane) {
@@ -669,7 +781,7 @@ function draftForm(redraw) {
       d.animal_group === "dog" || missing.has("sawb_registration_no") ? text("sawb_registration_no", "Dog-breeder reg.", { hint: "Required for dog breeders (State Animal Welfare Board)", placeholder: "e.g. SIM-TNAWB-DB-0042" }) : null,
       missing.has("parivesh_registration_id") || d.parivesh_registration_id ? text("parivesh_registration_id", "PARIVESH ID", { hint: "Required for CITES-listed birds" }) : null),
     h("div", { class: "step-label" }, h("span", { class: "num" }, "3"), "Publish"),
-    h("p", { class: "muted small", style: "margin:-4px 2px 10px" }, "AI looks at your photos and our rules check the species, price and wording. Listings you create here are visible only to you in this demo."),
+    h("p", { class: "muted small", style: "margin:-4px 2px 10px" }, "AI looks at your photos and our rules check the species, price and wording. In this demo, your listings are visible to customer accounts on this device only."),
     sell.busy === "publish" ? loading("Running trust checks…") : publish,
   ];
 }
@@ -679,29 +791,68 @@ function sellResult() {
   return h("div", { class: "card", style: "margin-top:16px" },
     h("div", { class: "success" }, h("div", { class: "ring", style: ok ? "" : "background:var(--bad-tint);color:var(--bad)" }, icon(ok ? "check" : "x")),
       h("h3", { style: "margin:0;font-size:22px" }, ok ? "Your listing is live" : "This listing can't be published"),
-      h("p", { class: "muted" }, ok ? "Buyers see it with its trust badge. (In this demo, only you can see it.)" : "It was recorded, but buyers will never see it.")),
+      h("p", { class: "muted" }, ok ? "Buyers see it with its trust badge. In this demo, customer accounts on this device can see it." : "It was recorded, but buyers will never see it.")),
     trustSummary(s, "Trust check"),
     !ok ? h("div", { class: "callout ok", style: "margin-top:12px" }, "Legal pets you can list instead: budgies, cockatiels, lovebirds, zebra or society finches and canaries.") : null,
     h("div", { style: "display:grid;gap:8px;margin-top:16px" },
-      ok ? h("button", { class: "btn primary block", type: "button", onclick: () => { state.filters = { species: "all", trusted: false, max: "" }; go("pets"); } }, "See it in Pets") : null,
+      ok ? h("button", { class: "btn primary block", type: "button", onclick: () => { sell.result = null; go("listings"); } }, "See my listings") : null,
       h("button", { class: "btn secondary block", type: "button", onclick: again }, "List another")));
 }
-async function farmListings(pane) {
-  pane.replaceChildren(loading("Loading…"));
-  const r = await api("/api/breeder/listings").catch(() => ({ listings: [] }));
-  pane.replaceChildren(r.listings.length ? h("div", { class: "group", style: "margin-top:16px" }, r.listings.map((l) => h("div", { class: "list-row" },
-    h("div", { class: "grow" }, h("b", {}, [l.species, l.variety].filter(Boolean).join(" · ")),
-      h("div", { class: "muted small" }, `${inr(l.price_inr)} · ${l.status === "BLOCKED" ? "Not published" : "Published (visible only to you)"}`)),
-    tag(l.trust_level, l.trust_score))))
-    : empty("list", "No listings yet", "Your listings and their trust checks show here.", h("button", { class: "btn small primary", type: "button", onclick: () => go("farm") }, "Sell your first pet")));
+
+function farmForm(farm, onChange) {
+  const f = { farm_name: "", seller_type: "home_breeder", locality: "", species: [], sawb_registration_no: "", ...(farm || {}) };
+  const set = (k, v) => { f[k] = v; onChange?.(f); };
+  const input = (k, label, attrs = {}) => {
+    const el = h("input", { id: `farm-${k}`, value: f[k] || "", ...attrs });
+    el.addEventListener("input", () => set(k, el.value));
+    return h("div", { class: "field" }, h("label", { for: el.id }, label), el);
+  };
+  const dogRow = input("sawb_registration_no", "Dog-breeder reg.", { placeholder: "e.g. SIM-TNAWB-DB-0042" });
+  dogRow.hidden = !f.species.includes("dog");
+  const chips = h("div", { class: "chips", style: "margin:0;padding:0;flex-wrap:wrap" }, FARM_SPECIES.map(([k, label]) => {
+    const b = h("button", { class: "chip", type: "button", "aria-pressed": String(f.species.includes(k)) }, label);
+    b.addEventListener("click", () => {
+      const on = !f.species.includes(k);
+      set("species", on ? [...f.species, k] : f.species.filter((s) => s !== k));
+      b.setAttribute("aria-pressed", String(on));
+      dogRow.hidden = !f.species.includes("dog");
+    });
+    return b;
+  }));
+  const typeSeg = h("div", { class: "segmented", role: "group", "aria-label": "Seller type" }, SELLER_TYPES.map(([k, label]) => {
+    const b = h("button", { type: "button", "aria-pressed": String(f.seller_type === k) }, label);
+    b.addEventListener("click", () => { set("seller_type", k); typeSeg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); });
+    return b;
+  }));
+  return { values: f, el: h("div", {},
+    h("div", { class: "form-group" }, input("farm_name", "Farm name", { placeholder: "e.g. Noyyal Finch House", maxlength: 80 }),
+      h("div", { class: "field" }, h("label", {}, "Type"), typeSeg), input("locality", "Area", { placeholder: "e.g. Saibaba Colony", maxlength: 80 }), dogRow),
+    h("div", { class: "h-sub" }, "What do you breed?"), chips) };
 }
-async function farmEnquiries(pane) {
-  pane.replaceChildren(loading("Loading…"));
-  const r = await api("/api/breeder/enquiries").catch(() => ({ enquiries: [] }));
-  pane.replaceChildren(r.enquiries.length ? h("div", { class: "group", style: "margin-top:16px" }, r.enquiries.map((e) => h("div", { class: "list-row" },
-    h("span", { class: "ico green", style: "width:36px;height:36px;border-radius:50%;display:grid;place-items:center" }, icon("mail")),
-    h("div", { class: "grow" }, h("div", {}, `“${e.message}”`), h("div", { class: "muted small" }, `${e.listing_id} · ${new Date(e.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`)))))
-    : empty("mail", "No enquiries yet", "When buyers contact you about your listings, their messages show here. Demo tip: publish a listing, find it in Pets (tagged “Yours”) and tap Contact."));
+
+async function viewFarm() {
+  const u = auth.user;
+  const form = farmForm(u.farm);
+  const district = h("select", { class: "select", "aria-label": "District", style: "width:100%" }, state.districts.map((d) => h("option", { value: d.key, selected: d.key === u.district }, d.name)));
+  const save = h("button", { class: "btn primary block", type: "button" }, "Save farm profile");
+  save.addEventListener("click", async () => {
+    save.disabled = true;
+    try { auth.user = (await api("/api/auth/me", { method: "PATCH", body: JSON.stringify({ farm: form.values, district: district.value }) })).user; toast("Farm profile saved"); route(); }
+    catch (e) { toast(e.message); save.disabled = false; }
+  });
+  main.replaceChildren(h("div", { class: "view" },
+    hero("Seller account", "Farm", "How buyers see your farm on BreederNear."),
+    h("div", { class: "card", style: "display:flex;gap:14px;align-items:center;margin-bottom:16px" }, avatar(u.farm?.farm_name || u.name, "avatar lg"),
+      h("div", {}, h("b", { style: "font-size:19px" }, u.farm?.farm_name || "Your farm"), h("div", { class: "muted small" }, `${u.name} · ${u.login || "demo account"}`), h("div", { style: "margin-top:6px" }, verifyTag(u.farm)))),
+    form.el, h("div", { class: "h-sub" }, "District"), district, h("div", { style: "height:16px" }), save,
+    accountActions(), disclaimer()));
+}
+
+function accountActions() {
+  return h("div", { style: "display:grid;gap:8px;margin-top:22px" },
+    h("button", { class: "btn secondary block", type: "button", onclick: () => logout() }, "Log out"),
+    h("button", { class: "btn plain block", type: "button", style: "color:var(--bad)", onclick: deleteAccount }, "Delete my account"),
+    h("p", { class: "muted small", style: "text-align:center;margin:4px 0 0" }, "We store only your name, email or mobile and district. Passwords are stored as secure hashes."));
 }
 
 // ---------------------------------------------------------------- AI tab (ADK agents)
@@ -710,17 +861,22 @@ const LOADING = { transfer_to_agent: "Passing you to the right assistant…", ex
   publish_listing: "Running trust checks…", check_external_listing: "Running trust checks…", recommend_species: "Matching pets to your home…",
   search_listings: "Finding trusted pets near you…", get_listing: "Opening the listing…", create_enquiry: "Sending your enquiry…",
   build_starter_kit: "Building your starter kit…", care_plan: "Writing your care plan…", add_to_cart: "Adding to your cart…" };
-const chat = { el: null, session: store.get("breedernear_ai_session"), busy: false, photos: [], restored: false };
+const chat = { el: null, session: null, busy: false, photos: [], restored: false };
+const chatKey = () => `breedernear_ai_session_${auth.user?.id}`;
+function resetChat() { Object.assign(chat, { el: null, session: auth.user ? store.get(chatKey()) : null, busy: false, photos: [], restored: false, restoring: null }); }
 
 function viewAI() {
   if (!chat.el) chat.el = h("div", { class: "chat", "aria-live": "polite" });
   const quick = (ico, cls, title, action) => h("button", { type: "button", onclick: action }, h("span", { class: `ico ${cls}`, style: "width:34px;height:34px;border-radius:10px;display:grid;place-items:center" }, icon(ico)), title);
   main.replaceChildren(h("div", { class: "view" },
-    hero("Five Gemini agents", "BreederNear AI", "Find a pet, list your animals or check a post. English or Tamil."),
-    h("div", { class: "quick" },
-      quick("paw", "green", "Find my pet", () => sendChat("Help me find the right pet for my family.")),
-      quick("shop", "amber", "List my animals", () => sendChat("I'm a breeder and I want to list my animals for sale.")),
-      quick("shield", "blue", "Is this post safe?", () => { prefillChat("Is this post safe? "); })),
+    hero("Five Gemini agents", "BreederNear AI", isSeller() ? "List your animals, check a post or ask about your enquiries. English or Tamil." : "Find a pet, check a post or plan the first two weeks. English or Tamil."),
+    h("div", { class: "quick" }, isSeller()
+      ? [quick("shop", "amber", "List my animals", () => sendChat("I want to list my animals for sale.")),
+        quick("mail", "green", "Any enquiries?", () => sendChat("Do I have any enquiries from buyers?")),
+        quick("shield", "blue", "Is this post safe?", () => { prefillChat("Is this post safe? "); })]
+      : [quick("paw", "green", "Find my pet", () => sendChat("Help me find the right pet for my family.")),
+        quick("sparkles", "amber", "First-14-days plan", () => sendChat("What do I need for a pair of budgies, and how do I care for them in the first two weeks?")),
+        quick("shield", "blue", "Is this post safe?", () => { prefillChat("Is this post safe? "); })]),
     chat.el,
     h("p", { class: "disclaimer" }, "Tap “What the AI did” under a reply to see which agent and tool ran. Prototype: sample data; not veterinary advice.")));
   if (!chat.restored) { chat.restored = true; chat.restoring = restoreChat(); }
@@ -808,7 +964,7 @@ function chatCard(name, r) {
         h("button", { class: "btn primary", type: "button", style: "margin-top:12px", onclick: (e) => { e.currentTarget.disabled = true; sendChat("Publish it"); } }, "Publish"));
       break;
     }
-    case "publish_listing": card(trustSummary(r.screening, r.listing_status === "BLOCKED" ? "Not published" : "Published", r.listing_status === "BLOCKED" ? "This listing can't be published." : "Visible only to you in this demo.")); refreshFarmCounts(); break;
+    case "publish_listing": card(trustSummary(r.screening, r.listing_status === "BLOCKED" ? "Not published" : "Published", r.listing_status === "BLOCKED" ? "This listing can't be published." : "Visible to customer accounts on this device in this demo.")); break;
     case "check_external_listing": card(trustSummary(r.screening, "Post check", "Nothing was published or stored.")); break;
     case "recommend_species":
       if (r.options?.length) card(h("h3", { style: "margin:0 0 8px;font-size:19px" }, "Suggested pets"), h("div", { class: "group" }, r.options.map((o) => h("button", { class: "row", type: "button",
@@ -821,7 +977,7 @@ function chatCard(name, r) {
       break;
     case "get_listing": card(h("div", { class: "detail-head", style: "margin:0 0 8px" }, h("h3", { style: "font-size:19px" }, [r.listing.species, r.listing.variety].filter(Boolean).join(" · ")), tag(r.listing.trust_level, r.listing.trust_score)),
       h("button", { class: "btn secondary", type: "button", onclick: () => openListing(r.listing.listing_id, r.listing) }, "Open listing")); break;
-    case "create_enquiry": card(h("b", {}, "Enquiry sent"), h("div", { class: "muted small" }, r.note)); refreshFarmCounts(); break;
+    case "create_enquiry": card(h("b", {}, "Enquiry sent"), h("div", { class: "muted small" }, r.note)); break;
     case "build_starter_kit": card(h("h3", { style: "margin:0 0 10px;font-size:19px" }, `Starter kit: ${r.count} ${r.species}`), kitBlock(r),
       h("button", { class: "btn primary", type: "button", onclick: (e) => { e.currentTarget.disabled = true; addToCart(r.items.map((i) => i.product_id)); } }, "Add whole kit")); break;
     case "care_plan": card(h("h3", { style: "margin:0 0 10px;font-size:19px" }, `First 14 days: ${r.care_plan.species}`), carePlanBlock(r.care_plan)); break;
@@ -832,21 +988,21 @@ function chatCard(name, r) {
 async function restoreChat() {
   if (!chat.session) return;
   try {
-    const s = await api(`/apps/${APP}/users/${GUEST}/sessions/${chat.session}`);
+    const s = await api(`/apps/${APP}/users/${auth.user.id}/sessions/${chat.session}`);
     let turn = null;
     for (const ev of s.events || []) {
       if (ev.author === "user" && ev.content?.parts?.some((p) => typeof p.text === "string")) { turn = new Turn(); userBubble(ev.content.parts.map((p) => p.text || "").join("")); continue; }
       handleEvent(turn || (turn = new Turn()), ev);
     }
-  } catch { chat.session = null; store.del("breedernear_ai_session"); }
+  } catch { chat.session = null; store.del(chatKey()); }
 }
 async function createSession() {
-  const s = await api(`/apps/${APP}/users/${GUEST}/sessions`, { method: "POST", body: JSON.stringify({ state: { mode: "" } }) });
-  chat.session = s.id; store.set("breedernear_ai_session", s.id);
+  const s = await api(`/apps/${APP}/users/${auth.user.id}/sessions`, { method: "POST", body: JSON.stringify({ state: {} }) });
+  chat.session = s.id; store.set(chatKey(), s.id);
 }
 async function runSse(text, turn) {
-  const res = await fetch("/run_sse", { method: "POST", headers: { "Content-Type": "application/json", "X-Guest-Id": GUEST },
-    body: JSON.stringify({ app_name: APP, user_id: GUEST, session_id: chat.session, streaming: true, new_message: { role: "user", parts: [{ text }] } }) });
+  const res = await fetch("/run_sse", { method: "POST", headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ app_name: APP, user_id: auth.user.id, session_id: chat.session, streaming: true, new_message: { role: "user", parts: [{ text }] } }) });
   if (!res.ok) { const e = new Error(`run ${res.status}`); e.status = res.status; throw e; }
   const reader = res.body.getReader(), decoder = new TextDecoder();
   let buffer = "";
@@ -875,7 +1031,8 @@ async function sendChat(text) {
   turn.setTyping(photos.length ? "Uploading photos…" : "Thinking…");
   try {
     let message = text;
-    if (photos.length) message = `${text}\n[attachments upload_ids=${(await uploadPhotos(photos, "listing_photo")).join(",")} kind=listing_photo]`;
+    const kind = isSeller() ? "listing_photo" : "external_listing";
+    if (photos.length) message = `${text}\n[attachments upload_ids=${(await uploadPhotos(photos, kind)).join(",")} kind=${kind}]`;
     if (!chat.session) await createSession();
     try { await runSse(message, turn); } catch (e) {
       if (e.status !== 404) throw e;
@@ -899,56 +1056,219 @@ $("chat-form").addEventListener("submit", (e) => { e.preventDefault(); sendChat(
 $("chat-input").addEventListener("input", autoGrow);
 $("chat-input").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendChat($("chat-input").value); } });
 
-// ---------------------------------------------------------------- shell, routing, demos
+// ---------------------------------------------------------------- customer account
+async function viewAccount() {
+  const u = auth.user;
+  const list = h("div", {}, loading("Loading…"));
+  const district = h("select", { class: "select", "aria-label": "Your district", style: "width:100%" }, state.districts.map((d) => h("option", { value: d.key, selected: d.key === (u.district || state.district) }, d.name)));
+  district.addEventListener("change", async () => {
+    try { auth.user = (await api("/api/auth/me", { method: "PATCH", body: JSON.stringify({ district: district.value }) })).user; setDistrict(district.value); toast("District saved"); }
+    catch (e) { toast(e.message); }
+  });
+  main.replaceChildren(h("div", { class: "view" },
+    hero("Customer account", "Account", "Your enquiries, cart and settings."),
+    h("div", { class: "card", style: "display:flex;gap:14px;align-items:center;margin-bottom:16px" }, avatar(u.name, "avatar lg"),
+      h("div", {}, h("b", { style: "font-size:19px" }, u.name), h("div", { class: "muted small" }, u.login || "Demo customer account"))),
+    h("div", { class: "group" },
+      h("button", { class: "row", type: "button", onclick: cartSheet }, h("span", { class: "ico green", style: "width:32px;height:32px;border-radius:9px;display:grid;place-items:center" }, icon("bag")),
+        h("span", { class: "grow" }, "Cart"), h("span", { class: "muted" }, String(state.cartCount)), h("span", { class: "chev" }, icon("chevR"))),
+      h("button", { class: "row", type: "button", onclick: () => go("breeders") }, h("span", { class: "ico green", style: "width:32px;height:32px;border-radius:9px;display:grid;place-items:center" }, icon("barn")),
+        h("span", { class: "grow" }, "Local Breeders"), h("span", { class: "chev" }, icon("chevR")))),
+    h("div", { class: "h-sub" }, "My district"), district,
+    h("div", { class: "h-sub" }, "Enquiries I sent"), list,
+    h("button", { class: "seller-banner", type: "button", style: "margin-top:20px", onclick: becomeSellerSheet },
+      h("span", { class: "ico" }, icon("shop")), h("span", { style: "flex:1" }, h("b", {}, "Want to sell pets?"), h("span", {}, "Breeders use a separate seller account.")), icon("chevR")),
+    accountActions(), disclaimer()));
+  const r = await api("/api/enquiries/sent").catch(() => ({ enquiries: [] }));
+  list.replaceChildren(r.enquiries.length ? h("div", { class: "group" }, r.enquiries.map((e) => h("div", { class: "list-row" },
+    h("div", { class: "grow" }, `“${e.message}”`, h("div", { class: "muted small" }, `${e.listing_id} · ${new Date(e.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`)))))
+    : h("p", { class: "muted" }, "No enquiries yet. Open a pet and tap Contact breeder."));
+}
+
+function becomeSellerSheet() {
+  openSheet("Sell on BreederNear", [
+    h("div", { class: "success" }, h("div", { class: "ring" }, icon("shop")), h("h3", { style: "margin:0;font-size:22px" }, "Sellers use a separate account"),
+      h("p", { class: "muted" }, "A seller account gets its own dashboard: list pets in a minute with AI, see enquiries and views, and manage listings.")),
+    h("div", { class: "callout info" }, "Listings on BreederNear are checked for legality, fair prices and scam signs before buyers see them. Protected native birds can never be listed."),
+  ], [h("button", { class: "btn primary block", type: "button", onclick: () => { closeSheet(); logout({ quiet: true, then: () => viewAuth("signup", "seller") }); } }, "Create a seller account"),
+    h("button", { class: "btn plain block", type: "button", onclick: () => { closeSheet(); logout({ quiet: true, then: () => demoLogin("seller") }); } }, "Try the demo seller instead")]);
+}
+
+// ---------------------------------------------------------------- login & sign-up
+function passwordField(id, autocomplete) {
+  const input = h("input", { id, type: "password", autocomplete, minlength: 8, required: true, placeholder: "At least 8 characters",
+    style: "flex:1;min-width:0;border:0;background:transparent;padding:10px 0;font-size:16px" });
+  const toggle = h("button", { class: "icon-btn", type: "button", "aria-label": "Show password", style: "background:none" }, icon("eye"));
+  toggle.addEventListener("click", () => { const show = input.type === "password"; input.type = show ? "text" : "password"; toggle.setAttribute("aria-label", show ? "Hide password" : "Show password"); });
+  return { input, el: h("div", { style: "display:flex;align-items:center;gap:6px" }, input, toggle) };
+}
+function authField(label, input, hint) {
+  if (input.tagName !== "DIV") input.style.cssText = "width:100%;border:0;background:transparent;padding:10px 0;font-size:16px";
+  return h("label", { style: "display:block;padding:6px 16px;border-top:.5px solid var(--sep)" }, h("span", { class: "muted small" }, label), input, hint ? h("span", { class: "muted small", style: "display:block;padding-bottom:6px" }, hint) : null);
+}
+function viewAuth(mode = "login", role = "customer") {
+  document.body.classList.add("signed-out");
+  $("composer").hidden = true;
+  const card = h("div", { class: "card", style: "max-width:440px;margin:0 auto;padding:24px 20px" });
+  const seg = h("div", { class: "segmented", role: "group", "aria-label": "Log in or sign up", style: "margin-bottom:18px" },
+    h("button", { type: "button", "aria-pressed": String(mode === "login"), onclick: () => viewAuth("login", role) }, "Log in"),
+    h("button", { type: "button", "aria-pressed": String(mode === "signup"), onclick: () => viewAuth("signup", role) }, "Sign up"));
+  const error = h("div", { class: "callout bad", role: "alert", hidden: true, style: "margin-bottom:12px" });
+  const fail = (e) => { error.textContent = e.message; error.hidden = false; };
+  const loginInput = h("input", { id: "auth-login", autocomplete: "username", inputmode: "email", required: true, placeholder: "you@example.com or 98765 43210" });
+  const remember = h("input", { type: "checkbox", checked: true, id: "auth-remember" });
+  const demo = h("div", {},
+    h("div", { style: "display:flex;align-items:center;gap:10px;margin:20px 0 14px;color:var(--label-3);font-size:13px" }, h("span", { style: "flex:1;border-top:.5px solid var(--sep)" }), "OR TRY THE DEMO", h("span", { style: "flex:1;border-top:.5px solid var(--sep)" })),
+    h("div", { style: "display:grid;gap:8px" },
+      h("button", { class: "btn secondary block", type: "button", onclick: () => demoLogin("customer") }, icon("paw"), "Demo customer · Priya"),
+      h("button", { class: "btn secondary block", type: "button", onclick: () => demoLogin("seller") }, icon("shop"), "Demo seller · Karthik")),
+    h("p", { class: "muted small", style: "text-align:center;margin:10px 0 0" }, "Demo accounts are private to you and need no sign-up."));
+  if (mode === "login") {
+    const pw = passwordField("auth-password", "current-password");
+    const submit = h("button", { class: "btn primary block", type: "submit" }, "Log in");
+    const form = h("form", {},
+      h("div", { class: "form-group" }, authField("Email or mobile number", loginInput), authField("Password", pw.el)),
+      h("div", { style: "display:flex;justify-content:space-between;align-items:center;margin:14px 2px" },
+        h("label", { style: "display:flex;gap:8px;align-items:center;font-size:15px" }, remember, "Remember me"),
+        h("button", { class: "link", type: "button", onclick: forgotSheet }, "Forgot password?")),
+      submit,
+      h("p", { class: "muted", style: "text-align:center;margin:14px 0 0;font-size:15px" }, "Don't have an account? ", h("button", { class: "link", type: "button", onclick: () => viewAuth("signup", role) }, "Sign up")));
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault(); error.hidden = true; submit.disabled = true;
+      try { await finishLogin(await api("/api/auth/login", { method: "POST", body: JSON.stringify({ login: loginInput.value, password: pw.input.value, remember: remember.checked }) }), remember.checked); }
+      catch (err) { fail(err); submit.disabled = false; }
+    });
+    card.append(seg, error, form, demo);
+  } else {
+    let chosen = role, farm = null;
+    const roleSeg = h("div", { class: "segmented", role: "group", "aria-label": "I want to" },
+      h("button", { type: "button", "aria-pressed": String(chosen === "customer"), onclick: () => viewAuth("signup", "customer") }, "Buy pets"),
+      h("button", { type: "button", "aria-pressed": String(chosen === "seller"), onclick: () => viewAuth("signup", "seller") }, "Sell pets"));
+    const name = h("input", { id: "auth-name", autocomplete: "name", required: true, maxlength: 60, placeholder: "Your name" });
+    const pw = passwordField("auth-new-password", "new-password");
+    const district = h("select", { id: "auth-district" }, state.districts.map((d) => h("option", { value: d.key, selected: d.key === state.district }, d.name)));
+    const farmBlock = chosen === "seller" ? (farm = farmForm(null), h("div", {}, h("div", { class: "h-sub" }, "Your farm"), farm.el)) : null;
+    const submit = h("button", { class: "btn primary block", type: "submit", style: "margin-top:16px" }, chosen === "seller" ? "Create seller account" : "Create account");
+    const form = h("form", {},
+      h("div", { class: "h-sub", style: "margin-top:0" }, "I want to"), roleSeg, h("div", { style: "height:14px" }),
+      h("div", { class: "form-group" }, authField("Name", name), authField("Email or mobile number", loginInput), authField("Password", pw.el, "At least 8 characters. Please don't reuse an important password in this prototype."), authField("District", district)),
+      farmBlock,
+      h("label", { style: "display:flex;gap:8px;align-items:center;font-size:15px;margin:14px 2px 0" }, remember, "Remember me"),
+      submit,
+      h("p", { class: "muted small", style: "text-align:center;margin:12px 0 0" }, "We store only your name, email or mobile and district. Passwords are stored as secure hashes."),
+      h("p", { class: "muted", style: "text-align:center;margin:10px 0 0;font-size:15px" }, "Already have an account? ", h("button", { class: "link", type: "button", onclick: () => viewAuth("login", role) }, "Log in")));
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault(); error.hidden = true; submit.disabled = true;
+      try {
+        await finishLogin(await api("/api/auth/signup", { method: "POST", body: JSON.stringify({ role: chosen, name: name.value, login: loginInput.value,
+          password: pw.input.value, district: district.value, remember: remember.checked, farm: farm?.values }) }), remember.checked);
+      } catch (err) { fail(err); submit.disabled = false; window.scrollTo({ top: 0, behavior: "smooth" }); }
+    });
+    card.append(seg, error, form, demo);
+  }
+  main.classList.remove("ai-main");
+  main.replaceChildren(h("div", { class: "view", style: "padding:28px 0 40px" },
+    h("div", { style: "text-align:center;margin-bottom:20px" },
+      h("div", { class: "mark", style: "width:58px;height:58px;border-radius:17px;background:var(--g-brand);display:grid;place-items:center;color:#fff;margin:0 auto 12px" }, icon("paw")),
+      h("h1", { class: "large-title", style: "font-size:30px;margin:0" }, mode === "login" ? "Welcome back" : "Join BreederNear"),
+      h("p", { class: "subtitle", style: "font-size:16px" }, mode === "login" ? "Log in to find trusted pets, or to manage your farm." : "Buy pets from trusted local breeders, or sell your own.")),
+    card, disclaimer()));
+  (mode === "login" ? loginInput : $("auth-name"))?.focus();
+}
+function forgotSheet() {
+  openSheet("Forgot password", [
+    h("p", {}, "Password reset needs a verified email or SMS service, which this prototype doesn't have."),
+    h("p", { class: "muted" }, "Please create a new account, or try the demo customer or demo seller."),
+  ], [h("button", { class: "btn primary block", type: "button", onclick: closeSheet }, "OK")]);
+}
+async function finishLogin(r, remember) {
+  auth.token = r.token; auth.user = r.user;
+  saveToken(r.token, remember);
+  document.body.classList.remove("signed-out");
+  if (r.user.district) { state.district = r.user.district; store.set("breedernear_district", r.user.district); }
+  resetChat(); Object.assign(sell, { photos: [], text: "", draftId: null, data: null, busy: "", result: null });
+  renderHeader();
+  history.replaceState(null, "", isSeller() ? "#dashboard" : "#pets");
+  route();
+  if (!isSeller()) api("/api/cart").then(updateCart).catch(() => {});
+}
+async function demoLogin(role) {
+  try {
+    await finishLogin(await api("/api/auth/demo", { method: "POST", body: JSON.stringify({ role }) }), false);
+    if (role === "seller") {
+      Object.assign(sell, { text: "4 jodi lutino lovebird, 5 maasam, oru jodi 1800 rubai. Saibaba Colony, Kovai. Healthy, parents on site." });
+      toast("Demo seller: tap “Sell a pet with AI” to try the listing assistant");
+    } else {
+      state.filters = { species: "bird", trusted: false, max: "" };
+      route();
+      setTimeout(() => quizSheet({ animal_group: "bird", home_type: "flat", has_young_children: true, first_time_owner: true, time_per_day_minutes: 30, noise_ok: true, budget_inr: 3000 }), 300);
+    }
+  } catch (e) { toast(e.message); }
+}
+function signedOut(message) {
+  auth.token = null; auth.user = null; clearToken(); resetChat(); state.cartCount = 0;
+  closeSheet(); renderHeader(); viewAuth("login");
+  if (message) toast(message);
+}
+async function logout({ quiet = false, then } = {}) {
+  try { await fetch("/api/auth/logout", { method: "POST", headers: authHeaders() }); } catch { /* signing out locally anyway */ }
+  signedOut(quiet ? null : "Logged out");
+  then?.();
+}
+async function deleteAccount() {
+  if (!confirm("Delete your account? Your profile, sessions and listings will be removed. This can't be undone.")) return;
+  try { await api("/api/auth/me", { method: "DELETE" }); signedOut("Your account was deleted"); } catch (e) { toast(e.message); }
+}
+
+// ---------------------------------------------------------------- shell & routing
 function renderHeader() {
+  const signedIn = !!auth.user;
   $("brand-mark").replaceChildren(icon("paw"));
+  $("district-btn").hidden = !signedIn || isSeller();
+  $("cart-btn").hidden = !signedIn || isSeller();
   $("district-btn").replaceChildren(icon("pin"), h("span", {}, districtName(state.district)));
   $("cart-btn").replaceChildren(...[icon("bag"), state.cartCount ? h("span", { class: "badge-dot" }, state.cartCount) : null].filter(Boolean));
   $("cart-btn").setAttribute("aria-label", `Cart, ${state.cartCount} item${state.cartCount === 1 ? "" : "s"}`);
+  $("role-pill").hidden = !isSeller();
+  $("role-pill").replaceChildren(icon("shop"), h("span", {}, "Seller"));
+  $("tabbar").hidden = !signedIn;
+  $("top-tabs").hidden = !signedIn;
+  $("tabbar").style.gridTemplateColumns = `repeat(${tabs().length}, 1fr)`;
 }
 function renderTabs(active) {
-  const make = () => TABS.map(([key, label, ico]) => h("a", { class: "tab", href: `#${key}`, "aria-current": key === active ? "page" : null }, icon(ico), h("span", {}, label)));
+  const make = () => tabs().map(([key, label, ico]) => h("a", { class: "tab", href: `#${key}`, "aria-current": key === active ? "page" : null }, icon(ico), h("span", {}, label)));
   $("tabbar").replaceChildren(...make());
   $("top-tabs").replaceChildren(...make());
 }
 function go(path) { if (location.hash === `#${path}`) route(); else location.hash = path; }
 function route() {
-  const path = location.hash.replace(/^#\/?/, "") || "pets";
-  const [page, sub] = path.split("/");
-  const tab = page === "farm" ? "breeders" : TABS.some(([k]) => k === page) ? page : "pets";
-  store.set("breedernear_tab", path);
-  renderTabs(tab);
-  $("composer").hidden = page !== "ai";
-  main.classList.toggle("ai-main", page === "ai");
-  if (page !== "ai") window.scrollTo({ top: 0 });
-  if (page === "breeders") viewBreeders();
-  else if (page === "farm") viewFarm(sub || "sell");
-  else if (page === "ai") viewAI();
-  else viewPets();
-}
-function demoPriya() {
-  setDistrict("tiruppur");
-  state.filters = { species: "bird", trusted: false, max: "" };
-  go("pets");
-  setTimeout(() => quizSheet({ animal_group: "bird", home_type: "flat", has_young_children: true, first_time_owner: true, time_per_day_minutes: 30, noise_ok: true, budget_inr: 3000 }), 250);
-}
-function demoKarthik() {
-  setDistrict("coimbatore");
-  Object.assign(sell, { photos: [], draftId: null, data: null, result: null,
-    text: "4 jodi lutino lovebird, 5 maasam, oru jodi 1800 rubai. Saibaba Colony, Kovai. Healthy, parents on site." });
-  go("farm");
-  setTimeout(() => toast("Add photos if you like, then tap Fill with AI"), 400);
+  if (!auth.user) { viewAuth("login"); return; }
+  const fallback = isSeller() ? "dashboard" : "pets";
+  const path = location.hash.replace(/^#\/?/, "") || fallback;
+  const page = path.split("/")[0];
+  const allowed = isSeller() ? ["dashboard", "listings", "enquiries", "sell", "ai", "farm"] : ["pets", "breeders", "ai", "account"];
+  const current = allowed.includes(page) ? page : fallback;
+  store.set("breedernear_tab", current);
+  renderTabs(current === "sell" ? "listings" : current);
+  $("composer").hidden = current !== "ai";
+  main.classList.toggle("ai-main", current === "ai");
+  if (current !== "ai") window.scrollTo({ top: 0 });
+  ({ dashboard: viewDashboard, listings: () => viewSellerListings(), enquiries: viewSellerEnquiries, sell: viewSell, farm: viewFarm,
+     breeders: viewBreeders, account: viewAccount, ai: viewAI, pets: viewPets })[current]();
 }
 window.addEventListener("hashchange", route);
 $("district-btn").addEventListener("click", districtSheet);
 $("cart-btn").addEventListener("click", cartSheet);
 
 (async function init() {
-  renderHeader();
   try { const m = await api("/api/meta"); state.districts = m.districts; } catch { state.districts = [{ key: "coimbatore", name: "Coimbatore" }]; }
   if (!state.districts.some((d) => d.key === state.district)) state.district = "coimbatore";
+  auth.token = readToken();
+  if (auth.token) {
+    try { auth.user = (await api("/api/auth/me")).user; } catch { auth.token = null; clearToken(); }
+  }
+  resetChat();
   renderHeader();
-  if (!location.hash) { const last = store.get("breedernear_tab"); if (last) { history.replaceState(null, "", `#${last}`); } }
   route();
-  api("/api/cart").then(updateCart).catch(() => {});
+  if (auth.user && !isSeller()) api("/api/cart").then(updateCart).catch(() => {});
 })();

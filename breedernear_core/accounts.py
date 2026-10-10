@@ -165,7 +165,7 @@ def login(login_value: str, password: str, device_id: str | None, remember: bool
     store = deps.get_store()
     user_id = store.login_owner(normalized)
     user = store.get_user(user_id) if user_id else None
-    if not verify_password(password or "", user["password_hash"] if user else None):
+    if not verify_password(password or "", user["password_hash"] if user else None):  # demo: no password
         if user is None:
             verify_password(password or "", hash_password("timing-equaliser"))
         raise wrong
@@ -173,17 +173,25 @@ def login(login_value: str, password: str, device_id: str | None, remember: bool
 
 
 def demo(role: str, device_id: str | None) -> tuple[str, dict]:
+    """One private demo account per role and device, so switching between them keeps their data."""
     if role not in ROLES:
         raise AccountError("Unknown demo account.")
-    preset = DEMO[role]
-    user_id = f"DEMO_{uuid.uuid4().hex[:16]}"
-    user = {"id": user_id, "role": role, "name": preset["name"], "login": None, "login_type": None,
-            "password_hash": None, "district": preset["district"], "device_id": _device(device_id),
-            "demo": True, "created_at": _now().isoformat()}
-    if role == "seller":
-        user["farm"] = _clean_farm(preset["farm"])
-    deps.get_store().save_user(user_id, user)
-    return _start_session(user, user["device_id"], remember=False), public(user)
+    device = _device(device_id)
+    store = deps.get_store()
+    key = f"demo:{role}:{device}"
+    existing = store.login_owner(key)
+    user = store.get_user(existing) if existing else None
+    if user is None:
+        preset = DEMO[role]
+        user = {"id": f"DEMO_{uuid.uuid4().hex[:16]}", "role": role, "name": preset["name"], "login": key,
+                "login_type": "demo", "password_hash": None, "district": preset["district"],
+                "device_id": device, "demo": True, "created_at": _now().isoformat()}
+        if role == "seller":
+            user["farm"] = _clean_farm(preset["farm"])
+        store.release_login(key)
+        store.claim_login(key, user["id"])
+        store.save_user(user["id"], user)
+    return _start_session(user, device, remember=False), public(user)
 
 
 def authenticate(token: str | None) -> dict:

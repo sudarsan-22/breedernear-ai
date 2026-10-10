@@ -39,7 +39,11 @@ async def _read_body(receive) -> bytes:
             return b"".join(chunks)
 
 
-def _replay(body: bytes):
+def _replay(body: bytes, original_receive):
+    """Hand the already-read body to the app, then pass through the client's real events.
+
+    Returning http.disconnect here would make streaming responses (the AI chat) stop immediately.
+    """
     sent = False
 
     async def receive():
@@ -47,7 +51,7 @@ def _replay(body: bytes):
         if not sent:
             sent = True
             return {"type": "http.request", "body": body, "more_body": False}
-        return {"type": "http.disconnect"}
+        return await original_receive()
 
     return receive
 
@@ -110,4 +114,4 @@ class Gatekeeper:
             if data.get("user_id") != user["id"] or data.get("app_name") != APP:
                 await _respond(send, 403, "Not your session.")
                 return
-        await self.app(scope, _replay(body), send)
+        await self.app(scope, _replay(body, receive), send)

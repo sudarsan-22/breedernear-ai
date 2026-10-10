@@ -72,3 +72,22 @@ def test_run_must_use_your_own_user_id(fakes):
 
 def test_static_app_still_served():
     assert client.get("/").status_code == 200
+
+
+def test_replayed_body_then_real_client_events():
+    """Regression: reporting a disconnect right after the body made streamed AI replies empty."""
+    import asyncio
+
+    from app.gatekeeper import _replay
+
+    async def original_receive():
+        return {"type": "http.request", "body": b"", "more_body": False, "from_client": True}
+
+    async def run():
+        receive = _replay(b'{"x": 1}', original_receive)
+        first, second = await receive(), await receive()
+        return first, second
+
+    first, second = asyncio.run(run())
+    assert first["body"] == b'{"x": 1}'
+    assert second.get("from_client") and second["type"] != "http.disconnect"

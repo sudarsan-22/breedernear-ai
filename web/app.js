@@ -677,7 +677,7 @@ async function viewSellerListings(filter = "all") {
     catch (e) { toast(e.message); }
   };
   pane.replaceChildren(h("div", { class: "group", style: "margin-top:14px" }, rows.map((l) => h("div", { class: "list-row", style: "align-items:flex-start" },
-    h("div", { class: `media ${groupOf(l)}`, style: "width:64px;height:64px;aspect-ratio:auto;border-radius:12px;font-size:28px;flex:none", "aria-hidden": "true" }, emojiFor(l)),
+    (() => { const m = media(l); m.style.cssText = "width:64px;height:64px;aspect-ratio:auto;border-radius:12px;font-size:28px;flex:none;overflow:hidden"; return m; })(),
     h("div", { class: "grow" },
       h("b", {}, [l.species, l.variety].filter(Boolean).join(" · ")),
       h("div", { class: "muted small" }, `${inr(l.price_inr)} / ${unitWord(l.unit)} · ${STATUS_WORD[l.status] || l.status} · ${l.views} view${l.views === 1 ? "" : "s"}`),
@@ -688,7 +688,7 @@ async function viewSellerListings(filter = "all") {
             : h("button", { class: "btn small secondary", type: "button", onclick: () => act(l, "PUBLISHED") }, l.status === "SOLD" ? "Relist" : "Resume"),
           l.status !== "SOLD" ? h("button", { class: "btn small secondary", type: "button", onclick: () => act(l, "SOLD") }, "Mark sold") : null,
           h("button", { class: "btn small plain", type: "button", onclick: () => openListing(l.listing_id, l) }, "View"),
-          h("button", { class: "btn small plain", type: "button", style: "color:var(--bad)", onclick: () => remove(l) }, "Remove")))))));
+          l.sample ? null : h("button", { class: "btn small plain", type: "button", style: "color:var(--bad)", onclick: () => remove(l) }, "Remove")))))));
 }
 
 async function viewSellerEnquiries() {

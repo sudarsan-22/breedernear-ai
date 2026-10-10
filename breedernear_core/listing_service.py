@@ -180,7 +180,8 @@ def my_listings(guest_id: str) -> dict:
         {"listing_id": x["id"], "species": x["draft"]["species_common"], "variety": x["draft"].get("variety"),
          "price_inr": x.get("price_inr"), "unit": x["draft"].get("unit"), "status": x["status"],
          "trust_level": x["trust_level"], "trust_score": x["trust_score"], "views": x.get("views", 0),
-         "photo": (x.get("photos") or [None])[0], "created_at": x.get("created_at")}
+         "photo": (x.get("photos") or [None])[0], "created_at": x.get("created_at"),
+         "sample": bool(x.get("simulated"))}
         for x in mine
     ]}
 

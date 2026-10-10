@@ -33,3 +33,4 @@ sessions.db
 
 # ADK local dev storage
 .adk/
+.firebase/

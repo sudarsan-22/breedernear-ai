@@ -60,7 +60,7 @@ SSE events carry an `author` (agent) and `content.parts` (`text`, `function_call
 
 All functions behind these routes are the same ones the agents' tools call (`listing_service`, `match_service`, `care_service`, plus a small `directory_service` for breeders). Errors return 400 with a human-readable `detail`.
 
-Every route that calls Gemini (`/run_sse`, `/run`, `POST /api/sell/drafts`, `.../publish`, `POST /api/check`, `GET /api/care-plan`) goes through the rate limiter (`app/ratelimit.py`): an in-memory token bucket per guest ID and per IP, 30 AI calls per hour, returning 429 with a friendly message. Read-only routes are not limited.
+Every route that calls Gemini (`/run_sse`, `/run`, `POST /api/sell/drafts`, `.../publish`, `POST /api/check`, `GET /api/care-plan`) goes through the rate limiter (`app/ratelimit.py`): an in-memory token bucket per guest ID and per IP, 40 AI calls per guest and 150 per IP per hour (sliding window), returning 429 with a friendly message. Read-only routes are not limited.
 
 ## Frontend (`web/`)
 

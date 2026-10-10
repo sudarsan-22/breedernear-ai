@@ -14,7 +14,8 @@ class Settings(BaseSettings):
     breedernear_model: str = "gemini-3.8-flash"
     breedernear_bucket: str = ""
     breedernear_region: str = "asia-south1"
-    rate_limit_per_hour: int = 30
+    rate_limit_per_hour: int = 40          # AI calls per guest per hour
+    rate_limit_per_ip_hour: int = 150      # AI calls per client IP per hour (shared networks)
     max_upload_mb: int = 5
     max_llm_calls_per_run: int = 20
     git_sha: str = "dev"

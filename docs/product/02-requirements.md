@@ -138,7 +138,7 @@ Buying and selling happen in the **same app**. A new user must be able to comple
 | Discoverability | A first-time user finds all three tabs and both sides (buy, sell) without instructions; tested with someone who hasn't seen the app. |
 | Accessibility | WCAG AA contrast, alt text, keyboard navigation; status never conveyed by colour alone. |
 | Security | No secrets in the repo; least-privilege service account; upload type and size validation. |
-| Abuse/cost | ≤ 30 AI calls per guest per hour (chat, AI fill, check, publish, care plan); capped `max-instances`; budget alert. |
+| Abuse/cost | ≤ 40 AI calls per guest and ≤ 150 per IP per hour (chat, AI fill, check, publish, care plan); capped `max-instances`; budget alert. |
 | Privacy | Synthetic data only; uploads in a private bucket; no personal contact data collected. |
 | Language | English UI and docs; Tamil and mixed **input** supported. |
 

@@ -67,3 +67,11 @@ def seeded(fakes):
     for listing in seed_listings():
         store.save_listing(listing["id"], listing)
     return fakes
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limit():
+    from app.ratelimit import limiter
+    limiter.reset()
+    yield
+    limiter.reset()

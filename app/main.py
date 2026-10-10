@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from google.adk.cli.fast_api import get_fast_api_app
 
 from app.api import router
+from app.ratelimit import rate_limit_middleware
 from breedernear_core.config import get_settings
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -17,6 +18,7 @@ app: FastAPI = get_fast_api_app(
     max_llm_calls=get_settings().max_llm_calls_per_run,
 )
 
+app.middleware("http")(rate_limit_middleware)
 app.include_router(router)
 
 # Static web UI, mounted last so it never shadows /api or ADK routes.

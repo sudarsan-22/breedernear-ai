@@ -143,6 +143,7 @@ def _distance_label(km: float | None) -> str | None:
 
 def _card(listing: dict, guest_id: str, km: float | None) -> dict:
     d = listing["draft"]
+    rng = price_range(listing.get("species_key"), d.get("variety"))
     warnings = [c["detail"] for c in listing["screening"]["checks"] if c["result"] in ("warn", "block")]
     return {
         "listing_id": listing["id"],
@@ -158,6 +159,11 @@ def _card(listing: dict, guest_id: str, km: float | None) -> dict:
         "distance_km": round(km) if km is not None else None,
         "distance": _distance_label(km),
         "breeder": listing.get("breeder_name") or "You (your own listing)",
+        "breeder_id": listing.get("breeder_id"),
+        "species_key": listing.get("species_key"),
+        "animal_group": d.get("animal_group"),
+        "fair_price_range_inr": list(rng) if rng else None,
+        "photo": (listing.get("photos") or [None])[0],
         "trust_level": listing["trust_level"],
         "trust_score": listing["trust_score"],
         "warnings": warnings,
@@ -214,6 +220,33 @@ def search_listings(guest_id: str, species: str, district: str, max_price_inr: i
         further = sorted(matches, key=lambda m: (m[0], m[1]))[:2]
         result["further_away"] = [_card(m[3], guest_id, m[1]) for m in further]
     return result
+
+
+def browse_pets(guest_id: str, district: str | None = None, species: str | None = None,
+                max_price_inr: int | None = None, trusted_only: bool = False, limit: int = 40) -> dict:
+    """The Pets tab grid: every visible pet, trusted first, then nearest, then cheapest."""
+    home = resolve_district(district) if district else None
+    if district and home is None:
+        raise ListingError(f"I don't know the district '{district}' yet.")
+    keys = None
+    if species and species.strip().lower() not in ("all", "any"):
+        keys = _species_keys(species)
+        if not keys:
+            raise ListingError(f"I don't have listings for '{species}' yet.")
+    matches = []
+    for lst in deps.get_store().all_listings():
+        if not _visible(lst, guest_id) or (keys is not None and lst.get("species_key") not in keys):
+            continue
+        if max_price_inr is not None and (lst.get("price_inr") or 0) > max_price_inr:
+            continue
+        if trusted_only and lst["trust_level"] != "TRUSTED":
+            continue
+        km = _distance(home, lst.get("district")) if home else None
+        far = km if km is not None else float("inf")
+        matches.append((TRUST_ORDER.get(lst["trust_level"], 2), far, lst.get("price_inr") or 0, km, lst))
+    matches.sort(key=lambda m: m[:3])
+    return {"status": "ok", "district": home, "total": len(matches),
+            "results": [_card(m[4], guest_id, m[3]) for m in matches[:limit]], "note": SAMPLE_NOTE}
 
 
 def _visible_listing(guest_id: str, listing_id: str) -> dict:

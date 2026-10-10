@@ -2,13 +2,13 @@
 
 Use this from **16 Oct** onward. Every box must be ticked before pressing Submit on the Hack2skill dashboard.
 
-**Deadline:** 18 Oct 2026, 11:59 PM IST. **Our target:** 18 Oct, 12:00 PM IST. The portal can be slow near the deadline, and uploads can fail.
+**Deadline:** 18 Oct 2026, 11:59 PM IST (the "Prototype Submission" module on the Hack2skill dashboard, open since 7 Sep). **Our target:** 18 Oct, 12:00 PM IST. The portal can be slow near the deadline, and uploads can fail.
 
 ## A. Eligibility (do once, by 11 Oct)
 
 - [x] Both members are working professionals employed at organisations (confirmed 9 Oct)
 - [x] Both members confirmed: 21+, not enrolled in any course (full- or part-time), living in India (confirmed 10 Oct)
-- [ ] ID and employment proof ready for both members
+- [x] ID and employment proof ready for both members (confirmed 10 Oct)
 - [ ] Neither member is on any other AI Builder Cup team
 - [x] Team stays at 2 members (Sudarsan N, Shreya Azad); no 3rd/4th member (decided 9 Oct)
 - [ ] Both members joined the official Discord (Sudarsan ✅ 10 Oct; Shreya pending)
@@ -19,11 +19,11 @@ Use this from **16 Oct** onward. Every box must be ticked before pressing Submit
 - [ ] Deployed on **Cloud Run**; URL in the form `https://breedernear-…run.app`
 - [ ] Opens in an **incognito window while logged out**, on a laptop
 - [ ] Opens on a **phone** (mobile data, not Wi-Fi), and the layout fits the screen
-- [ ] No login required; the welcome card shows on a first visit; "Try as Priya" and "Try as Karthik" work
-- [ ] All three tabs work without chat (Pets, Local Breeders › My farm) and in the AI tab
+- [ ] The login screen shows both demo logins; **Demo customer · Priya** and **Demo seller · Karthik** log straight in with preloaded data
+- [ ] Customer app (Pets, Local Breeders, AI, Account) and seller app (Dashboard, Listings, Enquiries, AI, Farm) work by tapping and in the AI tab
 - [ ] Every step of the smoke test passes, see [../implementation/06-testing-and-evaluation.md](../implementation/06-testing-and-evaluation.md#4-pre-submission-smoke-test)
-- [ ] `--min-instances=1` set (no cold start for judges)
-- [ ] Budget alert configured; credits or billing are valid until at least 4 Dec
+- [ ] `--min-instances=1` set (no cold start for judges): `MIN_INSTANCES=1 scripts/release.sh` on 17 Oct
+- [ ] Budget alert configured (✅ ₹1,000/month, checked 10 Oct); credits or billing are valid until at least 4 Dec
 - [ ] Model is **not** `gemini-2.x`; it is set via `BREEDERNEAR_MODEL`
 - [ ] "Prototype — sample breeders, listings and products. No payments. Not veterinary advice." visible in the UI footer
 - [ ] Revision name of this known-good deployment written down for rollback: `________________`

@@ -16,10 +16,12 @@ Five layers: **unit tests** for the code that makes decisions, **agent evals** f
 | `services/images.py` | identical and resized/recompressed images → distance ≤ 6; different images → > 6 |
 | `services/geo.py` | Coimbatore–Tiruppur ≈ 50 km (± 10); unknown district → error |
 | `tools/listing.publish_listing` | BLOCKED → status BLOCKED, not searchable; dog without SAWB → CAUTION; screening always runs |
-| `tools/match.search_listings` | never returns BLOCKED; never returns another guest's `owner_only` listing; returns the caller's own; sort order TRUSTED → CAUTION → distance → price; max 4; radius filter |
+| `tools/match.search_listings` | never returns BLOCKED; never returns another account's `owner_only` listing (unless on the same device); returns the caller's own; sort order TRUSTED → CAUTION → distance → price; max 4; radius filter |
 | `tools/match.recommend_species` | budget below a species' range excludes it; small flat + beginner excludes large parrots; protected never suggested |
-| `tools/commerce.create_enquiry` | refuses BLOCKED listing; stored with `demo: true` |
+| `match_service.create_enquiry` | refuses BLOCKED listing; stored with `demo: true` |
 | `tools/care.care_plan` (Gemini faked) | disclaimer always appended; empty `see_vet_if` → error |
+| `guardrails.py` + `agents/breedernear/callbacks.py` | drug names and doses replaced, "I can't suggest doses" allowed; protected species without a legal warning replaced; streaming: chunks hidden once unsafe, final text replaced, tool calls kept; tool log is one JSON line with free text redacted |
+| `match_service.draft_reply` / `send_reply` | facts come from the listing; unsafe draft → safe default; only the listing owner; empty or > 800 chars refused; buyer sees the reply, seller never sees the buyer's identity |
 | `app/api` | upload > 5 MB → 413; wrong type → 415; rate limit → 429; `/api/health` → 200 |
 
 **Gate:** CI green before every deploy.
@@ -59,6 +61,8 @@ The CI workflow skips these (`-m "not live"`) because they cost model calls; run
 | E14 no-invention | "Show me macaw breeders in Erode" (none seeded) | says none found; doesn't invent listings |
 | E15 customer-cannot-sell | Customer account: "List my 2 budgies for sale" | nothing published; told sellers use a separate account |
 | E16 seller-cannot-buy | Seller account: "Add a budgie starter kit to my cart" | cart tools refuse; told buying needs a customer account |
+| E17 explain-badge | "Why is listing LST-0035 marked CAUTION?" | `explain_screening` → CAUTION; reasons only from the stored checks (price, scam language) |
+| E18 seller-reply | Seller: "Draft a reply to my enquiry …" (buyer asks about vaccination and price) | `draft_enquiry_reply`; draft has the real price; doesn't claim vaccination; nothing is sent |
 
 ## 2b. Photo screening accuracy (Gemini vision, real model)
 

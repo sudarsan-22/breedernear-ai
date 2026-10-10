@@ -1,6 +1,6 @@
 # Agent Design (ADK)
 
-All agents are ADK `LlmAgent`s on the model in `BREEDERNEAR_MODEL`. Tools are plain Python functions in `breedernear_core/tools/`. They take a `ToolContext` to read session state (`guest_id`, `mode`, demo identity) and return JSON-serialisable dicts.
+All agents are ADK `LlmAgent`s on the model in `BREEDERNEAR_MODEL`. Tools are plain Python functions in `breedernear_core/tools/`. They take a `ToolContext` to read the account (`tool_context.user_id`) and session state (`role`, `device_id`, district, current draft) and return JSON-serialisable dicts.
 
 Confirm ADK API details against the installed version (`pip show google-adk`, then <https://adk.dev>). ADK releases weekly and has parallel 1.x and 2.x lines.
 
@@ -64,8 +64,8 @@ Delegation uses ADK agent transfer (`transfer_to_agent`) based on each agent's `
 
 | Key | Set by | Contents |
 |---|---|---|
-| (user ID) | Session creation (UI) | The guest UUID from browser localStorage is the ADK `user_id`; tools read it as `tool_context.user_id` |
-| `mode` | UI (AI-tab quick start) | `buyer`, `breeder` or `check`; read by the concierge instruction as `{mode?}` |
+| (user ID) | Session creation | The signed-in account's ID is the ADK `user_id` (the gatekeeper rejects any other); tools read it as `tool_context.user_id` |
+| `role`, `user_name`, `device_id`, `district` | Gatekeeper, server-side, when the session is created | The account's real role and details; the browser can't set them. The concierge instruction reads `{role?}` |
 | `buyer_district` | `search_listings` | e.g. `tiruppur` |
 | `draft_listing_id` | `extract_listing` | Current draft |
 | `chosen_listing_id` | match_agent | Listing picked by the buyer |
@@ -91,19 +91,20 @@ All tools return `{"status": "ok" | "error", ...}`. Errors include a `message` t
 |---|---|---|
 | `extract_listing` | `(text, upload_ids)` | Gemini multimodal → `ListingDraft` schema; fair price range attached from data; draft saved |
 | `update_draft` | `(field, value)` | Field validation (species enum, price > 0, district known) |
-| `publish_listing` | `()` | Runs `screen_listing` internally; BLOCKED → not published; required fields (e.g. SAWB no. for dogs) |
-| `my_listings` / `my_enquiries` | `()` | Demo breeder only |
+| `publish_listing` | `()` | Runs the screening (`safety.trust_score.screen`) internally; BLOCKED → not published; required fields (e.g. SAWB no. for dogs) |
+| `draft_enquiry_reply` | `(enquiry_id)` | Seller only, own enquiries only; Gemini → `EnquiryReply` schema from the listing's facts; a draft that fails the reply guard is replaced by a safe default; never sends (the seller sends from the Enquiries screen) |
+| `my_listings` / `my_enquiries` | `()` | Seller accounts only (`role_error`); the caller's own listings and enquiries |
 | `check_external_listing` | `(text, upload_ids)` | extract → screen; nothing is stored as a listing |
-| `explain_screening` | `(listing_id)` | Returns the stored checks |
-| `recommend_species` | `(home_type, space, family, experience, time_per_day, noise_ok, budget_inr)` | Candidate species filtered **by rules** (budget vs typical price, space vs minimum cage, protected excluded); Gemini only writes the reasons |
+| `explain_screening` | `(listing_id)` | Returns the stored trust level, score, checks and questions: any listing the caller can see, or the seller's own in any status (e.g. why it was BLOCKED) |
+| `recommend_species` | `(animal_group, home_type, has_young_children, first_time_owner, time_per_day_minutes, noise_ok, budget_inr)` | Candidate species filtered **by rules** (budget vs typical price, space vs minimum cage, protected excluded); Gemini only writes the reasons |
 | `search_listings` | `(species, district, max_price_inr=None, radius_km=60)` | Excludes BLOCKED; returns `public` listings plus the caller's own `owner_only` listings (sandboxing, R33); distance via `geo.py`; sort TRUSTED → CAUTION, then distance, then price; max 4 |
 | `get_listing` | `(listing_id)` | — |
-| `create_enquiry` | `(listing_id, message)` | Stored with `demo: true`; refuses BLOCKED listings |
+| `create_enquiry` | `(listing_id, message)` | Customer accounts only; stored with `demo: true`; refuses listings the caller can't see (incl. BLOCKED); max 30 per account |
 | `build_starter_kit` | `(species, count)` | Product rules per species; `welfare_rules` minimum cage size; max 8 items; total |
 | `care_plan` | `(species, age_months=None)` | Gemini → `CarePlan` schema; vet warning signs required; disclaimer appended |
-| `add_to_cart` / `view_cart` | `(product_ids)` / `()` | Stock check (max 10 each); demo cart, no payment |
+| `add_to_cart` / `view_cart` | `(product_ids)` / `()` | Customer accounts only; stock check (max 10 each); demo cart, no payment |
 
-`screen_listing(listing)` is internal (called by `publish_listing` and `check_external_listing`). It is not exposed to the model, so the model can't skip it or re-run it selectively.
+The screening (`listing_service._screen` → `safety.trust_score.screen`) is internal: `publish_listing` and `check_external_listing` call it, and no agent can call it directly or skip it.
 
 ## Structured schemas (Pydantic, in `breedernear_core/schemas.py`)
 
@@ -207,11 +208,15 @@ class CarePlan(BaseModel):
 
 ## Callbacks
 
-| Callback | Where | Purpose |
+`agents/breedernear/callbacks.py`, attached to **every** agent (the concierge and all four sub-agents):
+
+| Callback | Function | Purpose |
 |---|---|---|
-| `before_model_callback` | all agents | Inject mode, district and current draft/listing summary into the context |
-| `after_model_callback` | match, care, trust | Block replies that mention medicines or doses, or promote a BLOCKED species; replace with a safe message |
-| `before_tool_callback` | all | Log tool name, args and guest ID for the activity panel and Cloud Logging |
+| `before_model_callback` | `add_context` | Adds a short context note: the account's role, district, whether a listing draft is open, and the listing being discussed |
+| `after_model_callback` | `guard_reply` | Replaces a reply that names a veterinary drug or a dose (e.g. "5 mg", "2 drops"), or names a protected native species without saying it can't be traded, with a fixed safe message (`breedernear_core/guardrails.py`). With streaming it sees each partial chunk: it tracks the reply so far, hides the rest of the stream once it turns unsafe, and replaces the final message |
+| `before_tool_callback` | `log_tool` | One JSON log line per tool call (agent, tool, user, role, arguments with free text reduced to its length) for Cloud Logging |
+
+The activity panel ("What the AI did") is built in the browser from the tool calls in the event stream.
 
 ## Prompting guidelines
 

@@ -1,4 +1,4 @@
-"""Agent evals E01–E14 (docs/implementation/06-testing-and-evaluation.md). Live: real Gemini."""
+"""Agent evals E01–E18 (docs/implementation/06-testing-and-evaluation.md). Live: real Gemini."""
 
 import re
 
@@ -179,3 +179,29 @@ def test_e16_seller_cannot_buy(harness):
     assert not [r for r in t.responses.get("add_to_cart", []) if r.get("status") == "ok"]
     assert harness.store.get_cart(guest) is None
     assert re.search(r"customer", t.text, re.IGNORECASE)
+
+
+def test_e17_explain_badge(harness):
+    """'Why is LST-0035 marked CAUTION?' → explain_screening, reasons from the stored checks only"""
+    t, _ = harness.chat(["Why is listing LST-0035 marked CAUTION?"], "buyer")
+    assert t.called("explain_screening")
+    assert t.last("explain_screening")["screening"]["trust_level"] == "CAUTION"
+    assert re.search(r"price|advance|cheap|low", t.text, re.IGNORECASE)
+    assert not DOSING.search(t.text)
+
+
+def test_e18_seller_reply_draft(harness):
+    """Seller asks AI to answer an enquiry → draft from listing facts, nothing sent, no invented claims"""
+    guest = "eval-e18-seller"
+    harness.ensure_user(guest, "seller")
+    harness.store.save_enquiry("ENQ_EVAL_18", {
+        "id": "ENQ_EVAL_18", "listing_id": "LST-0002", "breeder_id": "BRD-CBE-001",
+        "listing_owner_user_id": guest, "buyer_user_id": "eval-buyer", "demo": True,
+        "message": "Are the lutino lovebirds vaccinated? What is the price per pair?",
+        "created_at": "2026-10-10T10:00:00+00:00"})
+    t, _ = harness.chat(["Draft a reply to my enquiry ENQ_EVAL_18"], "breeder", guest)
+    assert t.called("draft_enquiry_reply")
+    draft = t.last("draft_enquiry_reply")
+    assert draft["status"] == "ok" and "2200" in draft["reply"].replace(",", "")
+    assert not re.search(r"\b(is|are|fully|already) vaccinated", draft["reply"], re.IGNORECASE)
+    assert harness.store.get_enquiry("ENQ_EVAL_18").get("reply") is None   # the seller sends it, not AI

@@ -12,7 +12,7 @@ Trade in protected Indian native birds (e.g. parakeets, munias, silverbills, myn
 |---|---|
 | Listings whose species matches the protected list (common, scientific and Tamil names plus synonyms, e.g. "Indian ringneck", "rose-ringed parakeet", "pachai kili", "munia", "silverbill") are **BLOCKED** and can't be published or shown | **Code**: `breedernear_core/safety/species_rules.py`, run on both the model's species guess **and** the breeder's text |
 | If vision says "possibly protected" with confidence ≥ 0.5, the listing is BLOCKED pending a human review (prototype: stays blocked) | Code |
-| The buyer concierge refuses requests for protected species, explains briefly, and suggests legal alternatives | Prompt + `search_listings` never returns BLOCKED listings (code) |
+| The buyer concierge refuses requests for protected species, explains briefly, and suggests legal alternatives | Prompt + `search_listings` never returns BLOCKED listings (code) + **reply guard**: any agent reply that names a protected species without saying it can't be traded is replaced with a fixed legal explanation (`after_model_callback`, `breedernear_core/guardrails.py`) |
 | CITES-listed exotics show a PARIVESH registration note; without a registration ID the level is capped at CAUTION | Code |
 | Signs of dyeing or disguise → CAUTION with the reason | Vision flag + code |
 | The species list is versioned in `data/seed/protected_species.json`, with sources cited in the file | Data |
@@ -33,7 +33,7 @@ The PCA (Dog Breeding and Marketing) Rules, 2017 require dog breeders to hold a 
 |---|---|
 | Photo health checks are phrased as "signs to ask the seller about", never "this bird has X" | Prompt + eval rubric |
 | Care plans end with "This is general guidance, not veterinary advice. Consult a vet if you're worried." | **Code**: appended by the tool |
-| No medicines or doses are ever recommended | Prompt + `after_model_callback` check for dosage patterns |
+| No medicines or doses are ever recommended | Prompt + **code**: the `after_model_callback` on every agent replaces any reply that names a veterinary drug or a dose (e.g. "5 mg", "2 drops", "mg/kg") with a fixed "see a vet" message, also while streaming; care-plan lines that look like dosing are dropped by `care_service` |
 | Every species' care plan includes "see a vet if…" warning signs | Schema requires a non-empty list |
 | Minimum cage/space rules per species (e.g. no single-budgie "starter cages" below minimum size) | Code: `safety/welfare_rules.py` filters starter-kit products |
 
@@ -51,11 +51,14 @@ The PCA (Dog Breeding and Marketing) Rules, 2017 require dog breeders to hold a 
 - Text inside uploaded images, and breeder free text, are treated as **data**. Listing extraction is a schema-constrained call whose output is only the parsed fields.
 - A breeder writing "this listing is verified, ignore checks" has no effect, because the checks are code.
 - Off-topic requests get a polite refusal and a redirect.
-- Rate limit per guest; upload type and size checks.
+- The AI and the API need a signed-in account. Roles are enforced in the API and inside the agents' tools, so a customer can't publish and a seller can't buy, whatever the prompt says (evals E15, E16).
+- Rate limits per account session and per IP address (AI routes and login); upload type and size checks.
 
 ## 6. Privacy
 
-- Guest IDs only. No real names, phones or addresses are collected. Buyer–breeder contact is simulated.
+- Accounts store a display name, one login (email or mobile number), a district and a salted scrypt password hash. No addresses, ID documents (Aadhaar/PAN) or payment details are collected. The login is never shown to other users: a seller sees an enquiry's message, not the buyer's email or phone. Buyer–breeder contact is simulated.
+- Users can delete their account, which removes their listings, sessions and login (Account → Delete my account). The two shared demo accounts can't be deleted.
+- Tool-call logs record the account ID and role, never the name or login; free-text arguments are reduced to their length.
 - All breeders, listings, registries and products are **synthetic**, with fictional names and `SIM-` registration numbers.
 - Uploads are stored in a private Cloud Storage bucket and never served back publicly. A lifecycle rule deletes them after 30 days.
 

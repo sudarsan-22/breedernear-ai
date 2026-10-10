@@ -113,6 +113,10 @@ class StatusIn(BaseModel):
     status: str
 
 
+class ReplyIn(BaseModel):
+    text: str
+
+
 # ---------------------------------------------------------------- public
 @router.get("/health")
 def health() -> dict:
@@ -290,6 +294,20 @@ def seller_enquiries(user: dict = Depends(seller)) -> dict:
     return match_service.my_enquiries(user["id"])
 
 
+def _farm_name(user: dict) -> str:
+    return (user.get("farm") or {}).get("farm_name") or user["name"]
+
+
+@router.post("/seller/enquiries/{enquiry_id}/draft-reply")
+def seller_draft_reply(enquiry_id: str, user: dict = Depends(seller)) -> dict:
+    return _call(match_service.draft_reply, user["id"], enquiry_id, _farm_name(user), not_found=True)
+
+
+@router.post("/seller/enquiries/{enquiry_id}/reply")
+def seller_reply(enquiry_id: str, body: ReplyIn, user: dict = Depends(seller)) -> dict:
+    return _call(match_service.send_reply, user["id"], enquiry_id, body.text)
+
+
 @router.post("/sell/drafts")
 def sell_draft(body: TextAndPhotosIn, user: dict = Depends(seller)) -> dict:
     return _call(svc.extract_listing, user["id"], body.text, body.upload_ids)
@@ -307,5 +325,4 @@ def sell_edit(draft_id: str, body: dict, user: dict = Depends(seller)) -> dict:
 
 @router.post("/sell/drafts/{draft_id}/publish")
 def sell_publish(draft_id: str, user: dict = Depends(seller)) -> dict:
-    farm_name = (user.get("farm") or {}).get("farm_name") or user["name"]
-    return _call(svc.publish_listing, user["id"], draft_id, user.get("session_device_id"), farm_name)
+    return _call(svc.publish_listing, user["id"], draft_id, user.get("session_device_id"), _farm_name(user))

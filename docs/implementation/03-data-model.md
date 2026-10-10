@@ -59,7 +59,7 @@ Seed about 12 breeders across Coimbatore, Tiruppur, Erode, Salem, Madurai, Chenn
 }
 ```
 
-`status` is one of `DRAFT`, `PUBLISHED`, `BLOCKED`. `visibility` is `public` for curated seed listings and `owner_only` for every guest-created listing (sandboxing, rule R33). Guest listings carry `owner_user_id`. Top-level `species_key`, `district`, `price_inr` and `trust_level` are copied out of `draft` and `screening` for querying.
+`status` is one of `DRAFT`, `PUBLISHED`, `BLOCKED`. `visibility` is `public` for curated seed listings and `owner_only` for every listing a seller publishes (sandboxing, rule R33: visible to the owner and to accounts on the same device). Every listing with an owner carries `owner_user_id`; seller listings also carry `device_id` and `views`. Top-level `species_key`, `district`, `price_inr` and `trust_level` are copied out of `draft` and `screening` for querying.
 
 Composite index: `species_key` + `status` + `price_inr`.
 
@@ -81,7 +81,7 @@ Unpublished `ListingDraft` + `upload_ids` + `breeder_id`. Deleted on publish.
 ### `enquiries/{enquiry_id}`
 
 ```json
-{ "listing_id": "LST-0007", "breeder_id": "BRD-CBE-001", "guest_id": "...", "message": "...", "demo": true, "created_at": "..." }
+{ "id": "ENQ_…", "listing_id": "LST-0007", "breeder_id": "BRD-CBE-001", "buyer_user_id": "USR_…", "listing_owner_user_id": "USR_…", "message": "...", "demo": true, "created_at": "...", "reply": { "text": "...", "created_at": "..." } }
 ```
 
 ### Accessories catalogue (`data/seed/products.json`, read-only)
@@ -104,7 +104,7 @@ The catalogue is a versioned file like the other reference data (the demo cart n
 
 Fictional brands only: Featherhaven, Tailnook, PawNest, Whiskerwell. Each name was web-searched on 10 Oct and no pet brand with that name was found ("Tailwise" was dropped because it is a real dog-breeder marketplace). Re-check before adding a new brand name. No medicines are sold. 45 products: cages, perches, feeders, seed/pellet food, cuttlebone, nest boxes, dog beds, collars, puppy food, cat litter, carriers.
 
-### `carts/{guest_id}`
+### `carts/{user_id}`
 
 Demo cart: `{"items": [{"product_id": "...", "quantity": 1}], "updated_at": "..."}`
 
@@ -127,7 +127,7 @@ Protected and CITES species lists are files too: `data/seed/protected_species.js
 
 Bucket `gs://<PROJECT_ID>-breedernear-uploads` (`asia-south1`, uniform access, **not public**).
 
-- Path: `uploads/{guest_id}/{upload_id}.{ext}`; metadata `kind` = `listing_photo` | `external_listing`
+- Path: `uploads/{user_id}/{upload_id}.{ext}`; metadata `kind` = `listing_photo` | `external_listing`
 - Lifecycle: delete after 30 days
 - Accepted: `image/jpeg`, `image/png`, `image/webp`, `image/heic`, max 5 MB each, validated server-side
 - Not served back from the bucket. Seeded listing images are static files in `web/img/listings/`.

@@ -101,7 +101,9 @@ class Gatekeeper:
             if method == "POST" and not session_match.group(2):
                 data = json.loads(body or b"{}")
                 data["state"] = {**(data.get("state") or {}), "role": user["role"], "user_name": user["name"],
-                                 "device_id": user.get("session_device_id")}
+                                 "device_id": user.get("session_device_id"),
+                                 "district": user.get("district"),
+                                 "farm_name": (user.get("farm") or {}).get("farm_name")}
                 body = json.dumps(data).encode()
                 kept = [(k, v) for k, v in scope["headers"] if k.lower() != b"content-length"]
                 scope = {**scope, "headers": kept + [(b"content-length", str(len(body)).encode())]}

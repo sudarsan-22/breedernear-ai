@@ -48,7 +48,7 @@ Customers and sellers have **separate accounts** (email or mobile + password, or
 |---|---|
 | 📊 **Dashboard** | Live listings, buyer enquiries, listing views, trust status, verification badge, recent activity, "Sell a pet with AI" |
 | 📋 **Listings** | Add photos and a quick message (English or Tamil), tap "✨ Fill with AI", check the form, publish with a trust check; pause, mark sold or remove |
-| ✉️ **Enquiries** | Messages from buyers |
+| ✉️ **Enquiries** | Messages from buyers. Tap Reply → "✨ Draft with AI" writes an answer from your listing's facts and flags what only you can answer; you edit and send |
 | ✨ **AI** · 🏡 **Farm** | The listing assistant by chat; farm profile and dog-breeder registration |
 
 Everything works by tapping; the AI does the hard parts on every screen. Chat is there when you'd rather just ask.

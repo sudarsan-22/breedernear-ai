@@ -53,7 +53,7 @@ sequenceDiagram
     participant API as FastAPI
     participant GCS as Cloud Storage
     participant L as listing_agent
-    participant T as trust_agent
+    participant S as Trust code (safety/)
     participant G as Gemini
     participant FS as Firestore
 
@@ -65,12 +65,12 @@ sequenceDiagram
     L->>FS: price_range(species, variety)
     L-->>UI: draft + fair range + missing fields
     UI->>L: "publish"
-    L->>T: transfer → screen_listing(draft)
-    T->>G: screen_photos → PhotoScreen JSON (species check, dye, health signs)
-    T->>T: species_rules · phash duplicates · price anomaly · scam rules · registry (code)
-    T->>T: trust_score (code) → TRUSTED / CAUTION / BLOCKED
-    T->>FS: save listing + screening (BLOCKED → not published)
-    T-->>UI: trust badge + reasons
+    L->>S: publish_listing always runs the screening (no agent can skip it)
+    S->>G: screen_photos → PhotoScreen JSON (species check, dye, health signs)
+    S->>S: species_rules · phash duplicates · price anomaly · scam rules · registry (code)
+    S->>S: trust_score (code) → TRUSTED / CAUTION / BLOCKED
+    S->>FS: save listing + screening (BLOCKED → not published)
+    S-->>UI: trust badge + reasons
 ```
 
 ## Flow 2: buyer finds a pet and gets started
@@ -123,7 +123,7 @@ Not used, to keep it simple: load balancer, CDN, Cloud SQL, BigQuery, Pub/Sub, M
 | Frontend | Vanilla HTML/CSS/JS served by FastAPI, no build step | React/Next: more tooling and risk. ADK dev UI: a developer tool, not end-user UX. |
 | ADK sessions | **MVP:** in-memory, `--max-instances=1`, session affinity. **Upgrade if time:** persistent session service (`agentengine://` or Cloud SQL), then raise `max-instances` | Chat history loss is acceptable; business data is in Firestore |
 | Images to tools | Upload to GCS → pass `upload_id` in the message → tool loads the image and calls Gemini with a schema | Inline images in chat context: tokens every turn, unconstrained output |
-| Auth | Guest ID (UUID in `localStorage`); demo breeder/buyer identities | Real login: a barrier for judges |
+| Auth | Own accounts: email or mobile + password (scrypt hash) in Firestore; random session tokens stored as SHA-256; separate customer and seller roles; two one-tap demo accounts so judges don't need to sign up | Google / phone-OTP login: more setup and cost for a prototype (roadmap) |
 | Region | Cloud Run `asia-south1`; Gemini `global` endpoint | — |
 | Runtime AI | **Google models only** (Gemini via Agent Platform). No other providers' model APIs. | — |
 | Dependencies | Permissive licences only (MIT, BSD, Apache-2.0, HPND), installed from PyPI, never vendored | Copyleft (GPL/AGPL): conflicts with our MIT licence and IP warranty |
@@ -134,12 +134,20 @@ Not used, to keep it simple: load balancer, CDN, Cloud SQL, BigQuery, Pub/Sub, M
 breedernear-ai/
 ├── agents/
 │   └── breedernear/                 # ADK app (name: "breedernear")
-│       ├── __init__.py           # from . import agent
-│       ├── agent.py              # root_agent + sub-agents wiring
-│       └── prompts.py
+│       ├── agent.py              # root_agent (concierge) + 4 sub-agents, callbacks on every agent
+│       ├── callbacks.py          # context note, reply guard, tool log (ADK callbacks)
+│       └── prompts.py            # one instruction per agent
 ├── breedernear_core/                # business logic, unit-testable without ADK
-│   ├── config.py
+│   ├── config.py, deps.py        # settings; real Google Cloud services or in-memory fakes
 │   ├── schemas.py                # ListingDraft, PhotoScreen, Screening, CarePlan…
+│   ├── listing_service.py        # extract, edit, screen and publish listings; seller listings and dashboard
+│   ├── match_service.py          # species quiz, search, listing page, explain_screening, enquiries
+│   ├── directory_service.py      # Local Breeders directory and breeder pages
+│   ├── care_service.py           # starter kits, care plans, cart
+│   ├── accounts.py               # sign-up, login, sessions, roles (scrypt-hashed passwords)
+│   ├── default_accounts.py       # the two demo accounts and their preloaded data
+│   ├── guardrails.py             # reply checks: medicine doses, protected species
+│   ├── catalog.py, data.py, logs.py
 │   ├── safety/
 │   │   ├── species_rules.py      # protected / CITES lists, synonyms (incl. Tamil)
 │   │   ├── scam_rules.py
@@ -147,29 +155,29 @@ breedernear-ai/
 │   │   ├── welfare_rules.py      # minimum cage sizes etc.
 │   │   └── trust_score.py        # deterministic scoring
 │   ├── services/
-│   │   ├── firestore.py
-│   │   ├── storage.py
-│   │   ├── gemini.py             # structured multimodal calls
-│   │   ├── images.py             # perceptual hashing
-│   │   └── geo.py                # district centroids, haversine
-│   └── tools/
-│       ├── listing.py            # extract_listing, publish_listing
-│       ├── trust.py              # screen_listing
-│       ├── match.py              # recommend_species, search_listings
-│       ├── care.py               # build_starter_kit, care_plan
-│       └── commerce.py           # cart, enquiries
+│   │   ├── store.py              # Firestore and in-memory stores
+│   │   ├── uploads.py            # Cloud Storage and in-memory uploads
+│   │   ├── vision.py             # Gemini structured multimodal calls
+│   │   ├── images.py             # perceptual hashing (reused photos)
+│   │   ├── geo.py                # district centroids, haversine
+│   │   └── registry.py           # simulated SAWB registry lookups
+│   └── tools/                    # ADK tools: thin wrappers over the services, plus role checks
+│       ├── listing.py            # extract_listing, update_draft, publish_listing, my_listings, check_external_listing
+│       ├── match.py              # recommend_species, search_listings, get_listing, explain_screening, enquiries
+│       └── care.py               # build_starter_kit, care_plan, cart
 ├── app/
 │   ├── main.py                   # get_fast_api_app(...) + /api routes + static files
-│   ├── api.py
+│   ├── api.py                    # REST API for the tap-based screens
+│   ├── gatekeeper.py             # only the ADK routes the app uses, behind login
 │   └── ratelimit.py
 ├── web/                          # index.html, app.js, styles.css, img/
 ├── data/
-│   ├── seed/                     # breeders, listings, products, price_ranges, districts,
+│   ├── seed/                     # breeders, listings, products, species, price_ranges, districts,
 │   │                             # protected_species, cites_species, sawb_registry_sample
-│   └── samples/                  # demo photos for evals and the video
-├── scripts/                      # seed_firestore.py, smoke_test.py, deploy.sh
-├── tests/                        # pytest unit + integration
-├── evals/                        # ADK *.evalset.json + test_config.json
+│   └── samples/vision/           # labelled test photos for the photo-accuracy test
+├── scripts/                      # deploy, seed_firestore, smoke_test, run_evals, vision_accuracy, image generators
+├── tests/                        # unit/ (CI), evals/ (live Gemini), ui/ (axe-core accessibility)
+├── evals/                        # RESULTS.md, runs.jsonl, VISION_RESULTS.md (measured results)
 ├── .github/workflows/ci.yml
 ├── Dockerfile, requirements.txt, .env.example, .gitignore
 ├── ATTRIBUTIONS.md, LICENSE, README.md

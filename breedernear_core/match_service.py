@@ -18,6 +18,7 @@ from breedernear_core.services.geo import distance_km, resolve_district
 MAX_RESULTS = 4
 MAX_OPTIONS = 3
 MAX_ENQUIRY_CHARS = 500
+MAX_REPLY_CHARS = 800
 MAX_ENQUIRIES_PER_GUEST = 30
 LEGAL_ALTERNATIVES = ["Budgerigar (budgie)", "Cockatiel", "Peach-faced lovebird", "Zebra finch", "Canary"]
 SAMPLE_NOTE = (
@@ -299,6 +300,18 @@ def get_listing(guest_id: str, listing_id: str) -> dict:
     }
 
 
+def explain_screening(guest_id: str, listing_id: str) -> dict:
+    """The stored trust checks of a listing: any visible listing, or the seller's own in any status."""
+    listing = deps.get_store().get_listing(listing_id)
+    own = listing is not None and listing.get("owner_user_id") == as_viewer(guest_id).user_id
+    if listing is None or not (own or _visible(listing, guest_id)):
+        raise ListingError("That listing was not found or is not available.")
+    keys = ("trust_level", "trust_score", "checks", "questions_to_ask_seller")
+    screening = {key: listing["screening"].get(key, []) for key in keys}
+    return {"status": "ok", "listing_id": listing_id, "species": listing["draft"]["species_common"],
+            "listing_status": listing["status"], "is_yours": own, "screening": screening}
+
+
 def create_enquiry(guest_id: str, listing_id: str, message: str) -> dict:
     message = message.strip()
     if not message:
@@ -331,9 +344,7 @@ def my_enquiries(guest_id: str) -> dict:
     owner = as_viewer(guest_id).user_id
     received = [e for e in deps.get_store().all_enquiries() if e.get("listing_owner_user_id") == owner]
     received.sort(key=lambda e: e["created_at"], reverse=True)
-    return {"status": "ok", "enquiries": [
-        {"enquiry_id": e["id"], "listing_id": e["listing_id"], "message": e["message"],
-         "created_at": e["created_at"]} for e in received]}
+    return {"status": "ok", "enquiries": [_enquiry(e) for e in received]}
 
 
 def sent_enquiries(guest_id: str) -> dict:
@@ -341,6 +352,55 @@ def sent_enquiries(guest_id: str) -> dict:
     buyer = as_viewer(guest_id).user_id
     sent = [e for e in deps.get_store().all_enquiries() if e.get("buyer_user_id") == buyer]
     sent.sort(key=lambda e: e["created_at"], reverse=True)
-    return {"status": "ok", "enquiries": [
-        {"enquiry_id": e["id"], "listing_id": e["listing_id"], "message": e["message"],
-         "created_at": e["created_at"]} for e in sent]}
+    return {"status": "ok", "enquiries": [_enquiry(e) for e in sent]}
+
+
+def _enquiry(e: dict) -> dict:
+    """What either side sees: never the other side's login or contact details."""
+    return {"enquiry_id": e["id"], "listing_id": e["listing_id"], "message": e["message"],
+            "created_at": e["created_at"], "reply": e.get("reply")}
+
+
+def _received(seller_id: str, enquiry_id: str) -> dict:
+    enquiry = deps.get_store().get_enquiry(enquiry_id)
+    if enquiry is None or enquiry.get("listing_owner_user_id") != as_viewer(seller_id).user_id:
+        raise ListingError("That enquiry was not found.")
+    return enquiry
+
+
+def draft_reply(seller_id: str, enquiry_id: str, farm_name: str | None = None) -> dict:
+    """Gemini drafts a reply from the listing's facts; the seller edits and sends it (F8)."""
+    from breedernear_core.guardrails import unsafe_reply
+
+    enquiry = _received(seller_id, enquiry_id)
+    listing = deps.get_store().get_listing(enquiry["listing_id"]) or {}
+    d = listing.get("draft", {})
+    warnings = [c["detail"] for c in listing.get("screening", {}).get("checks", []) if c["result"] == "warn"]
+    facts = "\n".join(f"{k}: {v}" for k, v in [
+        ("Farm name", farm_name or listing.get("breeder_name") or "our farm"),
+        ("Listing status", listing.get("status")), ("Species", d.get("species_common")),
+        ("Variety", d.get("variety")), ("Count", d.get("count")), ("Sold per", d.get("unit")),
+        ("Age (months)", d.get("age_months")), ("Price per unit (INR)", d.get("price_inr")),
+        ("Area", ", ".join(x for x in [d.get("locality"), d.get("district")] if x)),
+        ("Health notes", d.get("health_notes")), ("Description", d.get("description")),
+        ("Trust check warnings", "; ".join(warnings) or "none"),
+    ] if v not in (None, "")) + f"\n\nBuyer's message:\n{enquiry['message']}"
+    result = deps.get_vision().write_reply(facts)
+    text = result.reply.strip()
+    if unsafe_reply(text) or not text:
+        text = ("Thank you for your interest. You are welcome to visit and see the animals and their "
+                f"parents before deciding. I will confirm the details soon. - {farm_name or 'our farm'}")
+    return {"status": "ok", "enquiry_id": enquiry_id, "reply": text[:MAX_REPLY_CHARS],
+            "needs_seller_input": result.needs_seller_input[:5]}
+
+
+def send_reply(seller_id: str, enquiry_id: str, text: str) -> dict:
+    text = text.strip()
+    if not text:
+        raise ListingError("Please write a reply first.")
+    if len(text) > MAX_REPLY_CHARS:
+        raise ListingError(f"Please keep the reply under {MAX_REPLY_CHARS} characters.")
+    enquiry = _received(seller_id, enquiry_id)
+    enquiry["reply"] = {"text": text, "created_at": _now()}
+    deps.get_store().save_enquiry(enquiry_id, enquiry)
+    return {"status": "ok", "enquiry": _enquiry(enquiry)}

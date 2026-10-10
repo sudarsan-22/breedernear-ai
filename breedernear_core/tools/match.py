@@ -58,6 +58,15 @@ def get_listing(listing_id: str, tool_context: ToolContext) -> dict:
     return result
 
 
+def explain_screening(listing_id: str, tool_context: ToolContext) -> dict:
+    """Explain why a BreederNear listing got its trust badge: the stored checks and questions to ask.
+
+    Args:
+        listing_id: The listing ID, e.g. "LST-0012".
+    """
+    return _safe(svc.explain_screening, _viewer(tool_context), listing_id)
+
+
 def create_enquiry(listing_id: str, message: str, tool_context: ToolContext) -> dict:
     """Send the buyer's enquiry to the breeder of a listing (demo: saved to the breeder inbox).
 
@@ -71,6 +80,18 @@ def create_enquiry(listing_id: str, message: str, tool_context: ToolContext) -> 
     if result.get("status") == "ok":
         tool_context.state[CHOSEN_KEY] = listing_id
     return result
+
+
+def draft_enquiry_reply(enquiry_id: str, tool_context: ToolContext) -> dict:
+    """Draft a reply to a buyer's enquiry from the listing's facts, for the seller to edit and send.
+
+    Args:
+        enquiry_id: The enquiry ID from my_enquiries, e.g. "ENQ_DEMO_1".
+    """
+    if denied := role_error(tool_context, "seller"):
+        return denied
+    farm = tool_context.state.get("farm_name") or tool_context.state.get("user_name")
+    return _safe(svc.draft_reply, tool_context.user_id, enquiry_id, farm)
 
 
 def my_enquiries(tool_context: ToolContext) -> dict:

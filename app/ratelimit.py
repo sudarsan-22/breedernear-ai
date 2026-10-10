@@ -20,6 +20,7 @@ LIMITED = [
     ("POST", re.compile(r"^/api/sell/drafts/[^/]+/publish$")),
     ("POST", re.compile(r"^/api/check$")),
     ("GET", re.compile(r"^/api/care-plan$")),
+    ("POST", re.compile(r"^/api/seller/enquiries/[^/]+/draft-reply$")),
     ("POST", re.compile(r"^/api/auth/(login|signup|demo)$")),      # slows password guessing
 ]
 MESSAGE = "You've used BreederNear a lot in the last hour. Please wait a few minutes and try again."

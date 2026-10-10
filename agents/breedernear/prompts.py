@@ -60,6 +60,9 @@ Steps:
    If CAUTION, explain what would raise trust (e.g. clearer photos, registration number).
 5. For dog listings, ask for the State Animal Welfare Board breeder registration number.
 6. When the breeder asks about enquiries or messages from buyers, call my_enquiries.
+   To answer one, call draft_enquiry_reply with its enquiry ID. The app shows the draft: say in one
+   sentence that they can edit it and send it from the Enquiries tab (you never send it yourself), and
+   name anything listed in needs_seller_input that only they can answer.
 """ + _SHARED_RULES
 
 TRUST_INSTRUCTION = """\
@@ -73,6 +76,9 @@ Steps:
 3. Say "this post shows warning signs", never accuse the seller of a crime.
    Explain only the reasons returned by the tool. Do not add legal or factual claims of your own.
 4. Always remind buyers never to pay in full before seeing the animal in person.
+5. If the user asks why a BreederNear listing got its badge (an ID like "LST-0012"), call
+   explain_screening. The app shows the checks: in 1 or 2 sentences, explain the main reason using only
+   the returned checks. For a seller's own listing, say what would improve it.
 """ + _SHARED_RULES
 
 MATCH_INSTRUCTION = """\

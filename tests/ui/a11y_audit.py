@@ -94,6 +94,12 @@ def audit(base: str, chromium: str | None = None, width: int = 390) -> list[str]
             _login(page, base, "karthik.seller@example.com")
             for tab in SELLER_TABS:
                 problems += _screen(page, base, tab, f"{scheme} seller {tab}")
+            page.goto(f"{base}/#enquiries")
+            page.get_by_role("button", name="Reply").first.click()
+            page.wait_for_selector("#sheet[open]")
+            page.wait_for_timeout(400)
+            problems += _axe(page, f"{scheme} reply sheet")
+            page.keyboard.press("Escape")
             problems += [f"[{scheme}] script error: {e}" for e in errors]
             page.close()
         browser.close()

@@ -73,7 +73,7 @@ def _summary(runs: list[dict], model: str) -> str:
 
 
 def pytest_sessionfinish(session, exitstatus):
-    if not RESULTS:
+    if not RESULTS or session.config.getoption("keyword"):     # only full runs count (not -k subsets)
         return
     from breedernear_core.config import get_settings
 

@@ -14,13 +14,13 @@ The app serves three things:
 
 ## ADK runtime endpoints used by the UI
 
-Check exact shapes against the installed ADK version: run `adk api_server agents` locally and open `/docs`.
+Only these ADK routes are reachable, all behind login (`app/gatekeeper.py`); every other ADK route (docs, memory, artifacts, the live WebSocket) returns 404. The `user_id` must be the signed-in account's.
 
 | Call | Purpose |
 |---|---|
-| `POST /apps/breedernear/users/{guest_id}/sessions` with `{"state": {"guest_id": "...", "mode": "buyer"}}` | Create a chat session |
-| `GET /apps/breedernear/users/{guest_id}/sessions/{session_id}` | Restore after reload |
-| `POST /run_sse` with `{"app_name": "breedernear", "user_id": guest_id, "session_id": ..., "new_message": {"role": "user", "parts": [{"text": "..."}]}, "streaming": true}` | Send a message; stream events |
+| `POST /apps/breedernear/users/{user_id}/sessions` with `{}` and the Bearer token | Create a chat session; the gatekeeper writes `role`, `user_name`, `device_id` and `district` into its state server-side |
+| `GET /apps/breedernear/users/{user_id}/sessions/{session_id}` | Restore after reload |
+| `POST /run_sse` with `{"app_name": "breedernear", "user_id": user_id, "session_id": ..., "new_message": {"role": "user", "parts": [{"text": "..."}]}, "streaming": true}` | Send a message; stream events |
 
 SSE events carry an `author` (agent) and `content.parts` (`text`, `function_call`, `function_response`). The UI renders:
 
@@ -42,12 +42,12 @@ SSE events carry an `author` (agent) and `content.parts` (`text`, `function_call
 | `GET /api/health` | — | `{"status":"ok","model":"...","version":"<git sha>"}` | Smoke test | — |
 | `POST /api/auth/signup` | `{role, name, login (email or mobile), password, district, remember, farm?}`; header `X-Device-Id` | `{token, user}` | Sign-up screen | — |
 | `POST /api/auth/login` | `{login, password, remember}`; header `X-Device-Id` | `{token, user}`; 401 "Wrong email/mobile or password" | Login screen | — |
-| `POST /api/auth/demo` | `{role}` (`customer` or `seller`); header `X-Device-Id` | Fresh private demo account + token | Demo buttons | — |
+| `POST /api/auth/demo` | `{role}` (`customer` or `seller`); header `X-Device-Id` | Session for the shared demo account of that role (Priya or Karthik, preloaded data) | Demo buttons | — |
 | `GET /api/auth/me`, `POST /api/auth/logout`, `DELETE /api/auth/me` | `Authorization: Bearer <token>` | Profile / logout / delete account | Account, Farm profile | — |
 | `PATCH /api/auth/me` | profile fields (name, district; seller: farm fields) | Updated profile | Profile edit | — |
 | `GET /api/seller/dashboard` | seller token | Counts (active, paused, sold, blocked listings; enquiries; views), verification status, recent activity | Seller dashboard | — |
 | `PATCH /api/seller/listings/{id}` / `DELETE` | `{status: "PUBLISHED" | "PAUSED" | "SOLD"}` | Updated listing / removed | My listings | — |
-| `POST /api/uploads` | multipart `file`, `kind`; header `X-Guest-Id` | `{"upload_id":"UPL_…"}` | Sell form, safety check, chat | — |
+| `POST /api/uploads` | multipart `file`, `kind` (`listing_photo` needs a seller) | `{"upload_id":"UPL_…"}` | Sell form, safety check, chat | — |
 | `GET /api/pets` | `district`, `species` (optional; `all`), `max_price`, `trusted_only`, `limit` | Published listings near the district: public + the caller's own, never BLOCKED; sorted TRUSTED → CAUTION, then distance, then newest | **Pets** tab grid | — |
 | `GET /api/listings/{id}` | — | Listing card + checks + questions + breeder | Listing page | — |
 | `GET /api/listings` | `species`, `district`, `max_price` | Same as the `search_listings` tool (max 4) | Chat parity | — |
@@ -57,19 +57,22 @@ SSE events carry an `author` (agent) and `content.parts` (`text`, `function_call
 | `POST /api/sell/drafts` | `{text, upload_ids}` | Draft + fair-price range + missing fields | Sell form "✨ Fill with AI" | **Gemini** |
 | `PATCH /api/sell/drafts/{id}` | `{field: value, ...}` (editable fields only) | Updated draft (validated) | Sell form edits | — |
 | `POST /api/sell/drafts/{id}/publish` | — | Listing ID, status, screening | Sell form Publish | **Gemini + rules** |
-| `GET /api/breeder/listings` | header `X-Guest-Id` | The guest's own listings incl. BLOCKED | My farm | — |
-| `GET /api/breeder/enquiries` | header `X-Guest-Id` | Enquiries received on the guest's own listings | My farm inbox | — |
+| `GET /api/seller/listings` | seller token | The seller's own listings incl. PAUSED, SOLD and BLOCKED | Seller Listings | — |
+| `GET /api/seller/enquiries` | seller token | Enquiries received on the seller's own listings (message and any reply; no buyer contact details) | Seller Enquiries | — |
+| `POST /api/seller/enquiries/{id}/draft-reply` | seller token | `{reply, needs_seller_input}` drafted from the listing's facts; nothing is sent | Reply sheet "✨ Draft with AI" | **Gemini** |
+| `POST /api/seller/enquiries/{id}/reply` | `{text}` (≤ 800 chars) | The enquiry with its reply; the buyer sees it under Account | Reply sheet Send | — |
 | `POST /api/check` | `{text, upload_ids}` | Extracted post + screening; nothing stored | "Is this post safe?" form | **Gemini + rules** |
-| `POST /api/enquiries` | `{listing_id, message}` | Enquiry (demo) | Contact form | — |
+| `POST /api/enquiries` | `{listing_id, message}` (customer token) | Enquiry (demo) | Contact form | — |
+| `GET /api/enquiries/sent` | customer token | Enquiries this customer sent, with the seller's reply | Account | — |
 | `GET /api/starter-kit` | `species`, `count` | Kit items with welfare-sized cage + total | Listing page | Rules |
 | `GET /api/care-plan` | `species`, `age_months` | 14-day plan + vet signs + disclaimer | Listing page | **Gemini** |
-| `GET /api/cart`, `POST /api/cart/items`, `DELETE /api/cart/items/{id}` | — | Cart | Cart drawer | — |
+| `GET /api/cart`, `POST /api/cart/items`, `DELETE /api/cart/items/{id}` | customer token | Cart | Cart drawer | — |
 
-**Auth:** every `/api` route except health, meta and auth requires `Authorization: Bearer <token>`. Role checks: seller-only routes (`/api/sell/*`, `/api/seller/*`, `/api/breeder/*`, `listing_photo` uploads) and customer-only routes (`/api/cart*`, `POST /api/enquiries`) return 403 for the wrong role. The ADK runtime (`/run`, `/run_sse`, `/apps/...`) also requires the token, and the `user_id` in the path or body must be the token's user. Agent tools check the role again (`listing_agent` tools need a seller; `match_agent`/`care_agent` enquiry and cart tools need a customer).
+**Auth:** every `/api` route except health, meta and auth requires `Authorization: Bearer <token>`. Role checks: seller-only routes (`/api/sell/*`, `/api/seller/*`, `listing_photo` uploads) and customer-only routes (`/api/cart*`, `POST /api/enquiries`) return 403 for the wrong role. The ADK runtime (`/run`, `/run_sse`, `/apps/...`) also requires the token, and the `user_id` in the path or body must be the token's user. Agent tools check the role again (`listing_agent` tools need a seller; `match_agent`/`care_agent` enquiry and cart tools need a customer).
 
 All functions behind these routes are the same ones the agents' tools call (`listing_service`, `match_service`, `care_service`, plus a small `directory_service` for breeders). Errors return 400 with a human-readable `detail`.
 
-Every route that calls Gemini (`/run_sse`, `/run`, `POST /api/sell/drafts`, `.../publish`, `POST /api/check`, `GET /api/care-plan`) goes through the rate limiter (`app/ratelimit.py`): an in-memory token bucket per guest ID and per IP, 40 AI calls per guest and 150 per IP per hour (sliding window), returning 429 with a friendly message. Read-only routes are not limited.
+Every route that calls Gemini (`/run_sse`, `/run`, `POST /api/sell/drafts`, `.../publish`, `POST /api/check`, `GET /api/care-plan`, `.../draft-reply`) goes through the rate limiter (`app/ratelimit.py`): an in-memory sliding window per login session and per IP, 40 AI calls per session and 150 per IP per hour (login and sign-up are limited too), returning 429 with a friendly message. Read-only routes are not limited.
 
 ## Frontend (`web/`)
 
@@ -241,8 +244,9 @@ The existing multi-agent chat (concierge → listing / trust / match / care agen
 
 ### Client state
 
-- `localStorage.breedernear_guest_id`: UUID v4
-- `breedernear_district`, `breedernear_tab`, `breedernear_welcome_dismissed`, `breedernear_session_{mode}` (AI tab chats, restored after reload)
+- `breedernear_token`: the login session token (localStorage with "Remember me", otherwise sessionStorage)
+- `breedernear_guest_id`: a random device ID (UUID v4) sent as `X-Device-Id`, used only for the same-device sandbox (R33); it is not a login
+- `breedernear_district`, `breedernear_tab`, `breedernear_welcome_done`, `breedernear_ai_session_{user}` (the AI tab chat, restored after reload)
 - Wrap every `localStorage` access in try/catch with an in-memory fallback.
 - Photos are resized in the browser to 1600 px JPEG before upload (phone photos often exceed 5 MB).
 - Agent replies are rendered with a minimal markdown renderer that escapes HTML first.

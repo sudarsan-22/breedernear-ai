@@ -48,7 +48,7 @@ Decided 10 Oct (idea from the founder's earlier PetZonic product; fresh code). *
 
 | ID | Feature | Scope |
 |---|---|---|
-| F1 | Web app with **three tabs** (Pets · Local Breeders · BreederNear AI), district picker, cart, first-visit welcome card. Guest session, no login. | **MVP** |
+| F1 | Web app with **three tabs** (Pets · Local Breeders · BreederNear AI), district picker, cart, first-visit welcome card. Sign-in required (customer or seller account, F13), with one-tap demo accounts. | **MVP** |
 | F2 | **Breeder listing assistant:** photos + casual message (English/Tamil/mixed) → AI-filled **sell form** (My farm) or chat draft → edit → publish | **MVP** |
 | F3 | **Trust & compliance screening** on every listing → trust score, level, reasons | **MVP** |
 | F3b | **"Is this post safe?":** a buyer uploads a screenshot or pastes a listing seen on WhatsApp/Instagram/Facebook and gets the same screening (form in Pets, or chat) | **MVP**: reuses the F2 + F3 pipeline |
@@ -58,7 +58,7 @@ Decided 10 Oct (idea from the founder's earlier PetZonic product; fresh code). *
 | F5 | **Starter kit & care plan** for the chosen pet (accessories catalogue + first-14-days plan + vet warning signs) | **MVP** |
 | F6 | **Buyer enquiry** to the breeder (demo: saved and shown in the breeder's inbox; no payment) | **MVP** |
 | F7 | Agent activity panel ("which agent and tool ran") in the AI tab | **MVP**: cheap, shows technical depth |
-| F8 | Breeder auto-reply: answers buyer questions from listing data on the breeder's behalf | Stretch |
+| F8 | Seller reply assistant: Gemini drafts a reply to a buyer's enquiry from the listing's facts only (no invented health claims, no contact details, invites a visit before paying) and lists what only the seller can answer; the seller edits and sends it, and the buyer sees it under Account. Also by chat (`draft_enquiry_reply`); the AI never sends on its own | **Built** (10 Oct) |
 | F9 | Semantic search over listings and products (Firestore vector search + embeddings) | Stretch |
 | F10 | Tamil replies when the user writes in Tamil | Stretch (input already works via Gemini) |
 | F11 | Google Maps view of nearby listings | Stretch |
@@ -83,7 +83,7 @@ Decided 10 Oct (idea from the founder's earlier PetZonic product; fresh code). *
 - **Sell form (My farm):** "✨ Fill with AI" fills normal form fields; the breeder can edit any field before publishing; each edit is validated; missing fields are highlighted; the fair-price bar updates with the price.
 - The same flow also works in the AI tab by chat.
 - **Publishing always runs F3 first.** Blocked listings can't be published.
-- **Sandboxing on the public demo:** listings created by guests are visible **only to that guest** (in their breeder view and their own buyer searches). Public search for everyone else shows only the curated seed listings. This stops strangers putting offensive or unlawful content in front of judges.
+- **Sandboxing on the public demo:** listings created by new seller accounts are visible **only to that seller and to accounts on the same device** (so one person can test buying and selling). Public search for everyone else shows only the curated seed listings. This stops strangers putting offensive or unlawful content in front of judges.
 - Photos that aren't of an animal (`image_quality = not_animal`) are rejected; Gemini safety filters stay on.
 - Target: ≤ 60 seconds from opening the form to a published listing, measured in the demo.
 
@@ -135,7 +135,7 @@ Decided 10 Oct (idea from the founder's earlier PetZonic product; fresh code). *
 
 ### F6: Buyer enquiry
 - A "Contact breeder" form on the listing page, or the chat, creates an enquiry (buyer's message + chosen listing).
-- **My farm › Enquiries** shows enquiries received on the guest's own listings (because listings are sandboxed, the demo uses one browser as both buyer and breeder).
+- **Seller › Enquiries** shows enquiries received on the seller's own listings. Because new listings are sandboxed per device, a tester buys and sells in one browser; the demo seller account (Karthik) has preloaded enquiries.
 - Clearly labelled: "Demo: no real breeder is contacted."
 
 ### F12: Local Breeders (Direct Farm)
@@ -145,7 +145,7 @@ Decided 10 Oct (idea from the founder's earlier PetZonic product; fresh code). *
 - Only breeders with at least one published (not BLOCKED) listing are shown. All breeders are fictional.
 
 ### F7: Agent activity panel
-- A collapsible list of `agent → tool → short result` for every turn (e.g. `trust_agent → screen_listing → CAUTION (price 60% below range)`).
+- A collapsible list of `agent → tool → short result` for every turn (e.g. `listing_agent → publish_listing → CAUTION (price 60% below range)`).
 
 ## Non-functional requirements
 
@@ -157,7 +157,7 @@ Decided 10 Oct (idea from the founder's earlier PetZonic product; fresh code). *
 | Discoverability | A first-time user finds all three tabs and both sides (buy, sell) without instructions; tested with someone who hasn't seen the app. |
 | Accessibility | WCAG AA contrast, alt text, keyboard navigation; status never conveyed by colour alone. |
 | Security | No secrets in the repo; least-privilege service account; upload type and size validation. |
-| Abuse/cost | ≤ 40 AI calls per guest and ≤ 150 per IP per hour (chat, AI fill, check, publish, care plan); capped `max-instances`; budget alert. |
+| Abuse/cost | ≤ 40 AI calls per login session and ≤ 150 per IP per hour (chat, AI fill, check, publish, care plan); capped `max-instances`; budget alert. |
 | Privacy | Synthetic data only; uploads in a private bucket; no personal contact data collected. |
 | Language | English UI and docs; Tamil and mixed **input** supported. |
 

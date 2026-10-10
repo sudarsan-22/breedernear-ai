@@ -79,6 +79,14 @@ class Phase(BaseModel):
     steps: list[str]
 
 
+class EnquiryReply(BaseModel):
+    """A reply the seller can edit and send, drafted from the listing's facts only."""
+
+    reply: str = Field(description="The message to the buyer, at most 90 words, in the buyer's language.")
+    needs_seller_input: list[str] = Field(default=[], description=(
+        "Questions the buyer asked that the listing facts don't answer, e.g. 'visit times'."))
+
+
 class CarePlan(BaseModel):
     species: str
     phases: list[Phase]

@@ -15,6 +15,7 @@ class Store(Protocol):
     def get_listing(self, listing_id: str) -> dict | None: ...
     def all_listings(self) -> list[dict]: ...
     def save_enquiry(self, enquiry_id: str, data: dict) -> None: ...
+    def get_enquiry(self, enquiry_id: str) -> dict | None: ...
     def all_enquiries(self) -> list[dict]: ...
     def save_cart(self, guest_id: str, data: dict) -> None: ...
     def get_cart(self, guest_id: str) -> dict | None: ...
@@ -61,6 +62,9 @@ class MemoryStore:
 
     def save_enquiry(self, enquiry_id: str, data: dict) -> None:
         self.enquiries[enquiry_id] = copy.deepcopy(data)
+
+    def get_enquiry(self, enquiry_id: str) -> dict | None:
+        return copy.deepcopy(self.enquiries.get(enquiry_id))
 
     def all_enquiries(self) -> list[dict]:
         return [copy.deepcopy(v) for v in self.enquiries.values()]
@@ -137,6 +141,10 @@ class FirestoreStore:
 
     def save_enquiry(self, enquiry_id: str, data: dict) -> None:
         self._db.collection("enquiries").document(enquiry_id).set(data)
+
+    def get_enquiry(self, enquiry_id: str) -> dict | None:
+        snap = self._db.collection("enquiries").document(enquiry_id).get()
+        return snap.to_dict() if snap.exists else None
 
     def all_enquiries(self) -> list[dict]:
         return [d.to_dict() for d in self._db.collection("enquiries").stream()]

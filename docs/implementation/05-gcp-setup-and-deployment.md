@@ -149,6 +149,7 @@ gcloud run deploy breedernear \
 - `--min-instances 1` means no cold start for judges. A small always-on cost; keep it from 17 Oct until results.
 - If `--allow-unauthenticated` fails because of an organisation policy, use a personal-account project (no organisation) or ask the org admin.
 - `scripts/deploy.sh` wraps this command and prints the URL and revision name.
+- `scripts/release.sh` is the normal way to ship: lint and unit tests, `deploy.sh`, the live smoke test, a reset of the demo accounts and sample data, and a row in [../submission/03-release-log.md](../submission/03-release-log.md). Final freeze: `MIN_INSTANCES=1 scripts/release.sh`.
 
 ### Rollback
 

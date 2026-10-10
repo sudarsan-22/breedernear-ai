@@ -32,7 +32,7 @@
 | **Wed 14 Oct** | Fixes from the user test. Evals E01–E14 + `scripts/smoke_test.py` + headless-browser UI test in the repo. Accessibility pass. | Phone + laptop smoke test; log bugs. Start the deck. | **MVP feature freeze.** Full smoke test passes |
 | **Thu 15 Oct** | Eval failures; callbacks; stretch only if all green. | Deck sources and screenshots; rehearse the video script. | Eval pass rate recorded |
 | **Fri 16 Oct** | Bug fixes. **Final README pass** (live URL, real setup, eval results, simulated-vs-real). `ATTRIBUTIONS.md` complete. Secrets audit. | Deck draft complete ([outline](../submission/01-pitch-deck-outline.md)). | README and deck reviewed by both |
-| **Sat 17 Oct** | Final deploy (`min-instances=1`); record the revision; freeze `main`. | **Record and edit the video** (≤ 2:55); upload to YouTube (Unlisted). Export the deck PDF. | Checklist sections B–E all ticked |
+| **Sat 17 Oct** | Final release: `MIN_INSTANCES=1 scripts/release.sh` (tests, deploy, smoke test, demo-data reset, logged in [03-release-log](../submission/03-release-log.md)); freeze `main`. | **Record and edit the video** (≤ 2:55); upload to YouTube (Unlisted). Export the deck PDF. | Checklist sections B–E all ticked |
 | **Sun 18 Oct** | Final smoke test, 9–10 AM. | Fill in the submission form with Sudarsan. | **Submitted by 12:00 PM IST**; screenshot saved |
 
 ## Definition of done (per feature)

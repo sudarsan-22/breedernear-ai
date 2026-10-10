@@ -59,7 +59,20 @@ def default_users() -> list[dict]:
 
 
 def seed_default_accounts(store) -> None:
-    """Create or reset both accounts and their data. Sample listings must already be in the store."""
+    """Create or reset both accounts and their data. Sample listings must already be in the store.
+
+    Anything visitors added to these shared accounts is removed: listings the demo seller published and
+    enquiries sent by or to them (other than the preloaded ones).
+    """
+    for listing in store.all_listings():
+        if listing.get("owner_user_id") == SELLER_ID and not listing.get("simulated"):
+            store.delete_listing(listing["id"])
+    preloaded = {e[0] for e in ENQUIRIES}
+    for enquiry in store.all_enquiries():
+        ours = SELLER_ID in (enquiry.get("listing_owner_user_id"), enquiry.get("buyer_user_id")) \
+            or enquiry.get("buyer_user_id") == CUSTOMER_ID
+        if ours and enquiry.get("id") not in preloaded:
+            store.delete_enquiry(enquiry["id"])
     for user in default_users():
         store.release_login(user["login"])
         store.claim_login(user["login"], user["id"])

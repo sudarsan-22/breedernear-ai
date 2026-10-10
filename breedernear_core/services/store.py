@@ -20,6 +20,7 @@ class Store(Protocol):
     def save_cart(self, guest_id: str, data: dict) -> None: ...
     def get_cart(self, guest_id: str) -> dict | None: ...
     def delete_listing(self, listing_id: str) -> None: ...
+    def delete_enquiry(self, enquiry_id: str) -> None: ...
     def save_user(self, user_id: str, data: dict) -> None: ...
     def get_user(self, user_id: str) -> dict | None: ...
     def delete_user(self, user_id: str) -> None: ...
@@ -77,6 +78,9 @@ class MemoryStore:
 
     def delete_listing(self, listing_id: str) -> None:
         self.listings.pop(listing_id, None)
+
+    def delete_enquiry(self, enquiry_id: str) -> None:
+        self.enquiries.pop(enquiry_id, None)
 
     def save_user(self, user_id: str, data: dict) -> None:
         self.users[user_id] = copy.deepcopy(data)
@@ -158,6 +162,9 @@ class FirestoreStore:
 
     def delete_listing(self, listing_id: str) -> None:
         self._db.collection("listings").document(listing_id).delete()
+
+    def delete_enquiry(self, enquiry_id: str) -> None:
+        self._db.collection("enquiries").document(enquiry_id).delete()
 
     def save_user(self, user_id: str, data: dict) -> None:
         self._db.collection("users").document(user_id).set(data)

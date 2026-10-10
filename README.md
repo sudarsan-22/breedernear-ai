@@ -4,8 +4,16 @@
 
 **Google Cloud AI Builder Cup 2026 (JAPAC) · Theme: Retail & Commerce**
 
-> 🚧 **Status: in active development** during the AI Builder Cup build window (prototype submission: 18 Oct 2026).
-> The live demo link and demo video will be added here at submission. This README describes only what is built or being built. Future ideas are listed under [Roadmap](#roadmap).
+**Live demo:** https://breedernear-655711985039.asia-south1.run.app · demo video: added at submission (18 Oct 2026)
+
+> This README describes only what is built. Future ideas are listed under [Roadmap](#roadmap).
+
+<p>
+<img src="docs/screenshots/02-pets.webp" width="180" alt="Customer app: Pets tab with trusted local pets and fair prices">
+<img src="docs/screenshots/03-listing-trust.webp" width="180" alt="Listing page: fair-price bar, details and trust checks">
+<img src="docs/screenshots/04-post-check.webp" width="180" alt="Is this post safe? A pasted sale post gets CAUTION with reasons">
+<img src="docs/screenshots/06-blocked.webp" width="180" alt="Seller tries to list a protected parakeet: blocked in code with legal alternatives">
+</p>
 
 ---
 
@@ -28,6 +36,20 @@ Our founder spent five years as a bird breeder and broker in Coimbatore, India. 
 | Seller | `karthik.seller@example.com` | `demo12345` | Karthik's Aviary (Coimbatore): 4 listings with photos (2 live, 1 paused, 1 sold), views, 4 buyer enquiries |
 
 Or tap **Demo customer** / **Demo seller** on the login screen. These are shared demo accounts with sample data only; they can't be deleted or renamed, and their sample listings can't be removed.
+
+### See it in 2 minutes
+
+1. **Demo customer · Priya** → **Pets**: trusted pets near Tiruppur with fair-price bars. Open one: trust checks, questions to ask, **Starter kit** (cage sized for the animals) and a 14-day care plan.
+2. **Pets → "Is this post safe?"** → paste `Lovebirds pair 500 only!! Full advance GPay, courier only, all India delivery` → **CAUTION** with the reasons.
+3. **BreederNear AI** tab → ask `I want an Indian parrot that talks` → refused, with legal alternatives.
+4. Log out → **Demo seller · Karthik** → **Dashboard** → **Sell a pet with AI** → type `pachai kili kunjugal virpanaikku, 2 for 800, Kovai` → **Fill with AI** → **Publish** → **BLOCKED** (protected species, decided in code). Then try `4 jodi lutino lovebird, 5 maasam, oru jodi 1800 rubai, Kovai` → published.
+5. **Enquiries** → **Reply** → **✨ Draft with AI**: a reply written from the listing's facts, with what only the seller can answer flagged. Send it, then see it as Priya under **Account**.
+
+<p>
+<img src="docs/screenshots/01-login.webp" width="160" alt="Login with one-tap demo accounts">
+<img src="docs/screenshots/05-seller-dashboard.webp" width="160" alt="Seller dashboard">
+<img src="docs/screenshots/07-reply-draft.webp" width="160" alt="AI-drafted reply to a buyer enquiry">
+</p>
 
 ## One app, two kinds of account
 
@@ -158,7 +180,7 @@ uvicorn app.main:app --reload --port 8080   # web app + API: http://localhost:80
 PYTHONPATH=. adk web agents                 # ADK developer UI for testing agents
 ruff check . && pytest -m "not live"        # lint + unit tests
 GOOGLE_CLOUD_PROJECT=<your-project> PYTHONPATH=. python scripts/seed_firestore.py  # sample data (cloud only)
-PROJECT_ID=<your-project> scripts/deploy.sh # deploy to Cloud Run
+PROJECT_ID=<your-project> scripts/release.sh  # test, deploy to Cloud Run, smoke-test, reset demo data
 ```
 
 ## Documentation

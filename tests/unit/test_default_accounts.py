@@ -66,3 +66,18 @@ def test_reseeding_resets_without_duplicates(defaults):
     d.seed_default_accounts(defaults)
     assert defaults.get_listing("LST-0001")["status"] == "PUBLISHED"
     assert len([e for e in defaults.all_enquiries() if e["id"].startswith("ENQ_DEMO")]) == 4
+
+
+def test_reset_removes_what_visitors_added(defaults):
+    visitor = {"id": "LST_visitor", "owner_user_id": d.SELLER_ID, "status": "PUBLISHED"}
+    defaults.save_listing("LST_visitor", visitor)
+    defaults.save_enquiry("ENQ_visitor", {"id": "ENQ_visitor", "listing_id": "LST-0001",
+                                          "listing_owner_user_id": d.SELLER_ID, "buyer_user_id": "USR_x"})
+    defaults.save_enquiry("ENQ_other", {"id": "ENQ_other", "listing_id": "LST-0009",
+                                        "listing_owner_user_id": "USR_other", "buyer_user_id": "USR_y"})
+    match_service.send_reply(d.SELLER_ID, "ENQ_DEMO_1", "A reply a visitor sent")
+    d.seed_default_accounts(defaults)
+    assert defaults.get_listing("LST_visitor") is None and defaults.get_listing("LST-0001")
+    ids = {e["id"] for e in defaults.all_enquiries()}
+    assert "ENQ_visitor" not in ids and "ENQ_other" in ids and {e[0] for e in d.ENQUIRIES} <= ids
+    assert defaults.get_enquiry("ENQ_DEMO_1").get("reply") is None

@@ -20,13 +20,23 @@ Our founder spent five years as a bird breeder and broker in Coimbatore, India. 
 - **Buyers can't tell good sellers from bad.** Scams are common, and protected native birds are still traded illegally, sometimes dyed to disguise them.
 - **Breeders lose hours every day** to manual selling: repeating answers, confirming stock, negotiating.
 
+## One app, both sides, three tabs
+
+| Tab | For | What you can do |
+|---|---|---|
+| 🐾 **Pets** | Buyers | Browse pets for sale near you, filter by species, price and trust; open a listing to see every trust check; contact the breeder; get a starter kit and care plan; take a quick "Which pet suits me?" quiz; check a post you saw on WhatsApp |
+| 🏡 **Local Breeders** | Buyers and sellers | **Direct Farm:** meet breeders near you and buy at the farm price, with no broker markup. **My farm:** sell your animals: add photos and a quick message, tap "✨ Fill with AI", check the form, publish with a trust check; see your listings and buyer enquiries |
+| ✨ **BreederNear AI** | Anyone | Ask in English or Tamil. Five Gemini agents find a pet, write a listing, check a post or plan the first two weeks, and show what they did |
+
+Everything works by tapping; the AI does the hard parts on every screen. Chat is there when you'd rather just ask.
+
 ## What BreederNear AI does
 
 | Step | What happens | How |
 |---|---|---|
 | **List** | A breeder sends photos plus a casual message, the way they'd post on WhatsApp, in English or Tamil. They get a complete, priced listing ready to publish. | Gemini multimodal and multilingual extraction into a validated schema; fair-price range from data |
 | **Check** | Every listing is screened before buyers see it. Protected species are **blocked**. Dyed birds, visible health concerns, reused photos, suspicious prices and scam language are flagged. Buyers see an explainable trust score. | Gemini vision + deterministic rules (perceptual hashing, price rules, species lists) → trust score **computed in code** |
-| **Find** | A buyer describes their home, family and budget. BreederNear suggests suitable pets and finds trusted breeders nearby, with fair-price indicators. | ADK agent with tool calls over Firestore; distance by district |
+| **Find** | A buyer browses nearby pets, takes a short quiz or describes their home, family and budget. BreederNear suggests suitable pets and finds trusted breeders nearby, with fair-price indicators. | Rules + ADK agent with tool calls over Firestore; distance by district |
 | **Start right** | A personalised starter kit (correct cage size, food, accessories) and a first-14-days care plan with "see a vet if…" signs | Product rules + Gemini structured care plans |
 | **Is this listing safe?** | Upload a screenshot of a post seen on WhatsApp or Instagram and get the same trust screening | Same pipeline, nothing stored |
 

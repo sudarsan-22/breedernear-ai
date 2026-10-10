@@ -14,18 +14,31 @@
 | Dogs | Labrador, Beagle, Shih Tzu, Indian breeds, etc. | Seller must provide a State Animal Welfare Board (SAWB) breeder registration no., checked against the **simulated** registry |
 | Cats | Persian, Siamese, Indian cats | Allowed |
 
+## Product shape: three tabs, AI everywhere, chat optional
+
+Buying and selling happen in the **same app**. A new user must be able to complete every core job **by tapping, without chatting**, and the AI must still do the hard parts on those screens. Chat is a third way in, not the only one.
+
+| Tab | Job | UI (no chat needed) | AI in that screen |
+|---|---|---|---|
+| 🐾 **Pets** | Buyer finds a pet | Browse grid, filters, listing page, contact form, starter kit, cart | Trust checks, fair-price indicator, quiz ranking (rules), care plan (Gemini), "Ask AI" |
+| 🏡 **Local Breeders** (Direct Farm) | Buyer meets breeders; **seller lists pets** (My farm) | Breeder directory and pages; sell form, my listings, enquiries | "✨ Fill with AI" from photos + message (Gemini), trust screening on publish (Gemini vision + rules) |
+| ✨ **BreederNear AI** | Anything, in English or Tamil | — | Multi-agent assistant (ADK) with cards and activity panel |
+
+"Direct Farm" means buying straight from the breeder at the farm price, with no broker markup. This is the problem in the founder story.
+
 ## Feature list
 
 | ID | Feature | Scope |
 |---|---|---|
-| F1 | Web app with two modes: **I'm buying** / **I'm a breeder**. Guest session, no login. | **MVP** |
-| F2 | **Breeder listing copilot:** photos + casual message (English/Tamil/mixed) → structured listing draft → edit → publish | **MVP** |
+| F1 | Web app with **three tabs** (Pets · Local Breeders · BreederNear AI), district picker, cart, first-visit welcome card. Guest session, no login. | **MVP** |
+| F2 | **Breeder listing copilot:** photos + casual message (English/Tamil/mixed) → AI-filled **sell form** (My farm) or chat draft → edit → publish | **MVP** |
 | F3 | **Trust & compliance screening** on every listing → trust score, level, reasons | **MVP** |
-| F3b | **"Is this listing safe?":** a buyer uploads a screenshot or pastes a listing seen on WhatsApp/Instagram/Facebook and gets the same screening | **MVP**: reuses the F2 + F3 pipeline |
-| F4 | **Buyer concierge:** needs-based pet matching + nearby trusted listings + fair-price comparison | **MVP** |
+| F3b | **"Is this post safe?":** a buyer uploads a screenshot or pastes a listing seen on WhatsApp/Instagram/Facebook and gets the same screening (form in Pets, or chat) | **MVP**: reuses the F2 + F3 pipeline |
+| F4 | **Buyer matching:** Pets tab grid with filters (species, district, max price, trusted only) and listing pages; "Which pet suits me?" quiz; the same in chat via the match agent | **MVP** |
+| F12 | **Local Breeders (Direct Farm):** breeder directory by district, breeder pages with their pets for sale | **MVP** |
 | F5 | **Starter kit & care plan** for the chosen pet (accessories catalogue + first-14-days plan + vet warning signs) | **MVP** |
 | F6 | **Buyer enquiry** to the breeder (demo: saved and shown in the breeder's inbox; no payment) | **MVP** |
-| F7 | Agent activity panel ("which agent and tool ran") | **MVP**: cheap, shows technical depth |
+| F7 | Agent activity panel ("which agent and tool ran") in the AI tab | **MVP**: cheap, shows technical depth |
 | F8 | Breeder auto-reply: answers buyer questions from listing data on the breeder's behalf | Stretch |
 | F9 | Semantic search over listings and products (Firestore vector search + embeddings) | Stretch |
 | F10 | Tamil replies when the user writes in Tamil | Stretch (input already works via Gemini) |
@@ -35,8 +48,11 @@
 ## User stories and acceptance criteria
 
 ### F1: App shell
-- Opening the URL shows the choice *I'm buying a pet* / *I'm a breeder* within 3 s (warm instance). No sign-up.
-- "Try the demo" buttons preload a demo breeder (Karthik, Coimbatore) or a demo buyer (Priya, Tiruppur).
+- Opening the URL shows the **Pets** tab with nearby pets within 3 s (warm instance). No sign-up.
+- Three tabs are always visible (bottom bar on phones): 🐾 Pets · 🏡 Local Breeders · ✨ BreederNear AI.
+- **First visit:** a welcome card explains the three tabs in one line each, asks for the district, and offers "I'm a breeder: sell" and the demo buttons. It can be dismissed and does not come back.
+- Every tab starts with a one-line explainer; every empty state says what to do next.
+- "Try the demo" buttons: **Priya** (buyer, Tiruppur) opens Pets filtered for her; **Karthik** (breeder, Coimbatore) opens My farm › Sell with his message prefilled.
 - The footer always shows: "Prototype — sample breeders, listings and products. No payments. Not veterinary advice."
 
 ### F2: Breeder listing copilot
@@ -45,7 +61,8 @@
 - Output: listing draft (schema in [../implementation/02-agent-design.md](../implementation/02-agent-design.md#listingdraft)) with species, variety/colour, count, sex (if stated), age, price per unit/pair, district, locality, vaccination/health notes, description, and the fields the breeder still needs to fill.
 - Gemini proposes the species from the photo. If the photo and text disagree, the draft says so and asks the breeder to confirm.
 - A suggested **fair price range** for the species and variety comes from market data in code (sample data in the prototype).
-- The breeder can edit any field before publishing.
+- **Sell form (My farm):** "✨ Fill with AI" fills normal form fields; the breeder can edit any field before publishing; each edit is validated; missing fields are highlighted; the fair-price bar updates with the price.
+- The same flow also works in the AI tab by chat.
 - **Publishing always runs F3 first.** Blocked listings can't be published.
 - **Sandboxing on the public demo:** listings created by guests are visible **only to that guest** (in their breeder view and their own buyer searches). Public search for everyone else shows only the curated seed listings. This stops strangers putting offensive or unlawful content in front of judges.
 - Photos that aren't of an animal (`image_quality = not_animal`) are rejected; Gemini safety filters stay on.
@@ -77,8 +94,11 @@
 - Nothing is stored as a listing. The upload follows the normal 30-day deletion rule.
 - This brings BreederNear's value to the informal groups where the trade actually happens today.
 
-### F4: Buyer concierge
+### F4: Buyer matching (Pets tab and chat)
 *As a first-time buyer, I want help choosing the right pet and a trustworthy breeder near me at a fair price.*
+- **Pets tab:** grid of published pets near the chosen district (never BLOCKED; own sandboxed listings tagged "Yours"), filters for species, max price and "trusted only", sorted trusted first, then distance. A listing page shows every trust check, the questions to ask, the breeder, Contact, Starter kit & care plan, and "Ask AI about this pet".
+- **Quiz:** "Which pet suits me?" asks the same needs as the chat in 4–6 taps and shows up to 3 species options with reasons; "Show these pets" filters the grid.
+- **Chat (AI tab):**
 - Understands needs from conversation: home type, space, family (kids, elderly), experience, time available, noise tolerance, budget, district.
 - Asks at most 2 clarifying questions per turn.
 - Recommends 1–3 suitable species with reasons (e.g. "budgies: quieter, easy for kids, small cage fits a flat").
@@ -95,9 +115,15 @@
 - Products can be added to a **demo cart**. No payment.
 
 ### F6: Buyer enquiry
-- A "Contact breeder" button on a listing card, or via chat, creates an enquiry (buyer's message + chosen listing).
-- The breeder mode **inbox** shows enquiries for the demo breeder.
+- A "Contact breeder" form on the listing page, or the chat, creates an enquiry (buyer's message + chosen listing).
+- **My farm › Enquiries** shows enquiries received on the guest's own listings (because listings are sandboxed, the demo uses one browser as both buyer and breeder).
 - Clearly labelled: "Demo: no real breeder is contacted."
+
+### F12: Local Breeders (Direct Farm)
+*As a buyer, I want to buy directly from a breeder near me instead of paying a broker's markup.*
+- Directory of breeders near the chosen district: name, locality, distance, species bred, years of experience, dog-breeder registration status (simulated registry), number of pets for sale, best trust level.
+- Breeder page lists their published pets (same cards and listing page as the Pets tab).
+- Only breeders with at least one published (not BLOCKED) listing are shown. All breeders are fictional.
 
 ### F7: Agent activity panel
 - A collapsible list of `agent → tool → short result` for every turn (e.g. `trust_agent → screen_listing → CAUTION (price 60% below range)`).
@@ -108,10 +134,11 @@
 |---|---|
 | Availability | Live from 17 Oct until at least 7 Nov; until 4 Dec if shortlisted. `min-instances=1`. |
 | Latency | First token < 4 s for text; listing draft from photos < 15 s (warm). |
-| Mobile | Breeder mode is phone-first. Usable at 375 px width; tap targets ≥ 44 px. |
+| Mobile | Phone-first. Usable at 375 px width; bottom tab bar; tap targets ≥ 44 px. |
+| Discoverability | A first-time user finds all three tabs and both sides (buy, sell) without instructions; tested with someone who hasn't seen the app. |
 | Accessibility | WCAG AA contrast, alt text, keyboard navigation; status never conveyed by colour alone. |
 | Security | No secrets in the repo; least-privilege service account; upload type and size validation. |
-| Abuse/cost | ≤ 30 messages per guest per hour; capped `max-instances`; budget alert. |
+| Abuse/cost | ≤ 30 AI calls per guest per hour (chat, AI fill, check, publish, care plan); capped `max-instances`; budget alert. |
 | Privacy | Synthetic data only; uploads in a private bucket; no personal contact data collected. |
 | Language | English UI and docs; Tamil and mixed **input** supported. |
 

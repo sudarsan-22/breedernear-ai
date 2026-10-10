@@ -8,9 +8,9 @@
 
 | By | Who | Action |
 |---|---|---|
-| 10 Oct | Sudarsan | R25 clarification email to the organisers · R39 paste the submission-form fields · R10 join Discord |
+| 10 Oct | Sudarsan | ✅ R25 clarification email (organisers replied: startups allowed) · R39 paste the submission-form fields · R10 join Discord (✅ Sudarsan; Shreya pending) |
 | 11 Oct | Both | R8 no part-time course · R9 ID + employment proof ready · R29 check employment contracts for IP/moonlighting clauses · R28 re-read T&C |
-| 12 Oct | Both / Sudarsan | R30 sign the team agreement · R32 make the public `petZonic` org profile private or neutral · R37 trademark quick-check |
+| 12 Oct | Both | R30 sign the team agreement · ✅ R32 old org profile private (9 Oct) · ✅ R37 name check (10 Oct) |
 | 15 Oct | Both | R41 passport validity · R28 re-read T&C |
 | 17–18 Oct | Both | R38 consents for anyone or any animals filmed · R28 re-read T&C before submitting |
 
@@ -18,16 +18,18 @@
 
 ## Day by day
 
+**Progress note (10 Oct):** the backend, all five agents, the sample data and a chat-based web app were finished on 9–10 Oct, ahead of the original plan. On 10 Oct the UI was redesigned to **three tabs** (Pets · Local Breeders + My farm · BreederNear AI) so new users can buy and sell by tapping, with AI built into each screen ([04](04-api-and-frontend.md#frontend-web)). The plan below reflects that.
+
 | Date | Sudarsan | Shreya | End-of-day proof |
 |---|---|---|---|
-| **Fri 9 Oct** | GCP project, billing, APIs, Firestore, bucket, service account ([05](05-gcp-setup-and-deployment.md) §1–5). Repo skeleton, `requirements.txt` (pin `google-adk`), Dockerfile. **Deploy hello-world** with one Gemini call. Send the organiser clarification email (R25). | Confirm R8/R9 (eligibility). Join Discord. Start `districts.json`, `species.json`, `price_ranges.json` (with Sudarsan's numbers). | Live URL returns a Gemini reply |
-| **Sat 10 Oct** | `breedernear_core`: config, schemas, services (Firestore, Storage, Gemini, images, geo), `safety/*` + unit tests. Seed script. | `protected_species.json` + `cites_species.json` with sources; `breeders.json`; `sawb_registry_sample.json`; first 20 listings. | `pytest` green; Firestore seeded |
-| **Sun 11 Oct** | `listing_agent`: `extract_listing`, `update_draft`, `publish_listing` with screening + trust score. Works in `adk web`. | **Roster final (no action needed: 2 members).** Generate listing and product images; `products.json` (~50); remaining listings incl. demo cases. | Photo + text → draft → publish → trust result in `adk web` |
-| **Mon 12 Oct** | `trust_agent` + `check_external_listing`; uploads API; root agent routing. | UI shell: home, mode switch, chat streaming via `/run_sse`, uploads with preview, draft card, trust card. | Breeder flow works on the live URL |
-| **Tue 13 Oct** | `match_agent`: `recommend_species`, `search_listings`, `create_enquiry`. `/api/listings`, `/api/enquiries`. | UI: species cards, listing cards (badge, fair-price bar, distance), breeder inbox. | Buyer flow works on the live URL |
-| **Wed 14 Oct** | `care_agent`: `build_starter_kit`, `care_plan`, cart. Callbacks; rate limiting; activity-panel data. | UI: product cards, care plan card, cart drawer, "Is this listing safe?" page, activity panel, mobile and accessibility pass. | **MVP feature freeze.** Full smoke test passes |
-| **Thu 15 Oct** | Evals E01–E14 + golden images; fix failures. CI workflow. Stretch (F8 auto-reply / F10 Tamil replies) only if all green. | Manual smoke test on phone and laptop; log bugs. Make the sample scam screenshot and demo photos. Collect deck sources. Start deck. | Eval pass rate recorded |
-| **Fri 16 Oct** | Bug fixes. **Final README pass** (live URL, real setup, eval results, simulated-vs-real). `ATTRIBUTIONS.md` complete. Secrets audit. | Deck draft complete ([outline](../submission/01-pitch-deck-outline.md)). Rehearse the video script. | README and deck reviewed by both |
+| **Fri 9 Oct** ✅ | GCP project, billing, APIs, Firestore, bucket, service account; repo skeleton; Cloud Run deploy; organiser email | Eligibility checks; Discord | Live URL returns a Gemini reply |
+| **Sat 10 Oct** ✅ | Core services, safety rules and trust score; all five agents (listing, trust, match, care, concierge); 40 sample listings, 16 breeders, 45 products; chat web app with cards, uploads, cart, inbox; 158 unit tests; CI | Review price ranges, cage sizes and care facts with Sudarsan | Every agent flow works on the live URL |
+| **Sun 11 Oct** | Three-tab shell, district picker, first-visit welcome card. **Pets** tab: grid + filters, listing page, Contact form, starter kit + care plan on the page. APIs: `/api/pets`, `/api/starter-kit`, `/api/care-plan`. **Rate limiting** on all AI routes. | Eligibility owner actions (R8, R9, R29). Try the Pets tab on a phone; log confusing spots. Collect demo photos (own birds, with consent). | Buyer can find, inspect and contact without chat on the live URL |
+| **Mon 12 Oct** | **Local Breeders** directory + breeder page. **My farm**: sell form with "✨ Fill with AI", per-field validation, Publish with trust check, My listings, Enquiries. APIs: `/api/breeders`, `/api/sell/*`. | Team agreement (R30). Listing and product images (generated or own photos) + attributions. Sample scam screenshot. | Seller can list by tapping in ≤ 60 s on the live URL |
+| **Tue 13 Oct** | "Is this post safe?" form (`/api/check`), "Which pet suits me?" quiz (`/api/recommend`), "Ask AI about this pet" deep link into the AI tab. Wire listing images (turns on the reused-photo demo case). | **First-time-user test:** someone who hasn't seen the app tries all three tabs; note where they get stuck. | All three tabs complete |
+| **Wed 14 Oct** | Fixes from the user test. Evals E01–E14 + `scripts/smoke_test.py` + headless-browser UI test in the repo. Accessibility pass. | Phone + laptop smoke test; log bugs. Start the deck. | **MVP feature freeze.** Full smoke test passes |
+| **Thu 15 Oct** | Eval failures; callbacks; stretch only if all green. | Deck sources and screenshots; rehearse the video script. | Eval pass rate recorded |
+| **Fri 16 Oct** | Bug fixes. **Final README pass** (live URL, real setup, eval results, simulated-vs-real). `ATTRIBUTIONS.md` complete. Secrets audit. | Deck draft complete ([outline](../submission/01-pitch-deck-outline.md)). | README and deck reviewed by both |
 | **Sat 17 Oct** | Final deploy (`min-instances=1`); record the revision; freeze `main`. | **Record and edit the video** (≤ 2:55); upload to YouTube (Unlisted). Export the deck PDF. | Checklist sections B–E all ticked |
 | **Sun 18 Oct** | Final smoke test, 9–10 AM. | Fill in the submission form with Sudarsan. | **Submitted by 12:00 PM IST**; screenshot saved |
 
@@ -43,11 +45,12 @@
 ## Cut list (if behind, cut in this order)
 
 1. Stretch F8–F11
-2. Breeder inbox (keep enquiry creation + confirmation only)
-3. Cart (keep starter-kit cards + total)
-4. Activity panel styling (plain list)
+2. "Which pet suits me?" quiz in the Pets tab (the AI tab already does it)
+3. Breeder pages (keep the directory cards with their pets listed inline)
+4. Cart (keep starter-kit cards + total)
+5. Activity panel styling (plain list)
 
-**Never cut:** deployment, listing copilot, trust screening with BLOCKED species, buyer matching with trust badges, "Is this listing safe?", README accuracy, video, deck.
+**Never cut:** deployment, the three tabs with the welcome card, Pets grid + listing page + Contact, My farm sell form with "Fill with AI", trust screening with BLOCKED species, "Is this post safe?", the AI tab, README accuracy, video, deck.
 
 ## Risk register
 

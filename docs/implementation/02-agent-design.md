@@ -18,14 +18,14 @@ Delegation uses ADK agent transfer (`transfer_to_agent`) based on each agent's `
 
 ### breedernear_concierge (root)
 
-- **Role:** greet, detect mode (buying / breeder) and language, route, refuse off-topic requests.
+- **Role:** greet, use the AI-tab quick start (`mode`) and language, route, refuse off-topic requests.
 - **Instruction essentials:**
   - Warm, short, practical. Reply in the user's language if they write in Tamil; keep listing data in English.
   - Breeder wants to list, edit or see enquiries → `listing_agent`.
   - "Is this seller/listing genuine?", a pasted or screenshotted listing from WhatsApp/Instagram, "why is this marked caution?" → `trust_agent`.
   - Wants a pet, or asks which pet suits them → `match_agent`.
   - What to buy or how to care for a new pet → `care_agent`.
-  - Protected native species requests → refuse briefly and suggest legal alternatives (also enforced in tools).
+  - Listing requests always go to `listing_agent`, even for species that may be protected: the code screening decides and records the result (the concierge never refuses a listing itself). Buyers asking for a protected species are refused by `match_agent` and by `search_listings`.
 
 ### listing_agent (breeder copilot)
 
@@ -64,10 +64,9 @@ Delegation uses ADK agent transfer (`transfer_to_agent`) based on each agent's `
 
 | Key | Set by | Contents |
 |---|---|---|
-| `guest_id` | Session creation (UI) | UUID from browser localStorage |
-| `mode` | UI | `buyer` or `breeder` |
-| `demo_breeder_id` | "Try as breeder" | Firestore breeder ID (Karthik) |
-| `buyer_district` | match_agent / UI | e.g. `tiruppur` |
+| (user ID) | Session creation (UI) | The guest UUID from browser localStorage is the ADK `user_id`; tools read it as `tool_context.user_id` |
+| `mode` | UI (AI-tab quick start) | `buyer`, `breeder` or `check`; read by the concierge instruction as `{mode?}` |
+| `buyer_district` | `search_listings` | e.g. `tiruppur` |
 | `draft_listing_id` | `extract_listing` | Current draft |
 | `chosen_listing_id` | match_agent | Listing picked by the buyer |
 

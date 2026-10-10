@@ -13,7 +13,13 @@ Policy:
 
 | File / folder | Source (URL) | Author | Licence | Added on |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| Font: Noto Sans Tamil (loaded from Google Fonts at runtime, not stored in the repo) | https://fonts.google.com/noto/specimen/Noto+Sans+Tamil | Google / Noto project | SIL Open Font License 1.1 | 10 Oct 2026 |
+
+## Ideas from the founder's earlier work
+
+| Idea | Where it came from | What was reused |
+|---|---|---|
+| "Local Breeders / Direct Farm" section: buy directly from nearby breeders at the farm price, without a broker markup | The founder's earlier PetZonic product concept and founder story | The idea only. No code, layout, styling, text, images or data were copied. The organisers confirmed on 10 Oct that using startup ideas and founder experience is allowed. |
 
 ## AI-generated assets
 

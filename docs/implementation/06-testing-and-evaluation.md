@@ -88,16 +88,18 @@ Add the CI badge to the README.
 
 ## 4. Pre-submission smoke test
 
-`scripts/smoke_test.py <BASE_URL>` automates 1–3. Do 4–9 by hand in an incognito window, **on both a phone and a laptop**.
+`scripts/smoke_test.py <BASE_URL>` automates 1–3 (API). A headless-browser script drives 4–11 on the live URL at 375 px and 1280 px; still do them once by hand in an incognito window, **on both a phone and a laptop**.
 
 1. `GET /api/health` → 200; the model is not `gemini-2.x`
 2. Create session → "hello" → reply streams
-3. `GET /api/listings?species=budgerigar` → results, none BLOCKED
-4. **Breeder flow:** "Try as breeder" → 2 photos + E01 text → draft card → Publish → TRUSTED badge with reasons. Time it: ≤ 60 s.
-5. **Blocked flow:** E04 text → BLOCKED with a polite explanation
-6. **Buyer flow:** "Try as buyer" → E05 → species options → listing cards with badges, distance and fair-price bar
-7. **Starter kit:** pick a listing → kit cards + total + care plan with vet warning signs → add to demo cart
-8. **Safety check:** "Is this listing safe?" → upload the scam screenshot → CAUTION + questions to ask
-9. **UI:** activity panel works; footer visible; fits at 375 px; enquiry appears in the breeder inbox
+3. `GET /api/pets?district=tiruppur` → results, none BLOCKED
+4. **First visit:** welcome card explains the three tabs; pick a district; dismiss; it doesn't come back
+5. **Pets tab (no chat):** filter Budgies + trusted only → cards with badges, distance and fair-price bar → open a listing → checks + questions → **Contact breeder** form → "saved to inbox"
+6. **Starter kit:** on the listing page → kit cards + total + care plan with vet warning signs → Add all → cart count updates
+7. **Quiz:** "Which pet suits me?" → species options → "Show these pets" filters the grid
+8. **Safety check form:** paste the scam text / upload the scam screenshot → CAUTION + questions to ask
+9. **Local Breeders:** directory sorted by distance → breeder page → their pets. **My farm › Sell:** "Try as Karthik" → 2 photos + E01 text → "✨ Fill with AI" → edit a field → Publish → TRUSTED. Time it: ≤ 60 s. Enquiry from step 5 (on an own listing) shows in Enquiries.
+10. **Blocked:** sell form with E04 text → BLOCKED with a polite explanation and legal alternatives
+11. **AI tab:** "Try as Priya" message → species cards → listing cards; activity panel works; Tamil renders; footer visible; fits at 375 px with no horizontal scroll
 
 Record the date and result in the checklist. During evaluation (19 Oct – 7 Nov), repeat every 2–3 days.

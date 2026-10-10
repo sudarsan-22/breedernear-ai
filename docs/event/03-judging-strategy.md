@@ -42,7 +42,8 @@ What existing pet marketplaces and classifieds don't do:
 
 ## User Experience & Solution Design: 10% (plus the Best UI/UX prize)
 
-- **Zero friction:** no login; "Try as Priya / Karthik" demo buttons.
+- **Zero friction:** no login; a first-visit welcome card explains the three tabs; "Try as Priya / Karthik" demo buttons.
+- **Not "just a chatbot":** every core job (browse, contact, sell, check a post, starter kit) works by tapping in the Pets and Local Breeders tabs, with AI built into those screens; the multi-agent chat is the third tab.
 - **Phone-first breeder flow:** camera upload, one message, one Publish tap.
 - **Explainable trust:** every badge expands into ✅ / ⚠️ / ⛔ reasons and questions to ask the seller.
 - **Accessible:** icon + word + colour for trust levels, AA contrast, keyboard navigation, alt text.

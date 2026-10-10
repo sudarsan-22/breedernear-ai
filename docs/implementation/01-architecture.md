@@ -7,6 +7,7 @@
 3. **Structured outputs where it matters.** Listing extraction, photo screening and care plans return Pydantic-validated JSON.
 4. **Business state lives in Firestore**, not chat memory: listings, screenings, enquiries and carts survive restarts.
 5. **Configuration over code.** Model ID, region, limits and thresholds come from env vars or seed data.
+6. **One tool layer, two front doors.** The UI tabs (Pets, Local Breeders) call the service functions through `/api`; the AI tab reaches the same functions through ADK agents. Buyers and sellers can do everything by tapping, and the AI does the hard parts on both paths.
 
 ## System diagram
 
@@ -16,8 +17,8 @@ flowchart TD
     U[Buyer<br/>phone / laptop] -->|HTTPS| CR
 
     subgraph CR[Cloud Run service: breedernear, asia-south1]
-        WEB[Static web UI<br/>buyer mode · breeder mode]
-        API[FastAPI /api/*<br/>uploads, listings, enquiries, cart]
+        WEB[Static web UI: three tabs<br/>Pets · Local Breeders + My farm · BreederNear AI]
+        API[FastAPI /api/*<br/>pets, breeders, sell form, check,<br/>enquiries, starter kit, care plan, cart]
         ADK[ADK runtime<br/>/run_sse, sessions]
         subgraph AG[ADK agents]
             ROOT[breedernear_concierge<br/>root agent]
@@ -25,18 +26,20 @@ flowchart TD
             TRUST[trust_agent<br/>screening & compliance]
             MATCH[match_agent<br/>buyer pet & breeder matching]
             CARE[care_agent<br/>starter kit & care plan]
-            ROOT --> LIST & MATCH & CARE
-            LIST --> TRUST
+            ROOT --> LIST & TRUST & MATCH & CARE
         end
-        CORE[breedernear_core<br/>tools · safety rules · trust score · schemas · services]
+        CORE[breedernear_core<br/>services · safety rules · trust score · schemas]
+        WEB -->|tabs: tap| API
+        WEB -->|AI tab: chat| ADK
         ADK --> AG
-        AG --> CORE
+        AG -->|tools| CORE
         API --> CORE
     end
 
     CORE -->|multimodal + JSON schema| GEM[Gemini Flash<br/>via Agent Platform / Vertex AI]
     AG -->|LLM calls| GEM
-    CORE --> FS[(Firestore<br/>breeders · listings · screenings<br/>products · enquiries · carts<br/>reference data)]
+    CORE --> FS[(Firestore<br/>breeders · listings · drafts<br/>enquiries · carts)]
+    CORE --> REF[Versioned seed files<br/>species · prices · products<br/>protected/CITES lists · districts]
     CORE --> GCS[(Cloud Storage<br/>private uploads bucket)]
     CR --> LOG[Cloud Logging]
     CB[Cloud Build + Artifact Registry] -.->|gcloud run deploy --source| CR

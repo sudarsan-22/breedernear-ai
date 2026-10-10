@@ -19,7 +19,8 @@ Use this from **16 Oct** onward. Every box must be ticked before pressing Submit
 - [ ] Deployed on **Cloud Run**; URL in the form `https://breedernear-…run.app`
 - [ ] Opens in an **incognito window while logged out**, on a laptop
 - [ ] Opens on a **phone** (mobile data, not Wi-Fi), and the layout fits the screen
-- [ ] No login required; "Try as Priya" and "Try as Karthik" work
+- [ ] No login required; the welcome card shows on a first visit; "Try as Priya" and "Try as Karthik" work
+- [ ] All three tabs work without chat (Pets, Local Breeders › My farm) and in the AI tab
 - [ ] Every step of the smoke test passes, see [../implementation/06-testing-and-evaluation.md](../implementation/06-testing-and-evaluation.md#4-pre-submission-smoke-test)
 - [ ] `--min-instances=1` set (no cold start for judges)
 - [ ] Budget alert configured; credits or billing are valid until at least 4 Dec

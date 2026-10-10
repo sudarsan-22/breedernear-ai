@@ -7,7 +7,7 @@ import uuid
 from datetime import UTC, datetime
 
 from breedernear_core import deps
-from breedernear_core.catalog import breeders
+from breedernear_core.catalog import WEB_DIR, breeders
 from breedernear_core.data import contains_phrase, load_seed, normalize
 from breedernear_core.listing_service import ListingError
 from breedernear_core.safety.price_rules import price_range
@@ -60,7 +60,8 @@ def recommend_species(animal_group: str = "any", home_type: str = "flat", has_yo
         if group in GROUP_WORDS and sp["group"] != group:
             continue
         if budget_inr is not None and rng and rng[0] > budget_inr:
-            reasons_out.append(f"usually costs ₹{rng[0]:,} or more per {_unit(sp['key'])}")
+            per = "pair" if _unit(sp["key"]) == "pair" else "animal"
+            reasons_out.append(f"usually costs ₹{rng[0]:,} or more per {per}")
         if SPACE_RANK[sp["space_needed"]] > SPACE_RANK[max_space]:
             reasons_out.append("needs more space than a flat")
         if not noise_ok and sp["noise"] == "high":
@@ -141,6 +142,14 @@ def _distance_label(km: float | None) -> str | None:
     return "in your district" if km < 5 else f"about {round(km)} km away"
 
 
+def _photo(listing: dict) -> str | None:
+    """Path of the first sample photo that exists in web/ (guest photos are never served back)."""
+    for path in listing.get("photos") or []:
+        if (WEB_DIR / path).is_file():
+            return path
+    return None
+
+
 def _card(listing: dict, guest_id: str, km: float | None) -> dict:
     d = listing["draft"]
     rng = price_range(listing.get("species_key"), d.get("variety"))
@@ -163,7 +172,7 @@ def _card(listing: dict, guest_id: str, km: float | None) -> dict:
         "species_key": listing.get("species_key"),
         "animal_group": d.get("animal_group"),
         "fair_price_range_inr": list(rng) if rng else None,
-        "photo": (listing.get("photos") or [None])[0],
+        "photo": _photo(listing),
         "trust_level": listing["trust_level"],
         "trust_score": listing["trust_score"],
         "warnings": warnings,

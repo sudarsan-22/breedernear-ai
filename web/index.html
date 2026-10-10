@@ -2,80 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="BreederNear AI: find trusted pet breeders near you, at fair prices. Legal, healthy pets.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="BreederNear AI: buy pets direct from trusted local breeders at farm prices. Every listing is checked by AI and clear rules.">
+  <meta name="theme-color" content="#f5f5f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <title>BreederNear AI</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%2323784a'/><text x='50' y='68' font-size='56' text-anchor='middle'>🐾</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="top">
-    <button class="brand" id="home-btn" type="button" aria-label="BreederNear AI home">
-      🐾 BreederNear AI <small id="mode-label"></small>
-    </button>
-    <button class="icon-btn" id="inbox-btn" type="button" hidden aria-label="Enquiries from buyers">
-      📥 <span>Inbox</span> <span class="count" id="inbox-count">0</span>
-    </button>
-    <button class="icon-btn" id="cart-btn" type="button" hidden aria-label="Demo cart">
-      🛒 <span>Cart</span> <span class="count" id="cart-count">0</span>
-    </button>
-    <button class="icon-btn" id="new-btn" type="button" hidden aria-label="Start a new chat">↺ <span>New</span></button>
+  <header class="nav">
+    <a class="brand" href="#pets" aria-label="BreederNear AI home">
+      <span class="mark" id="brand-mark" aria-hidden="true"></span>
+      <span>BreederNear <small>AI</small></span>
+    </a>
+    <nav class="top-tabs" id="top-tabs" aria-label="Sections"></nav>
+    <button class="pill-btn" id="district-btn" type="button" aria-label="Change your district"></button>
+    <button class="pill-btn" id="cart-btn" type="button" aria-label="Cart"></button>
   </header>
 
-  <main>
-    <section class="home" id="home" aria-labelledby="home-title">
-      <h1 id="home-title">Find the trusted breeder next door.</h1>
-      <p class="lead">Fair prices. Legal, healthy pets. Every listing is checked by AI and clear rules before buyers see it.</p>
-      <div class="choices">
-        <button class="choice" type="button" data-mode="buyer">
-          <span class="emoji" aria-hidden="true">🛒</span>
-          <span><strong>I'm buying a pet</strong><span class="sub">Which pet suits my home? Trusted breeders near me.</span></span>
-        </button>
-        <button class="choice" type="button" data-mode="breeder">
-          <span class="emoji" aria-hidden="true">🐣</span>
-          <span><strong>I'm a breeder</strong><span class="sub">List animals in a minute from a photo and a message, in English or Tamil.</span></span>
-        </button>
-        <button class="choice" type="button" data-mode="check">
-          <span class="emoji" aria-hidden="true">🔍</span>
-          <span><strong>Is this listing safe?</strong><span class="sub">Check a WhatsApp, Instagram or Facebook post for warning signs.</span></span>
-        </button>
-      </div>
-      <div class="demo">
-        <span>Try the demo:</span>
-        <button type="button" id="demo-priya">Priya, buyer in Tiruppur</button>
-        <button type="button" id="demo-karthik">Karthik, breeder in Coimbatore</button>
-      </div>
-      <div class="how" aria-label="How BreederNear works">
-        <div><b>🤖 AI reads</b>Gemini reads photos and casual messages, in English and Tamil.</div>
-        <div><b>⚖️ Code decides</b>Trust scores come from fixed rules: protected species, prices, scam signs, registrations.</div>
-        <div><b>🏡 Local first</b>Nearby breeders, fair-price ranges and a starter kit sized for welfare.</div>
-      </div>
-    </section>
-
-    <section class="chat" id="chat" hidden aria-label="Conversation">
-      <div class="intro" id="intro"></div>
-      <div id="log" aria-live="polite" aria-relevant="additions" style="display:contents"></div>
-    </section>
+  <main id="main">
+    <noscript><p class="disclaimer">BreederNear AI needs JavaScript. Prototype — sample breeders, listings and products. No payments. Not veterinary advice.</p></noscript>
   </main>
 
   <div class="composer" id="composer" hidden>
     <div class="previews" id="previews" aria-label="Photos to send"></div>
-    <form id="form">
-      <input type="file" id="file" accept="image/*" multiple hidden>
-      <button type="button" class="attach" id="attach" aria-label="Add photos">📷</button>
-      <label for="input" class="sr-only">Message</label>
-      <textarea id="input" rows="1" placeholder="Type a message…" maxlength="2000"></textarea>
-      <button type="submit" class="send" id="send">Send</button>
+    <form id="chat-form">
+      <input type="file" id="chat-file" accept="image/*" multiple hidden>
+      <button type="button" class="round attach" id="chat-attach" aria-label="Add photos"></button>
+      <label for="chat-input" class="sr-only">Message BreederNear AI</label>
+      <textarea id="chat-input" rows="1" maxlength="2000" placeholder="Ask in English or Tamil…"></textarea>
+      <button type="submit" class="round send" id="chat-send" aria-label="Send"></button>
     </form>
   </div>
-  <footer class="disclaimer">Prototype — sample breeders, listings and products. No payments. Not veterinary advice.</footer>
 
-  <dialog id="drawer" aria-labelledby="drawer-title">
-    <div class="head"><h2 id="drawer-title"></h2><button class="icon-btn" type="button" id="drawer-close" aria-label="Close">✕</button></div>
-    <div class="body" id="drawer-body"></div>
+  <nav class="tabbar" id="tabbar" aria-label="Sections"></nav>
+
+  <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
+    <div class="panel" role="document">
+      <div class="grabber" aria-hidden="true"></div>
+      <div class="bar"><h2 id="sheet-title"></h2><button class="icon-btn" type="button" id="sheet-close" aria-label="Close"></button></div>
+      <div class="content" id="sheet-content"></div>
+      <div class="actions" id="sheet-actions" hidden></div>
+    </div>
   </dialog>
 
   <script src="app.js"></script>

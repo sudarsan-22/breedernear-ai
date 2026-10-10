@@ -11,3 +11,4 @@ gcloud run services update-traffic breedernear --region asia-south1 --to-revisio
 | Date | Commit | Cloud Run revision | Min instances | Smoke test | Firebase Hosting |
 |---|---|---|---|---|---|
 | 2026-10-10 21:39 IST | `bb15c18` | `breedernear-00020-kz9` | 0 | 17/17 passed in 10.1s | not yet set up |
+| 2026-10-10 22:08 IST | `0709991` | `breedernear-00021-wlp` | 0 | 17/17 passed in 8.1s | FAILED |

@@ -6,6 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 : "${PROJECT_ID:?Set PROJECT_ID, e.g. PROJECT_ID=breedernear-ai-2026}"
-npx --yes firebase-tools@13.29.1 deploy --only hosting --project "$PROJECT_ID" --non-interactive
+# VSCODE_CWD makes firebase-tools look for its files as if it were the VS Code extension; clear it.
+env -u VSCODE_CWD npx --yes firebase-tools@13.29.1 deploy --only hosting --project "$PROJECT_ID" --non-interactive
 echo "Hosting: https://${PROJECT_ID}.web.app"
 curl -fsS -o /dev/null -w "web app: %{http_code}\n" "https://${PROJECT_ID}.web.app/"

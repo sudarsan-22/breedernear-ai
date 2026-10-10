@@ -98,7 +98,7 @@ flowchart TD
 | Database | Firestore |
 | File storage | Cloud Storage (private bucket) |
 | Build / deploy | Cloud Build, Artifact Registry |
-| Quality | pytest unit tests, ADK evaluations, GitHub Actions |
+| Quality | pytest unit tests, live agent evals (run 3×), photo-accuracy test, axe-core accessibility audit, GitHub Actions |
 
 Full design: [docs/implementation/01-architecture.md](docs/implementation/01-architecture.md)
 
@@ -113,6 +113,20 @@ Full design: [docs/implementation/01-architecture.md](docs/implementation/01-arc
 - Starter kits respect minimum cage sizes per species.
 
 Details: [docs/product/03-responsible-ai-and-safety.md](docs/product/03-responsible-ai-and-safety.md)
+
+## Measured quality
+
+Measured on 10 Oct 2026 with real Gemini (`gemini-3.8-flash`). Each command reproduces its figure.
+
+| What | Result | Details |
+|---|---|---|
+| Agent evals (16 cases: listing, Tamil input, blocking, scams, reused photos, prompt injection, no medicine advice, roles), **run 3 times** | **48/48 case runs passed** | [evals/RESULTS.md](evals/RESULTS.md) · `scripts/run_evals.sh 3` |
+| Protected native species blocked from the photo alone (parakeets, munias, avadavat, myna, star tortoise, a dyed munia) | **8/8** | [evals/VISION_RESULTS.md](evals/VISION_RESULTS.md) · `scripts/vision_accuracy.py` |
+| Ordinary pet photos wrongly flagged as protected | **0/37** | same |
+| All photo checks (species, dye, blur, no animal, watermark, screenshot) | **202/202** | same; test photos are AI-generated and the prompt was tuned on them, so treat this as an upper bound |
+| Accessibility: axe-core WCAG 2.2 AA on every screen, light and dark, 320 / 390 / 1280 px | **0 problems** | `pytest -m ui tests/ui` |
+| Unit tests (CI on every push) | **221 passed** | `pytest -m "not live"` |
+| Live smoke test | **17/17** | `scripts/smoke_test.py <URL>` |
 
 ## Simulated vs real
 

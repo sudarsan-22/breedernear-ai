@@ -20,6 +20,8 @@
 
 **Progress note (10 Oct):** the backend, all five agents, the sample data and a chat-based web app were finished on 9–10 Oct, ahead of the original plan. On 10 Oct the UI was redesigned to **three tabs** (Pets · Local Breeders + My farm · BreederNear AI) so new users can buy and sell by tapping, with AI built into each screen ([04](04-api-and-frontend.md#frontend-web)). The plan below reflects that.
 
+**Progress note (10 Oct, evening):** Sudarsan's engineering items for 11–14 Oct are already done and live: the three tabs, the sell form, "Is this post safe?", the quiz, listing photos, separate customer and seller accounts with two preloaded demo accounts, the agent evals run 3×, the photo-accuracy test ([06 §2b](06-testing-and-evaluation.md#2b-photo-screening-accuracy-gemini-vision-real-model)) and the accessibility audit ([06 §2c](06-testing-and-evaluation.md#2c-accessibility-axe-core-headless-chromium)). Still to do: fixes from Shreya's first-time-user test (13 Oct), doc cleanup, the final README pass with screenshots, deck support, and the 17 Oct freeze. Shreya's column is unchanged.
+
 | Date | Sudarsan | Shreya | End-of-day proof |
 |---|---|---|---|
 | **Fri 9 Oct** ✅ | GCP project, billing, APIs, Firestore, bucket, service account; repo skeleton; Cloud Run deploy; organiser email | Eligibility checks; Discord | Live URL returns a Gemini reply |
@@ -60,7 +62,7 @@
 | Billing/credits not ready | Medium | Blocks deploy | Do it first on day 1 |
 | Model ID wrong or unavailable | Medium | Blocks AI | Day-1 hello-world; `GOOGLE_CLOUD_LOCATION=global`; model in an env var |
 | ADK API differs from docs | Medium | Slows dev | Pin the version; check `adk --help` and the installed source |
-| Gemini species ID unreliable for similar birds | Medium | Wrong trust result | Combine vision with text; protected decision on text **or** vision; demo with clear photos; golden-image tests |
+| Gemini species ID unreliable for similar birds | Medium | Wrong trust result | Combine vision with text; protected decision on text **or** vision; demo with clear photos; photo-accuracy test: 8/8 protected species blocked from the photo alone, 0/37 false alarms (AI-generated test photos; add real ones) |
 | Getting realistic bird/dog photos legally | Medium | Weak demo | Own photos (Sudarsan's aviary contacts, with permission) or Gemini-generated images; log in ATTRIBUTIONS |
 | In-memory sessions lost on restart | Low | Chat resets | `min-instances=1`, `max-instances=1`; business data in Firestore |
 | Portal trouble near the deadline | Medium | Missed deadline | Submit by 12:00 PM on 18 Oct |

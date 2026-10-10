@@ -48,7 +48,7 @@ It runs on **Cloud Run** with **Firestore** and **Cloud Storage**. The idea come
 | Team formation (closes 11 Oct) | Done: 2 members (Sudarsan N, lead; Shreya Azad), both working professionals; final |
 | "Prompt your jersey" activity | Done |
 | Documentation | ✅ This folder |
-| Prototype | Live (10 Oct): separate **customer and seller accounts** (email or mobile + password; one-tap demo accounts), customer app (Pets · Local Breeders · AI · Account) and seller app (Dashboard · Listings · Enquiries · AI · Farm), roles enforced on the server and in the agents, ADK routes locked behind login. 210 unit tests, 16/16 live agent evals, 17/17 smoke checks. Next: vision accuracy test set, accessibility audit, README with screenshots |
+| Prototype | Live (10 Oct): separate **customer and seller accounts** (email or mobile + password; one-tap demo accounts), customer app (Pets · Local Breeders · AI · Account) and seller app (Dashboard · Listings · Enquiries · AI · Farm), roles enforced on the server and in the agents, ADK routes locked behind login. 221 unit tests, agent evals 48/48 over 3 runs, photo screening 8/8 protected species blocked with 0/37 false alarms, accessibility 0 axe problems (light/dark, 320–1280 px), 17/17 smoke checks. Next: doc cleanup, README screenshots, deck support |
 | Deployment | ✅ Live on Cloud Run: https://breedernear-655711985039.asia-south1.run.app (10 Oct) |
 | Deck / video | Not started |
 | Submission | Not started |

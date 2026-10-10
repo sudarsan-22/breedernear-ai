@@ -25,7 +25,9 @@ Policy:
 
 | File / folder | Generated with | Prompt summary | Added on |
 |---|---|---|---|
-| — | — | — | — |
+| `web/img/listings/*.webp` (illustrative photos for the 38 sample listings that buyers can see) | Google `gemini-3.1-flash-image` on Vertex AI, via `scripts/generate_sample_images.py` (the exact prompts are in that script) | Realistic smartphone-style photo of the listed species and colour variety (birds, puppies, kittens) in a clean Indian home setting; no people, text, watermarks or logos | 10 Oct 2026 |
+
+These photos illustrate fictional sample listings and are labelled "Illustrative photo" in the app. They show no real breeder's animals.
 
 ## Software dependencies
 

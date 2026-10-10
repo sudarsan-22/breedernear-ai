@@ -24,25 +24,17 @@ Three layers: **unit tests** for the code that makes decisions, **ADK evals** fo
 
 **Gate:** CI green before every deploy.
 
-## 2. ADK evaluations (agent behaviour, real Gemini)
+## 2. Agent evaluations (agent behaviour, real Gemini)
 
-`evals/` holds `*.evalset.json` files and `test_config.json`. Run them locally, and in CI on demand (they cost model calls).
+`tests/evals/` runs the **real ADK agent tree** (`InMemoryRunner`, real Gemini, sample data in memory) for each case below and checks **properties** of the run: which tools must or must not run, the code-computed results (trust level, checks, kit sizes) and what the reply must not contain (e.g. medicine doses, invented listings).
 
 ```bash
-adk eval agents/breedernear evals/core.evalset.json \
-  --config_file_path=evals/test_config.json --print_detailed_results
+pytest -m live tests/evals          # needs Google Cloud credentials; writes evals/RESULTS.md
 ```
 
-```json
-{
-  "criteria": {
-    "tool_trajectory_avg_score": 0.9,
-    "final_response_match_v2": 0.7
-  }
-}
-```
+**Why property checks instead of exact trajectory matching:** ADK's `tool_trajectory_avg_score` compares exact tool sequences, including agent hand-offs, so a correct run that takes an equally valid path (e.g. asking a question first, or opening a listing before enquiring) fails. Our cases are about safety and correctness ("publish always runs the screening", "never search for a protected species", "no doses"), which explicit assertions express precisely. The measured pass rate goes into `evals/RESULTS.md`, the README and the deck.
 
-`tool_trajectory_avg_score` checks that the right agent calls the right tools. LLM-judged criteria (`final_response_match_v2`, or rubric-based `rubric_based_final_response_quality_v1`) check what is said. See <https://adk.dev/evaluate/>.
+The CI workflow skips these (`-m "not live"`) because they cost model calls; run them before each submission-relevant deploy.
 
 ### Eval cases (minimum set)
 

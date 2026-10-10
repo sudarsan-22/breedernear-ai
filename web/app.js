@@ -256,7 +256,7 @@ function empty(iconName, title, text, action) {
   return h("div", { class: "empty" }, h("div", { class: "ico green" }, icon(iconName)), h("b", {}, title), h("div", {}, text),
     action ? h("div", { style: "margin-top:14px" }, action) : null);
 }
-const disclaimer = () => h("p", { class: "disclaimer" }, "Prototype — sample breeders, listings and products. No payments. Not veterinary advice.");
+const disclaimer = () => h("p", { class: "disclaimer" }, "Prototype — sample breeders, listings and products, with illustrative photos. No payments. Not veterinary advice.");
 
 // ---------------------------------------------------------------- sheet
 const sheet = $("sheet");
@@ -298,7 +298,7 @@ async function openListing(id, card) {
     r.description ? h("p", { class: "muted", style: "margin:0" }, r.description) : null,
     r.health_notes ? h("p", { style: "margin:8px 0 0" }, h("b", {}, "Health: "), r.health_notes) : null,
     h("div", { class: "h-sub" }, "Trust checks"), checksGroup(r.checks), questionsCallout(r.questions_to_ask_seller),
-    h("p", { class: "disclaimer", style: "margin-top:18px" }, c.sample_data ? "Sample listing from a fictional breeder." : "Your own listing (visible only to you)."),
+    h("p", { class: "disclaimer", style: "margin-top:18px" }, c.sample_data ? "Sample listing from a fictional breeder. Illustrative photo." : "Your own listing (visible only to you)."),
   ];
   openSheet("Pet", content, [
     h("button", { class: "btn primary block", type: "button", onclick: () => contactView(c, r) }, icon("mail"), "Contact breeder"),

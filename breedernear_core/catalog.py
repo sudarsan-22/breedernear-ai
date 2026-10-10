@@ -5,6 +5,7 @@ disagree with the trust rules.
 """
 
 from collections.abc import Callable
+from functools import lru_cache
 from pathlib import Path
 
 from breedernear_core.data import load_seed
@@ -20,6 +21,7 @@ DRAFT_FIELDS = ("species_common", "variety", "animal_group", "count", "unit", "a
                 "locality", "health_notes", "sawb_registration_no", "parivesh_registration_id")
 
 
+@lru_cache(maxsize=128)
 def _photo_hash(path: str) -> str | None:
     file = WEB_DIR / path
     return dhash(file.read_bytes()) if file.is_file() else None

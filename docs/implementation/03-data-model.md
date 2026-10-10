@@ -31,7 +31,8 @@ Seed about 12 breeders across Coimbatore, Tiruppur, Erode, Salem, Madurai, Chenn
   "visibility": "public",
   "owner_guest_id": null,
   "draft": { "...ListingDraft..." },
-  "photos": [{"upload_id": "UPL_a1", "image_path": "/img/listings/LST-0007-1.webp", "phash": "c3a1f0..."}],
+  "photos": ["img/listings/LST-0007.webp"],
+  "photo_hashes": ["c3a1f0..."],
   "screening": { "...Screening..." },
   "trust_level": "TRUSTED",
   "trust_score": 90,
@@ -123,7 +124,7 @@ Bucket `gs://<PROJECT_ID>-breedernear-uploads` (`asia-south1`, uniform access, *
 | `data/seed/price_ranges.json`, `districts.json`, `species.json` | Reference data | Us (founder's experience; labelled sample) |
 | `data/seed/protected_species.json`, `cites_species.json` | Species lists with `source` per entry | Us, from official schedules/CITES lists |
 | `data/seed/sawb_registry_sample.json` | ~10 fake registrations (`SIM-` prefix) | Us |
-| `web/img/listings/*`, `web/img/products/*` | Images | Generated with a Gemini image model, or our own photos. Recorded in `ATTRIBUTIONS.md`. |
+| `web/img/listings/*` | One illustrative photo per visible sample listing (the reused-photo demo pair shares one on purpose) | Generated with `gemini-3.1-flash-image` by `scripts/generate_sample_images.py`; labelled "Illustrative photo" in the app; recorded in `ATTRIBUTIONS.md` |
 | `data/samples/*` | Demo/eval photos (healthy pair, dyed-looking bird, duplicate, screenshot of a "scam" post we write ourselves) | Us |
 
 `scripts/seed_firestore.py` loads the seed files idempotently. Screening for sample listings is computed by the same trust code as guest listings (`breedernear_core/catalog.py`), including pHashes of seeded listing images once they exist; re-run the script after changing trust rules. Local runs (`BREEDERNEAR_BACKEND=memory`) load the same sample data in memory.

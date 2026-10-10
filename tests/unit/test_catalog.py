@@ -1,7 +1,5 @@
-from conftest import make_image
 
 from breedernear_core.catalog import breeders, seed_listings
-from breedernear_core.services.images import dhash
 
 
 def by_id(records):
@@ -32,15 +30,30 @@ def test_only_demo_cases_are_not_trusted():
             assert r["trust_level"] == "TRUSTED", r["id"]
 
 
-def test_reused_photo_is_flagged_once_images_exist():
-    same = dhash(make_image(3))
-    r = by_id(seed_listings(photo_hash=lambda path: same))
-    assert r["LST-0011"]["trust_level"] == "TRUSTED"
-    checks = {c["name"] for c in r["LST-0013"]["screening"]["checks"]}
-    assert "duplicate_photo" in checks and r["LST-0013"]["trust_level"] == "CAUTION"
+def test_without_photos_there_is_no_duplicate_check():
+    r = by_id(seed_listings(photo_hash=lambda path: None))
+    assert r["LST-0013"]["trust_level"] == "TRUSTED" and r["LST-0013"]["photo_hashes"] == []
 
 
 def test_screening_is_computed_not_stored_in_seed_file():
     from breedernear_core.data import load_seed
     raw = load_seed("listings.json")["listings"]
     assert all("screening" not in x and "trust_level" not in x for x in raw)
+
+
+def test_every_visible_sample_listing_has_its_own_photo_file():
+    from breedernear_core.catalog import WEB_DIR
+    records = seed_listings()
+    for r in records:
+        if r["status"] == "BLOCKED":
+            assert r["photos"] == []
+            continue
+        assert r["photos"] and (WEB_DIR / r["photos"][0]).is_file(), r["id"]
+    shared = [r["id"] for r in records if r["photos"] == ["img/listings/cockatiel-lutino-1.webp"]]
+    assert shared == ["LST-0011", "LST-0013"]                     # the deliberate reused-photo demo
+
+
+def test_reused_photo_demo_is_caution_with_real_images():
+    r = by_id(seed_listings())
+    assert "duplicate_photo" in {c["name"] for c in r["LST-0013"]["screening"]["checks"]}
+    assert r["LST-0013"]["trust_level"] == "CAUTION"

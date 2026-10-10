@@ -102,7 +102,7 @@ All tools return `{"status": "ok" | "error", ...}`. Errors include a `message` t
 | `create_enquiry` | `(listing_id, message)` | Stored with `demo: true`; refuses BLOCKED listings |
 | `build_starter_kit` | `(species, count)` | Product rules per species; `welfare_rules` minimum cage size; max 8 items; total |
 | `care_plan` | `(species, age_months=None)` | Gemini → `CarePlan` schema; vet warning signs required; disclaimer appended |
-| `add_to_cart` / `view_cart` | `(product_id, quantity=1)` / `()` | Stock check; demo cart |
+| `add_to_cart` / `view_cart` | `(product_ids)` / `()` | Stock check (max 10 each); demo cart, no payment |
 
 `screen_listing(listing)` is internal (called by `publish_listing` and `check_external_listing`). It is not exposed to the model, so the model can't skip it or re-run it selectively.
 

@@ -67,26 +67,27 @@ Unpublished `ListingDraft` + `upload_ids` + `breeder_id`. Deleted on publish.
 { "listing_id": "LST-0007", "breeder_id": "BRD-CBE-001", "guest_id": "...", "message": "...", "demo": true, "created_at": "..." }
 ```
 
-### `products/{product_id}` (accessories catalogue)
+### Accessories catalogue (`data/seed/products.json`, read-only)
 
 ```json
 {
-  "id": "PRD-CAGE-012",
+  "id": "PRD-CAGE-003",
   "name": "Roomy Flight Cage 76×46×92 cm",
   "brand": "Featherhaven",
-  "species": ["lovebird", "cockatiel", "budgerigar"],
+  "species": ["budgerigar", "lovebird_peach_faced", "cockatiel", "..."],
   "category": "cage",
   "dimensions_cm": [76, 46, 92],
   "price_inr": 3499,
   "stock": 15,
-  "image": "/img/products/PRD-CAGE-012.webp",
   "description": "..."
 }
 ```
 
-Fictional brands only: Featherhaven, Tailnook, PawNest, Whiskerwell. Each name was web-searched on 10 Oct and no pet brand with that name was found ("Tailwise" was dropped because it is a real dog-breeder marketplace). Re-check before adding a new brand name. No medicines are sold. Seed about 50 products: cages, perches, feeders, seed/pellet food, cuttlebone, nest boxes, dog beds, collars, puppy food, cat litter, carriers.
+The catalogue is a versioned file like the other reference data (the demo cart never changes stock). Starter kits pick the cheapest in-stock product per category for the species; cages must pass `welfare_rules.cage_is_big_enough` for the species and count, and the deliberately too-small `PRD-CAGE-001` demonstrates that rule. Breeding products (nest boxes) are never put in a starter kit.
 
-### `guests/{guest_id}/cart/current`
+Fictional brands only: Featherhaven, Tailnook, PawNest, Whiskerwell. Each name was web-searched on 10 Oct and no pet brand with that name was found ("Tailwise" was dropped because it is a real dog-breeder marketplace). Re-check before adding a new brand name. No medicines are sold. 45 products: cages, perches, feeders, seed/pellet food, cuttlebone, nest boxes, dog beds, collars, puppy food, cat litter, carriers.
+
+### `carts/{guest_id}`
 
 Demo cart: `{"items": [{"product_id": "...", "quantity": 1}], "updated_at": "..."}`
 

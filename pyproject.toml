@@ -8,7 +8,10 @@ license = "MIT"
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
-markers = ["live: calls real Google Cloud / Gemini (skipped in CI)"]
+markers = [
+    "live: calls real Google Cloud / Gemini (skipped in CI)",
+    "ui: headless-browser checks; needs Playwright (skipped when it is not installed)",
+]
 
 [tool.ruff]
 line-length = 110

@@ -1229,7 +1229,8 @@ function renderHeader() {
   $("brand-mark").replaceChildren(icon("paw"));
   $("district-btn").hidden = !signedIn || isSeller();
   $("cart-btn").hidden = !signedIn || isSeller();
-  $("district-btn").replaceChildren(icon("pin"), h("span", {}, districtName(state.district)));
+  $("district-btn").replaceChildren(icon("pin"), h("span", { class: "pill-text" }, districtName(state.district)));
+  $("district-btn").setAttribute("aria-label", `District: ${districtName(state.district)}. Change`);
   $("cart-btn").replaceChildren(...[icon("bag"), state.cartCount ? h("span", { class: "badge-dot" }, state.cartCount) : null].filter(Boolean));
   $("cart-btn").setAttribute("aria-label", `Cart, ${state.cartCount} item${state.cartCount === 1 ? "" : "s"}`);
   $("role-pill").hidden = !isSeller();

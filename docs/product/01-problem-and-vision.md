@@ -39,7 +39,7 @@ What he saw, again and again:
 
 An AI agent system that connects breeders and buyers **directly, safely and fairly**:
 
-1. **List (breeder copilot):** a breeder sends photos plus a casual message, the way they would post in a WhatsApp group ("4 lutino lovebird pairs, 5 months, ₹1800 per pair, Saibaba Colony"), in English, Tamil or a mix. Gemini turns it into a complete structured listing with species, variety, age, count and price, and suggests a fair price range. The breeder taps "Publish".
+1. **List (breeder listing assistant):** a breeder sends photos plus a casual message, the way they would post in a WhatsApp group ("4 lutino lovebird pairs, 5 months, ₹1800 per pair, Saibaba Colony"), in English, Tamil or a mix. Gemini turns it into a complete structured listing with species, variety, age, count and price, and suggests a fair price range. The breeder taps "Publish".
 2. **Check (trust & compliance agent):** every listing is screened before buyers see it:
    - protected Indian native species are **blocked**
    - signs of dyed or disguised birds and visible health concerns in photos are flagged
@@ -70,7 +70,7 @@ An AI agent system that connects breeders and buyers **directly, safely and fair
 | Personalisation | Pet-fit matching (home, experience, budget, family) and personalised kits |
 | Fraud prevention | Trust & compliance agent (illegal species, dyed birds, reused photos, price anomalies, scam language) |
 | Customer insights | Fair-price ranges and demand signals per district |
-| Inventory / operational efficiency | Breeder listing copilot turns a phone message into a structured listing |
+| Inventory / operational efficiency | Breeder listing assistant turns a phone message into a structured listing |
 
 ## Impact (for the deck)
 

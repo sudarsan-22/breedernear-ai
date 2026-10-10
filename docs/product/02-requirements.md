@@ -31,7 +31,7 @@ Buying and selling happen in the **same app**. A new user must be able to comple
 | ID | Feature | Scope |
 |---|---|---|
 | F1 | Web app with **three tabs** (Pets · Local Breeders · BreederNear AI), district picker, cart, first-visit welcome card. Guest session, no login. | **MVP** |
-| F2 | **Breeder listing copilot:** photos + casual message (English/Tamil/mixed) → AI-filled **sell form** (My farm) or chat draft → edit → publish | **MVP** |
+| F2 | **Breeder listing assistant:** photos + casual message (English/Tamil/mixed) → AI-filled **sell form** (My farm) or chat draft → edit → publish | **MVP** |
 | F3 | **Trust & compliance screening** on every listing → trust score, level, reasons | **MVP** |
 | F3b | **"Is this post safe?":** a buyer uploads a screenshot or pastes a listing seen on WhatsApp/Instagram/Facebook and gets the same screening (form in Pets, or chat) | **MVP**: reuses the F2 + F3 pipeline |
 | F4 | **Buyer matching:** Pets tab grid with filters (species, district, max price, trusted only) and listing pages; "Which pet suits me?" quiz; the same in chat via the match agent | **MVP** |
@@ -55,7 +55,7 @@ Buying and selling happen in the **same app**. A new user must be able to comple
 - "Try the demo" buttons: **Priya** (buyer, Tiruppur) opens Pets filtered for her; **Karthik** (breeder, Coimbatore) opens My farm › Sell with his message prefilled.
 - The footer always shows: "Prototype — sample breeders, listings and products. No payments. Not veterinary advice."
 
-### F2: Breeder listing copilot
+### F2: Breeder listing assistant
 *As a breeder, I want to create a listing from my phone in under a minute, the way I'd post in a WhatsApp group.*
 - Input: 1–4 photos (JPEG/PNG/WebP/HEIC, ≤ 5 MB each) plus free text in English, Tamil or a mix.
 - Output: listing draft (schema in [../implementation/02-agent-design.md](../implementation/02-agent-design.md#listingdraft)) with species, variety/colour, count, sex (if stated), age, price per unit/pair, district, locality, vaccination/health notes, description, and the fields the breeder still needs to fill.

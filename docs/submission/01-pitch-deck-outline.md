@@ -11,7 +11,7 @@ The T&C (Deliverables) require the deck to cover **solution architecture and the
 | 3 | **The problem, in four parts** | Discovery (can't find breeders), trust (scams, sick animals), legality (protected birds, dyed munias, unregistered dog breeders; **cited news/rules**), time (breeders lose hours to manual selling) | Alignment & Impact |
 | 4 | **Theme alignment** | Theme keyword → BreederNear feature table (conversational shopping, product discovery, personalisation, fraud prevention, customer insights, efficiency) | Alignment (25%) |
 | 5 | **Solution overview** | One app, both sides, three tabs: **Pets** (buy), **Local Breeders** (direct farm price, no broker; My farm to sell), **BreederNear AI** (ask anything). Flow: List → Check → Find → Start right, one screenshot per step. Point: everything works by tapping, and AI does the hard parts on every screen. | Alignment, UX |
-| 6 | **Breeder copilot** | Before: WhatsApp message. After: structured listing with fair-price bar. Timed: "≤ 60 s". | Innovation, UX |
+| 6 | **Breeder listing assistant** | Before: WhatsApp message. After: structured listing with fair-price bar. Timed: "≤ 60 s". | Innovation, UX |
 | 7 | **Trust & compliance** | Trust card screenshot; the signals table; BLOCKED example; "Is this listing safe?" for outside posts | Innovation, Impact |
 | 8 | **Solution architecture** | Diagram from [01-architecture.md](../implementation/01-architecture.md): Cloud Run, 5 ADK agents, Gemini, Firestore, Cloud Storage; list of services and what each does | Technical (40%) |
 | 9 | **How the AI works** | Multimodal + multilingual extraction to JSON; vision screening; deterministic trust score; pHash + geo + rules alongside Gemini. Show one real `ListingDraft` JSON. | Technical (40%) |

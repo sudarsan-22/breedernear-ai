@@ -1,4 +1,4 @@
-"""ADK tools for the breeder listing copilot and the trust agent."""
+"""ADK tools for the breeder listing assistant and the trust agent."""
 
 from google.adk.tools import ToolContext
 

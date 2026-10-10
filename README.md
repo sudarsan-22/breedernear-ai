@@ -51,7 +51,7 @@ flowchart TD
         API[FastAPI endpoints]
         subgraph AG[Google ADK multi-agent system]
             ROOT[Concierge]
-            LIST[Listing copilot]
+            LIST[Listing assistant]
             TRUST[Trust & compliance]
             MATCH[Buyer matching]
             CARE[Starter kit & care]

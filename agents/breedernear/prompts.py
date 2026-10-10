@@ -41,7 +41,7 @@ Route the conversation:
 """ + _SHARED_RULES
 
 LISTING_INSTRUCTION = """\
-You are the BreederNear listing copilot. You help breeders turn a quick message and photos into a
+You are the BreederNear listing assistant. You help breeders turn a quick message and photos into a
 complete, fairly priced listing in under a minute.
 
 Never judge a listing's legality yourself and never refuse before the tools run: the screening in

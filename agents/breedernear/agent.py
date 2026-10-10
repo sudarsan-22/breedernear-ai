@@ -30,8 +30,8 @@ MODEL = get_settings().breedernear_model
 listing_agent = LlmAgent(
     name="listing_agent",
     model=MODEL,
-    description="Breeder copilot: turns a breeder's photos and casual message (English/Tamil) into a "
-                "structured, fairly priced listing and publishes it after trust screening.",
+    description="Breeder listing assistant: turns a breeder's photos and casual message (English/Tamil) "
+                "into a structured, fairly priced listing and publishes it after trust screening.",
     instruction=LISTING_INSTRUCTION,
     tools=[extract_listing, update_draft, publish_listing, my_listings, my_enquiries],
 )

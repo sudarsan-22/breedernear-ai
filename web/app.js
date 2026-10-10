@@ -705,7 +705,7 @@ async function farmEnquiries(pane) {
 }
 
 // ---------------------------------------------------------------- AI tab (ADK agents)
-const AGENTS = { breedernear_concierge: "Concierge", listing_agent: "Listing copilot", trust_agent: "Trust checker", match_agent: "Buyer guide", care_agent: "Care guide" };
+const AGENTS = { breedernear_concierge: "Concierge", listing_agent: "Listing assistant", trust_agent: "Trust checker", match_agent: "Buyer guide", care_agent: "Care guide" };
 const LOADING = { transfer_to_agent: "Passing you to the right assistant…", extract_listing: "Reading your photos and message…", update_draft: "Updating your draft…",
   publish_listing: "Running trust checks…", check_external_listing: "Running trust checks…", recommend_species: "Matching pets to your home…",
   search_listings: "Finding trusted pets near you…", get_listing: "Opening the listing…", create_enquiry: "Sending your enquiry…",

@@ -22,7 +22,7 @@ flowchart TD
         ADK[ADK runtime<br/>/run_sse, sessions]
         subgraph AG[ADK agents]
             ROOT[breedernear_concierge<br/>root agent]
-            LIST[listing_agent<br/>breeder copilot]
+            LIST[listing_agent<br/>breeder listing assistant]
             TRUST[trust_agent<br/>screening & compliance]
             MATCH[match_agent<br/>buyer pet & breeder matching]
             CARE[care_agent<br/>starter kit & care plan]

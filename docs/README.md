@@ -32,7 +32,7 @@ This folder is the single source of truth for **what** we are building, **why**,
 *"The breeder is 50 metres away. The customer never finds them."* That's the founder's 5 years as a bird breeder and broker in Coimbatore, in one line.
 
 BreederNear AI is an **agentic, trusted breeder-to-buyer pet commerce system** for India, entered under the **Retail & Commerce** theme. Five **Google ADK** agents on **Gemini** do the work:
-- **Listing copilot:** a breeder's photos plus a WhatsApp-style Tamil/English message become a structured, fairly priced listing in under a minute.
+- **Listing assistant:** a breeder's photos plus a WhatsApp-style Tamil/English message become a structured, fairly priced listing in under a minute.
 - **Trust & compliance:** every listing is screened. Protected native species are blocked in code. Dyed birds, health signs, reused photos, price anomalies, scam language and missing dog-breeder registration are flagged. The result is an explainable trust score.
 - **Buyer matching:** suitable pets, then trusted breeders nearby at fair prices.
 - **Starter kit & care:** what to buy and a first-14-days care plan.
@@ -48,7 +48,7 @@ It runs on **Cloud Run** with **Firestore** and **Cloud Storage**. The idea come
 | Team formation (closes 11 Oct) | Done: 2 members (Sudarsan N, lead; Shreya Azad), both working professionals; final |
 | "Prompt your jersey" activity | Done |
 | Documentation | ✅ This folder |
-| Prototype | Live: listing copilot (photos + English/Tamil text → screened listing), trust check for external posts, code-enforced BLOCKED for protected species (10 Oct). Buyer matching live (species shortlist by rules, nearby trusted listings, demo enquiries; 40 sample listings in Firestore). Starter kit with welfare-sized cages, 14-day care plan and demo cart live. Web app live: home, three modes, demo buttons, streaming chat, cards for every tool, photo upload, activity panel, cart and inbox; tested in a headless browser at 375 px and 1280 px (10 Oct). Three-tab app live (10 Oct): **Pets** (browse, filters, listing page, contact, starter kit + AI care plan, quiz, post check), **Local Breeders** (directory, breeder pages, **My farm**: AI-filled sell form, listings, enquiries), **BreederNear AI** (agents chat). Rate limiting on all AI routes. Next: listing images, evals, first-time-user test |
+| Prototype | Live: listing assistant (photos + English/Tamil text → screened listing), trust check for external posts, code-enforced BLOCKED for protected species (10 Oct). Buyer matching live (species shortlist by rules, nearby trusted listings, demo enquiries; 40 sample listings in Firestore). Starter kit with welfare-sized cages, 14-day care plan and demo cart live. Web app live: home, three modes, demo buttons, streaming chat, cards for every tool, photo upload, activity panel, cart and inbox; tested in a headless browser at 375 px and 1280 px (10 Oct). Three-tab app live (10 Oct): **Pets** (browse, filters, listing page, contact, starter kit + AI care plan, quiz, post check), **Local Breeders** (directory, breeder pages, **My farm**: AI-filled sell form, listings, enquiries), **BreederNear AI** (agents chat). Rate limiting on all AI routes. Next: listing images, evals, first-time-user test |
 | Deployment | ✅ Live on Cloud Run: https://breedernear-655711985039.asia-south1.run.app (10 Oct) |
 | Deck / video | Not started |
 | Submission | Not started |

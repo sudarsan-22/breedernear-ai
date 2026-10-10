@@ -8,7 +8,7 @@ Confirm ADK API details against the installed version (`pip show google-adk`, th
 
 ```
 breedernear_concierge (root)
-├── listing_agent   breeder copilot
+├── listing_agent   breeder listing assistant
 ├── trust_agent     screening, "is this listing safe?", explanations
 ├── match_agent     buyer: which pet, which breeder
 └── care_agent      buyer: starter kit + first-14-days care plan
@@ -27,7 +27,7 @@ Delegation uses ADK agent transfer (`transfer_to_agent`) based on each agent's `
   - What to buy or how to care for a new pet → `care_agent`.
   - Listing requests always go to `listing_agent`, even for species that may be protected: the code screening decides and records the result (the concierge never refuses a listing itself). Buyers asking for a protected species are refused by `match_agent` and by `search_listings`.
 
-### listing_agent (breeder copilot)
+### listing_agent (breeder listing assistant)
 
 - **Description:** "Turns a breeder's photos and casual message (English/Tamil) into a structured pet listing, suggests a fair price, and publishes it after screening."
 - **Tools:** `extract_listing`, `update_draft`, `publish_listing`, `my_listings`, `my_enquiries`

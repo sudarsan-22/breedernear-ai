@@ -37,8 +37,6 @@ SSE events carry an `author` (agent) and `content.parts` (`text`, `function_call
 |---|---|---|---|
 | `GET /api/health` | — | `{"status":"ok","model":"...","version":"<git sha>"}` | Smoke test |
 | `POST /api/uploads` | multipart `file`, `kind`; header `X-Guest-Id` | `{"upload_id":"UPL_…"}` | Type/size validation (≤ 5 MB) |
-| `POST /api/demo/breeder` | — | Demo breeder profile (Karthik) bound to this guest | "Try as breeder" |
-| `POST /api/demo/buyer` | — | Demo buyer context (Priya, Tiruppur) | "Try as buyer" |
 | `GET /api/listings` | `species`, `district`, `max_price` | Published listings (never BLOCKED) | Browse view, same function as `search_listings` |
 | `GET /api/listings/{id}` | — | Listing + screening | |
 | `GET /api/breeder/listings` | header `X-Guest-Id` | Demo breeder's listings incl. BLOCKED/DRAFT | |
@@ -117,11 +115,19 @@ Upload a screenshot and/or paste text → trust card with reasons and "Questions
 | Care plan card | Phases as steps; "See a vet if" in a highlighted box; disclaimer |
 | Activity panel | Collapsible `agent → tool → short result` |
 
+### Demo buttons
+
+"Try the demo" needs no server endpoint: "Priya" opens buyer mode in a fresh session and sends a preset first message (flat in Tiruppur, 8-year-old daughter, ₹3000); "Karthik" opens breeder mode and sends a Tamil-English lovebird listing. The home-screen mode is stored in the session state (`mode`) so the concierge routes pasted posts in "Is this listing safe?" to the trust agent.
+
 ### Client state
 
 - `localStorage.breedernear_guest_id`: UUID v4
-- `localStorage.breedernear_session_id`, `breedernear_mode`
+- `localStorage.breedernear_session_{mode}` (one chat per mode, restored after reload), `breedernear_mode`
 - Wrap every `localStorage` access in try/catch with an in-memory fallback.
+- Photos are resized in the browser to 1600 px JPEG before upload (phone photos often exceed 5 MB).
+- Agent replies are rendered with a minimal markdown renderer that escapes HTML first.
+- Agents keep replies short because the cards carry the details (shared prompt rule).
+- Tamil text uses Noto Sans Tamil from Google Fonts so it renders on laptops without Tamil fonts.
 
 ### Quality bar
 

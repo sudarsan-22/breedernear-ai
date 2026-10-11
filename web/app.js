@@ -65,6 +65,7 @@ function h(tag, attrs = {}, ...children) {
 }
 const ICONS = {
   paw: '<circle cx="6.5" cy="9.5" r="1.8"/><circle cx="10" cy="5.8" r="1.8"/><circle cx="14" cy="5.8" r="1.8"/><circle cx="17.5" cy="9.5" r="1.8"/><path d="M8 17.2c0-2.6 1.8-5 4-5s4 2.4 4 5c0 1.7-1.6 2.6-4 2.6s-4-.9-4-2.6z"/>',
+  heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
   barn: '<path d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   sparkles: '<path d="M11 3.5l1.7 4.6 4.6 1.7-4.6 1.7L11 16.1l-1.7-4.6-4.6-1.7 4.6-1.7z"/><path d="M18.5 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
   bag: '<path d="M5.5 8h13l-1 12.5h-11z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/>',
@@ -227,7 +228,7 @@ function media(c, cls = "media") {
 }
 function petCard(c) {
   const m = media(c);
-  m.append(h("div", { class: "float" }, tag(c.trust_level), c.is_yours ? h("span", { class: "tag neutral" }, "Yours") : null));
+  m.append(h("div", { class: "float" }, tag(c.trust_level), c.is_yours ? h("span", { class: "tag neutral" }, "Yours") : null, matchChip(c)));
   return h("button", { class: "pet", type: "button", onclick: () => openListing(c.listing_id, c),
     "aria-label": `${c.species} ${c.variety || ""}, ${inr(c.price_inr)} per ${unitWord(c.unit)}, ${LEVEL_WORD[c.trust_level]}` },
     m,
@@ -330,13 +331,17 @@ async function openListing(id, card) {
     facts,
     r.description ? h("p", { class: "muted", style: "margin:0" }, r.description) : null,
     r.health_notes ? h("p", { style: "margin:8px 0 0" }, h("b", {}, "Health: "), r.health_notes) : null,
+    compat.byKey[c.species_key] ? h("div", { class: "callout info inline", style: "margin-top:10px" }, h("b", {}, `${compat.byKey[c.species_key].percent}% match for your home`),
+      (compat.byKey[c.species_key].percent ? compat.byKey[c.species_key].reasons : compat.byKey[c.species_key].watch_outs).join(" · ")) : null,
     h("div", { class: "h-sub" }, "Trust checks"), checksGroup(r.checks), questionsCallout(r.questions_to_ask_seller),
     h("p", { class: "disclaimer", style: "margin-top:18px" }, c.sample_data ? "Sample listing from a fictional breeder. Illustrative photo." : "Your own listing (visible only to you)."),
   ];
   const actions = isSeller()
     ? [c.is_yours ? h("button", { class: "btn secondary block", type: "button", onclick: () => { closeSheet(); go("listings"); } }, "Manage in Listings")
         : h("p", { class: "muted small", style: "text-align:center;margin:0" }, "You're signed in as a seller. Buying uses a customer account.")]
-    : [h("button", { class: "btn primary block", type: "button", onclick: () => contactView(c, r) }, icon("mail"), "Contact breeder"),
+    : [h("div", { style: "display:grid;grid-template-columns:1fr 1fr;gap:8px" },
+        h("button", { class: "btn primary", type: "button", onclick: () => contactView(c, r) }, icon("mail"), "Contact"),
+        h("button", { class: "btn primary", type: "button", onclick: () => visitSheet(c) }, icon("pin"), "Book a visit")),
       h("div", { style: "display:grid;grid-template-columns:1fr 1fr;gap:8px" },
         h("button", { class: "btn secondary", type: "button", onclick: () => kitView(c) }, "Starter kit"),
         h("button", { class: "btn secondary", type: "button", onclick: () => askAI(`Tell me about listing ${c.listing_id}. Is it a good choice for a first-time owner?`) }, icon("sparkles"), "Ask AI"))];
@@ -348,6 +353,7 @@ function contactView(c, r) {
   const text = h("textarea", { class: "big-input", rows: 4, maxlength: 500, "aria-label": "Message to the breeder" });
   text.value = `Hello, is your ${[c.variety, c.species].filter(Boolean).join(" ")} still available? Can I visit to see ${c.unit === "pair" ? "them" : "it"} this week?`;
   const send = h("button", { class: "btn primary block", type: "button" }, "Send enquiry");
+  const drafter = draftOpeningButton(c, text);
   send.addEventListener("click", async () => {
     send.disabled = true; send.textContent = "Sending…";
     try {
@@ -360,7 +366,8 @@ function contactView(c, r) {
     } catch (e) { send.disabled = false; send.textContent = "Send enquiry"; toast(e.message); }
   });
   setSheet([backTo(() => openListing(c.listing_id, c)), h("h3", { style: "margin:6px 0 4px;font-size:24px" }, `Message ${c.breeder}`),
-    h("p", { class: "muted", style: "margin:0 0 12px" }, "Keep phone numbers and addresses out of the first message."), text], [send]);
+    h("p", { class: "muted", style: "margin:0 0 12px" }, "Keep phone numbers and addresses out of the first message."), text,
+    h("div", { style: "margin-top:8px" }, drafter)], [send]);
 }
 
 function productRows(items, { addable = true } = {}) {
@@ -431,7 +438,10 @@ function quizSheet(prefill = {}) {
   const go = h("button", { class: "btn primary block", type: "button" }, icon("sparkles"), "Show my matches");
   go.addEventListener("click", async () => {
     go.disabled = true;
-    try { showQuizResults(await api("/api/recommend", { method: "POST", body: JSON.stringify(a) }), a); } catch (e) { toast(e.message); go.disabled = false; }
+    try {
+      showQuizResults(await api("/api/recommend", { method: "POST", body: JSON.stringify(a) }), a);
+      if (!isSeller()) api("/api/buyer/profile", { method: "POST", body: JSON.stringify({ profile: a }) }).then(() => loadCompat(true)).catch(() => {});
+    } catch (e) { toast(e.message); go.disabled = false; }
   });
   openSheet("Which pet suits me?", [
     h("p", { class: "muted", style: "margin:0 0 16px" }, "A few taps. Suggestions come from care rules and sample market prices."),
@@ -526,7 +536,7 @@ async function addToCart(ids) {
 
 // ---------------------------------------------------------------- views
 const main = $("main");
-const CUSTOMER_TABS = [["pets", "Pets", "paw"], ["breeders", "Local Breeders", "barn"], ["ai", "BreederNear AI", "sparkles"], ["account", "Account", "user"]];
+const CUSTOMER_TABS = [["pets", "Pets", "paw"], ["breeders", "Local Breeders", "barn"], ["mypets", "My pets", "heart"], ["ai", "BreederNear AI", "sparkles"], ["account", "Account", "user"]];
 const SELLER_TABS = [["dashboard", "Dashboard", "grid"], ["listings", "Listings", "list"], ["enquiries", "Enquiries", "mail"], ["ai", "AI", "sparkles"], ["farm", "Farm", "barn"]];
 const tabs = () => (isSeller() ? SELLER_TABS : CUSTOMER_TABS);
 
@@ -558,6 +568,7 @@ async function viewPets() {
   if (!chips.some(([k]) => k === f.species)) chips.push([f.species, f.chipLabel || titleCase(f.species.replace(/_/g, " "))]);
   const grid = h("div", {}, h("div", { class: "pet-grid" }, Array.from({ length: 4 }, () => h("div", { class: "skeleton", style: "aspect-ratio:3/4" }))));
   const count = h("div", { class: "count-line" }, " ");
+  const banner = h("div");
   const trusted = h("input", { type: "checkbox", checked: f.trusted });
   trusted.addEventListener("change", () => { f.trusted = trusted.checked; load(); });
   const cap = h("select", { class: "select", "aria-label": "Maximum price" }, PRICE_CAPS.map(([v, t]) => h("option", { value: v, selected: v === String(f.max) }, t)));
@@ -566,7 +577,8 @@ async function viewPets() {
     onclick: (e) => { f.species = k; chipRow.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c === e.currentTarget))); load(); } }, label)));
   async function load() {
     try {
-      const r = await api(`/api/pets?${qs({ district: state.district, species: f.species, max_price: f.max, trusted_only: f.trusted ? "true" : "" })}`);
+      const [r] = await Promise.all([api(`/api/pets?${qs({ district: state.district, species: f.species, max_price: f.max, trusted_only: f.trusted ? "true" : "" })}`), loadCompat()]);
+      banner.replaceChildren(...[profileBanner()].filter(Boolean));
       count.textContent = r.total ? `${r.total} pet${r.total > 1 ? "s" : ""} · trusted first, then nearest` : "";
       grid.replaceChildren(r.results.length ? petGrid(r.results)
         : empty("search", "No pets match", "Try another species, a higher price or turn off “Trusted only”."));
@@ -578,6 +590,7 @@ async function viewPets() {
     h("div", { class: "tiles" },
       h("button", { class: "tile", type: "button", onclick: () => quizSheet() }, h("span", { class: "ico green" }, icon("sparkles")), h("b", {}, "Which pet suits me?"), h("span", {}, "A few taps. AI-matched to your home.")),
       h("button", { class: "tile", type: "button", onclick: checkSheet }, h("span", { class: "ico blue" }, icon("shield")), h("b", {}, "Is this post safe?"), h("span", {}, "Check a WhatsApp or Instagram post."))),
+    banner,
     chipRow,
     h("div", { class: "controls" }, h("label", { class: "switch" }, trusted, h("span", { class: "track", "aria-hidden": "true" }), "Trusted only"), cap),
     count, grid, disclaimer()));
@@ -797,11 +810,12 @@ async function viewSellerListings(filter = "all") {
 
 async function viewSellerEnquiries() {
   const pane = h("div", {}, loading("Loading…"));
-  main.replaceChildren(h("div", { class: "view" }, hero("Your farm", "Enquiries", "Messages from buyers about your listings."), pane, disclaimer()));
+  main.replaceChildren(h("div", { class: "view" }, hero("Your farm", "Enquiries", "Visit requests and messages from buyers."), sellerVisitsSection(), h("div", { class: "h-sub" }, "Messages"), pane, disclaimer()));
   const r = await api("/api/seller/enquiries").catch(() => ({ enquiries: [] }));
   pane.replaceChildren(r.enquiries.length ? h("div", { class: "group" }, r.enquiries.map((e) => h("div", { class: "list-row" },
     h("span", { class: "ico green", style: "width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none" }, icon("mail")),
     h("div", { class: "grow" }, h("div", {}, `“${e.message}”`), h("div", { class: "muted small" }, `${e.listing_id} · ${new Date(e.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`),
+      scanBanner(e.scan, "message"),
       e.reply ? replyQuote("You replied", e.reply)
         : h("div", { style: "margin-top:8px" }, h("button", { class: "btn small secondary", type: "button", onclick: () => replySheet(e) }, icon("sparkles"), "Reply"))))))
     : empty("mail", "No enquiries yet", "When buyers contact you about a listing, their message shows here. Demo tip: on this device, log in as a demo customer, find your pet in Pets (tagged by your farm) and tap Contact."));
@@ -918,6 +932,7 @@ function draftForm(redraw) {
       field("health_notes", "Health", h("textarea", { rows: 2, placeholder: "e.g. Healthy, dewormed, parents on site" }, d.health_notes || "")),
       d.animal_group === "dog" || missing.has("sawb_registration_no") ? text("sawb_registration_no", "Dog-breeder reg.", { hint: "Required for dog breeders (State Animal Welfare Board)", placeholder: "e.g. SIM-TNAWB-DB-0042" }) : null,
       missing.has("parivesh_registration_id") || d.parivesh_registration_id ? text("parivesh_registration_id", "PARIVESH ID", { hint: "Required for CITES-listed birds" }) : null),
+    h("div", { style: "margin:12px 0 4px" }, vaccinationButton(sell.draftId)),
     h("div", { class: "step-label" }, h("span", { class: "num" }, "3"), "Publish"),
     h("p", { class: "muted small", style: "margin:-4px 2px 10px" }, "AI looks at your photos and our rules check the species, price and wording. In this demo, your listings are visible to customer accounts on this device only."),
     sell.busy === "publish" ? loading("Running trust checks…") : publish,
@@ -1218,8 +1233,13 @@ async function viewAccount() {
     h("div", { class: "group" },
       h("button", { class: "row", type: "button", onclick: cartSheet }, h("span", { class: "ico green", style: "width:32px;height:32px;border-radius:9px;display:grid;place-items:center" }, icon("bag")),
         h("span", { class: "grow" }, "Cart"), h("span", { class: "muted", "data-cart-count": "" }, String(state.cartCount)), h("span", { class: "chev" }, icon("chevR"))),
+      h("button", { class: "row", type: "button", onclick: profileSheet }, h("span", { class: "ico green", style: "width:32px;height:32px;border-radius:9px;display:grid;place-items:center" }, icon("sparkles")),
+        h("span", { class: "grow" }, "My home and family (match %)"), h("span", { class: "chev" }, icon("chevR"))),
+      h("button", { class: "row", type: "button", onclick: () => go("mypets") }, h("span", { class: "ico green", style: "width:32px;height:32px;border-radius:9px;display:grid;place-items:center" }, icon("heart")),
+        h("span", { class: "grow" }, "My pets"), h("span", { class: "chev" }, icon("chevR"))),
       h("button", { class: "row", type: "button", onclick: () => go("breeders") }, h("span", { class: "ico green", style: "width:32px;height:32px;border-radius:9px;display:grid;place-items:center" }, icon("barn")),
         h("span", { class: "grow" }, "Local Breeders"), h("span", { class: "chev" }, icon("chevR")))),
+    h("div", { class: "h-sub" }, "My visits"), visitsSection(),
     h("div", { class: "h-sub" }, "My district"), district,
     h("div", { class: "h-sub" }, "Enquiries I sent"), list,
     h("button", { class: "seller-banner", type: "button", style: "margin-top:20px", onclick: becomeSellerSheet },
@@ -1228,7 +1248,7 @@ async function viewAccount() {
   const r = await api("/api/enquiries/sent").catch(() => ({ enquiries: [] }));
   list.replaceChildren(r.enquiries.length ? h("div", { class: "group" }, r.enquiries.map((e) => h("div", { class: "list-row" },
     h("div", { class: "grow" }, `“${e.message}”`, h("div", { class: "muted small" }, `${e.listing_id} · ${new Date(e.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`),
-      e.reply ? replyQuote("Breeder replied", e.reply) : h("div", { class: "muted small" }, "Waiting for a reply")))))
+      e.reply ? [replyQuote("Breeder replied", e.reply), scanBanner(e.reply.scan, "reply")] : h("div", { class: "muted small" }, "Waiting for a reply")))))
     : h("p", { class: "muted" }, "No enquiries yet. Open a pet and tap Contact breeder."));
 }
 
@@ -1353,7 +1373,7 @@ async function demoLogin(role) {
   } catch (e) { toast(e.message); }
 }
 function signedOut(message) {
-  auth.token = null; auth.user = null; clearToken(); resetChat(); state.cartCount = 0;
+  auth.token = null; auth.user = null; clearToken(); resetChat(); resetCompat(); state.cartCount = 0;
   closeSheet(); renderHeader(); viewAuth("login");
   if (message) toast(message);
 }
@@ -1395,7 +1415,7 @@ function route() {
   const fallback = isSeller() ? "dashboard" : "pets";
   const path = location.hash.replace(/^#\/?/, "") || fallback;
   const page = path.split("/")[0];
-  const allowed = isSeller() ? ["dashboard", "listings", "enquiries", "sell", "ai", "farm"] : ["pets", "breeders", "ai", "account"];
+  const allowed = isSeller() ? ["dashboard", "listings", "enquiries", "sell", "ai", "farm"] : ["pets", "breeders", "mypets", "ai", "account"];
   const current = allowed.includes(page) ? page : fallback;
   store.set("breedernear_tab", current);
   renderTabs(current === "sell" ? "listings" : current);
@@ -1403,7 +1423,7 @@ function route() {
   main.classList.toggle("ai-main", current === "ai");
   if (current !== "ai") window.scrollTo({ top: 0 });
   ({ dashboard: viewDashboard, listings: () => viewSellerListings(), enquiries: viewSellerEnquiries, sell: viewSell, farm: viewFarm,
-     breeders: viewBreeders, account: viewAccount, ai: viewAI, pets: viewPets })[current]();
+     breeders: viewBreeders, account: viewAccount, ai: viewAI, pets: viewPets, mypets: viewMyPets })[current]();
 }
 window.addEventListener("hashchange", route);
 $("district-btn").addEventListener("click", districtSheet);

@@ -10,7 +10,7 @@ import sys
 AXE_URL = "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.2/axe.min.js"
 TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
 PASSWORD = "demo12345"
-CUSTOMER_TABS = ["pets", "breeders", "ai", "account"]
+CUSTOMER_TABS = ["pets", "breeders", "mypets", "mypets/PET_DEMO_MANGO", "ai", "account"]
 SELLER_TABS = ["dashboard", "listings", "enquiries", "sell", "farm", "ai"]
 
 

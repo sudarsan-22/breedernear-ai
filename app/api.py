@@ -237,8 +237,10 @@ async def upload(file: UploadFile = File(...), kind: str = Form("listing_photo")
 
 @router.get("/pets")
 def pets(district: str | None = None, species: str | None = None, max_price: int | None = None,
-         trusted_only: bool = False, user: dict = Depends(current_user)) -> dict:
-    return _call(match_service.browse_pets, viewer(user), district, species, max_price, trusted_only)
+         trusted_only: bool = False, min_price: int | None = None, sort: str = "best",
+         offset: int = 0, limit: int = 40, user: dict = Depends(current_user)) -> dict:
+    return _call(match_service.browse_pets, viewer(user), district, species, max_price, trusted_only,
+                 limit, min_price, sort, offset)
 
 
 @router.get("/listings")
@@ -259,9 +261,9 @@ def recommend(body: QuizIn, user: dict = Depends(current_user)) -> dict:
 
 
 @router.get("/breeders")
-def breeders_list(district: str | None = None, species: str | None = None,
+def breeders_list(district: str | None = None, species: str | None = None, within_km: int | None = None,
                   user: dict = Depends(current_user)) -> dict:
-    return _call(directory_service.list_breeders, viewer(user), district, species)
+    return _call(directory_service.list_breeders, viewer(user), district, species, within_km)
 
 
 @router.get("/breeders/{breeder_id}")

@@ -25,6 +25,32 @@ def test_browse_filters(seeded):
     assert cheap and all(c["price_inr"] <= 600 for c in cheap)
 
 
+def test_browse_price_range_sort_and_pages(seeded):
+    mid = match_service.browse_pets(GUEST, "Tiruppur", min_price_inr=1000, max_price_inr=10000)["results"]
+    assert mid and all(1000 <= c["price_inr"] <= 10000 for c in mid)
+    def prices(sort):
+        return [c["price_inr"] for c in match_service.browse_pets(GUEST, "Tiruppur", sort=sort)["results"]]
+
+    low, high = prices("price_low"), prices("price_high")
+    assert low == sorted(low)
+    assert high == sorted(high, reverse=True)
+    nearest = match_service.browse_pets(GUEST, "Tiruppur", sort="nearest")["results"]
+    near = [c["distance_km"] for c in nearest]
+    assert near == sorted(near)
+    page1 = match_service.browse_pets(GUEST, "Tiruppur", limit=12)
+    page2 = match_service.browse_pets(GUEST, "Tiruppur", limit=12, offset=12)
+    assert page1["total"] == page2["total"] == 38 and len(page1["results"]) == len(page2["results"]) == 12
+    assert not {c["listing_id"] for c in page1["results"]} & {c["listing_id"] for c in page2["results"]}
+    with pytest.raises(ListingError):
+        match_service.browse_pets(GUEST, "Tiruppur", sort="random")
+
+
+def test_directory_within_distance(seeded):
+    rows = directory.list_breeders(GUEST, "Tiruppur", within_km=25)["breeders"]
+    assert all(r["distance_km"] <= 25 for r in rows)
+    assert len(rows) < len(directory.list_breeders(GUEST, "Tiruppur")["breeders"])
+
+
 def test_browse_cards_carry_fair_range_and_breeder_link(seeded):
     card = match_service.browse_pets(GUEST, "Coimbatore", "lovebird")["results"][0]
     assert card["fair_price_range_inr"] and card["breeder_id"]

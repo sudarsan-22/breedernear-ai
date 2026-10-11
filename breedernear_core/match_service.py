@@ -249,9 +249,21 @@ def search_listings(guest_id: str, species: str, district: str, max_price_inr: i
     return result
 
 
+SORTS = {
+    "best": lambda m: m[:3],                      # trusted first, then nearest, then cheapest
+    "price_low": lambda m: (m[2], m[1]),
+    "price_high": lambda m: (-m[2], m[1]),
+    "nearest": lambda m: (m[1], m[0], m[2]),
+}
+
+
 def browse_pets(guest_id: str, district: str | None = None, species: str | None = None,
-                max_price_inr: int | None = None, trusted_only: bool = False, limit: int = 40) -> dict:
-    """The Pets tab grid: every visible pet, trusted first, then nearest, then cheapest."""
+                max_price_inr: int | None = None, trusted_only: bool = False, limit: int = 40,
+                min_price_inr: int | None = None, sort: str = "best", offset: int = 0) -> dict:
+    """The Pets tab grid: every visible pet, by default trusted first, then nearest, then cheapest."""
+    if sort not in SORTS:
+        raise ListingError(f"Unknown sort '{sort}'. Use one of: {', '.join(SORTS)}.")
+    limit, offset = max(1, min(limit, 60)), max(0, offset)
     home = resolve_district(district) if district else None
     if district and home is None:
         raise ListingError(f"I don't know the district '{district}' yet.")
@@ -266,14 +278,17 @@ def browse_pets(guest_id: str, district: str | None = None, species: str | None 
             continue
         if max_price_inr is not None and (lst.get("price_inr") or 0) > max_price_inr:
             continue
+        if min_price_inr is not None and (lst.get("price_inr") or 0) < min_price_inr:
+            continue
         if trusted_only and lst["trust_level"] != "TRUSTED":
             continue
         km = _distance(home, lst.get("district")) if home else None
         far = km if km is not None else float("inf")
         matches.append((TRUST_ORDER.get(lst["trust_level"], 2), far, lst.get("price_inr") or 0, km, lst))
-    matches.sort(key=lambda m: m[:3])
-    return {"status": "ok", "district": home, "total": len(matches),
-            "results": [_card(m[4], guest_id, m[3]) for m in matches[:limit]], "note": SAMPLE_NOTE}
+    matches.sort(key=SORTS[sort])
+    page = matches[offset:offset + limit]
+    return {"status": "ok", "district": home, "total": len(matches), "offset": offset, "limit": limit,
+            "results": [_card(m[4], guest_id, m[3]) for m in page], "note": SAMPLE_NOTE}
 
 
 def _visible_listing(guest_id: str, listing_id: str) -> dict:

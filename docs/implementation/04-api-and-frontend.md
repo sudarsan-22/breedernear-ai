@@ -48,11 +48,11 @@ SSE events carry an `author` (agent) and `content.parts` (`text`, `function_call
 | `GET /api/seller/dashboard` | seller token | Counts (active, paused, sold, blocked listings; enquiries; views), verification status, recent activity | Seller dashboard | — |
 | `PATCH /api/seller/listings/{id}` / `DELETE` | `{status: "PUBLISHED" | "PAUSED" | "SOLD"}` | Updated listing / removed | My listings | — |
 | `POST /api/uploads` | multipart `file`, `kind` (`listing_photo` needs a seller) | `{"upload_id":"UPL_…"}` | Sell form, safety check, chat | — |
-| `GET /api/pets` | `district`, `species` (optional; `all`), `max_price`, `trusted_only`, `limit` | Published listings near the district: public + the caller's own, never BLOCKED; sorted TRUSTED → CAUTION, then distance, then newest | **Pets** tab grid | — |
+| `GET /api/pets` | `district`, `species` (optional; `all`), `min_price`, `max_price`, `trusted_only`, `sort` (`best`, `price_low`, `price_high`, `nearest`), `limit` (max 60), `offset` | Published listings near the district: public + the caller's own, never BLOCKED. `best` sorts TRUSTED → CAUTION, then distance, then price. Returns `total`, `offset`, `limit` for paging (12 per page in the app) | **Pets** tab grid | — |
 | `GET /api/listings/{id}` | — | Listing card + checks + questions + breeder | Listing page | — |
 | `GET /api/listings` | `species`, `district`, `max_price` | Same as the `search_listings` tool (max 4) | Chat parity | — |
 | `POST /api/recommend` | `{animal_group, home_type, has_young_children, first_time_owner, time_per_day_minutes, noise_ok, budget_inr}` | Up to 3 species options with reasons, plus excluded ones | "Which pet suits me?" quiz | Rules |
-| `GET /api/breeders` | `district`, `species` (optional) | Breeders with distance, species bred, years, dog-registration status (simulated), active listings, best trust level | **Local Breeders** directory | — |
+| `GET /api/breeders` | `district`, `species` (optional), `within_km` (optional: 10, 25, 50) | Breeders with distance, species bred, years, dog-registration status (simulated), active listings, best trust level | **Local Breeders** directory | — |
 | `GET /api/breeders/{id}` | — | Breeder profile + their published listings | Breeder page | — |
 | `POST /api/sell/drafts` | `{text, upload_ids}` | Draft + fair-price range + missing fields | Sell form "✨ Fill with AI" | **Gemini** |
 | `PATCH /api/sell/drafts/{id}` | `{field: value, ...}` (editable fields only) | Updated draft (validated) | Sell form edits | — |

@@ -55,7 +55,8 @@ def _summary(breeder: dict, listings: list[dict], home: str | None) -> dict:
     }
 
 
-def list_breeders(guest_id: str, district: str | None = None, species: str | None = None) -> dict:
+def list_breeders(guest_id: str, district: str | None = None, species: str | None = None,
+                  within_km: int | None = None) -> dict:
     home = resolve_district(district) if district else None
     if district and home is None:
         raise ListingError(f"I don't know the district '{district}' yet.")
@@ -67,6 +68,8 @@ def list_breeders(guest_id: str, district: str | None = None, species: str | Non
             listings = [lst for lst in listings if lst.get("species_key") in keys]
         if breeder_id in people and listings:
             rows.append(_summary(people[breeder_id], listings, home))
+    if home and within_km:
+        rows = [r for r in rows if r["distance_km"] is not None and r["distance_km"] <= within_km]
     rows.sort(key=lambda r: (r["distance_km"] if r["distance_km"] is not None else 10**6, r["name"]))
     return {"status": "ok", "district": home, "breeders": rows,
             "note": "Sample breeders (fictional). Registration status uses a simulated registry."}

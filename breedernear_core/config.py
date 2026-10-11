@@ -35,6 +35,14 @@ class Settings(BaseSettings):
         return value
 
 
+def retry_options():
+    """Retry Gemini calls that fail for capacity reasons (429 resource exhausted, 5xx), with backoff."""
+    from google.genai import types
+
+    return types.HttpRetryOptions(attempts=5, initial_delay=1.0, max_delay=16.0, exp_base=2.0,
+                                  http_status_codes=[408, 429, 500, 502, 503, 504])
+
+
 def vision_model() -> str:
     return get_settings().breedernear_model_vision or get_settings().breedernear_model
 

@@ -206,8 +206,11 @@ class Vision(Protocol):
 class GeminiVision:
     def __init__(self, model: str) -> None:
         from google import genai
+        from google.genai import types
 
-        self._client = genai.Client()
+        from breedernear_core.config import retry_options
+
+        self._client = genai.Client(http_options=types.HttpOptions(retry_options=retry_options()))
         self._model = model
 
     def _generate(self, prompt: str, text: str, images: list[tuple[bytes, str]], schema: type):

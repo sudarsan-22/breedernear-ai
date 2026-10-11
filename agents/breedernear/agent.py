@@ -1,6 +1,7 @@
 from google.adk.agents import LlmAgent
+from google.adk.models.google_llm import Gemini
 
-from breedernear_core.config import agents_model
+from breedernear_core.config import agents_model, retry_options
 from breedernear_core.tools.care import add_to_cart, build_starter_kit, care_plan, view_cart
 from breedernear_core.tools.companion import (
     add_pet_weight,
@@ -47,7 +48,8 @@ from .prompts import (
     VERIFICATION_INSTRUCTION,
 )
 
-MODEL = agents_model()
+# One model object for every agent, retrying capacity errors (429/5xx) with backoff.
+MODEL = Gemini(model=agents_model(), retry_options=retry_options())
 # Every agent: context note before the model, reply guard after it, a log line before each tool.
 GUARDS = {"before_model_callback": add_context, "after_model_callback": guard_reply,
           "before_tool_callback": log_tool}

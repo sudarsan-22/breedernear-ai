@@ -223,11 +223,11 @@ def s_brief(s):
         "Real local breeders, often a street away, are invisible and lose hours to manual selling.",
     ], fill=RED_BG, title_color=RED, size=10.8, title_size=12.5)
     card(s, X0 + 4.75, 1.68, 4.55, 3.35, "Our solution", [
-        "A breeder-to-buyer pet marketplace where every listing is screened by Gemini and by rules in code "
-        "before any buyer sees it.",
+        "A breeder-to-buyer pet marketplace where every listing is screened by Gemini and rules in code "
+        "before any buyer sees it, and breeders can earn a Verified badge.",
         "Sellers list from photos and a casual Tamil or English message in under a minute.",
-        "Buyers find trusted pets nearby at fair prices, then get a welfare-sized starter kit and a 14-day "
-        "care plan.",
+        "Buyers see a match % for their home, book a visit, pay in person, then get a care companion for "
+        "the pet at home.",
         "“Is this post safe?”: buyers can check any post they saw in a WhatsApp or Instagram group.",
         ("Built from our founder’s five years as a bird breeder and broker in Coimbatore.",
          {"size": 10, "color": GREEN, "bold": True}),
@@ -271,62 +271,57 @@ def s_opportunities(s):
 
 def s_features(s):
     cw = (W - 0.3) / 2
-    card(s, X0, Y0, cw, 2.75, "For buyers (customer app)", [
-        "Pets near me: trusted first, distance, fair-price bar",
+    card(s, X0, Y0, cw, 2.95, "For buyers (customer app)", [
+        "Pets near me with a match % for your home, trusted first, fair-price bar",
         "Listing page: trust checks, health notes, questions to ask",
-        "“Which pet suits me?” quiz: home, family, time, budget",
-        "“Is this post safe?” for WhatsApp or Instagram posts",
-        "Contact the breeder; replies appear under Account",
-        "Welfare-sized starter kit, 14-day care plan with vet warning signs",
-        "Local Breeders directory: buy direct at farm prices",
-    ], fill=GREEN_BG, title_color=GREEN, size=10.6, title_size=12.5)
-    card(s, X0 + cw + 0.3, Y0, cw, 2.75, "For sellers (seller app)", [
+        "AI-drafted first message; scam warnings on replies",
+        "Book a visit; “I bought this pet” after it (paid in person)",
+        "My pets: daily log with AI feedback, growth, health calendar",
+        "Symptom checker: how urgently to see a vet (never medicines)",
+        "“Is this post safe?”, starter kit, Local Breeders directory",
+    ], fill=GREEN_BG, title_color=GREEN, size=10.2, title_size=12.5)
+    card(s, X0 + cw + 0.3, Y0, cw, 2.95, "For sellers (seller app)", [
         "“Fill with AI”: photos + a Tamil/English message become a listing",
         "Publish with trust check: TRUSTED, CAUTION or BLOCKED, with reasons",
-        "Dashboard: live listings, views, enquiries, trust status",
-        "Manage listings: pause, resume, mark sold",
-        "Enquiries with AI-drafted replies from the listing’s facts",
-        "Farm profile and dog-breeder registration (simulated registry)",
-    ], fill=BLUE_BG, title_color=BLUE, size=10.6, title_size=12.5)
-    card(s, X0, Y0 + 2.9, W, 1.15, "Everywhere", [
-        [("BreederNear AI chat", {"bold": True, "size": 10.4}),
-         (" (5 Gemini agents, English or Tamil) uses the same tools as the screens.  ", {"size": 10.4}),
-         ("Safety:", {"bold": True, "size": 10.4}),
-         (" separate customer and seller accounts, roles checked in the API and inside the AI tools, rate "
-          "limits, AI replies checked for medicine doses.  ", {"size": 9.6}),
-         ("Accessible:", {"bold": True, "size": 10.4}),
-         (" WCAG 2.2 AA, light and dark, phone to desktop.", {"size": 10.4})],
-    ], size=10.4, title_size=12.5)
+        "Dashboard charts: views, enquiries, visits, sales, funnel",
+        "Verified breeder badge: phone code, facility photos read by Gemini, dog-breeder certificate (no ID documents)",
+        "Visit requests to confirm; AI-drafted replies to enquiries",
+        "Vaccination card read into the trust check",
+    ], fill=BLUE_BG, title_color=BLUE, size=10.2, title_size=12.5)
+    card(s, X0, Y0 + 3.05, W, 1.0, "Everywhere", [
+        [("Seven Gemini agents", {"bold": True, "size": 10}),
+         (" in English or Tamil use the same tools as the screens.  ", {"size": 10}),
+         ("Sign-in:", {"bold": True, "size": 10}), (" password, one-time code or Google (Firebase Authentication).  ", {"size": 10}),
+         ("Safety:", {"bold": True, "size": 10}), (" roles checked in the API and the AI tools, rate limits, every AI reply "
+          "checked for medicine doses.  ", {"size": 10}),
+         ("Accessible:", {"bold": True, "size": 10}), (" WCAG 2.2 AA, phone to desktop.", {"size": 10})],
+    ], size=10, title_size=12)
 
 
 def s_flow(s):
-    # Seller lane
     text(s, X0, Y0 - 0.02, 2, 0.25, [("SELLER", {"bold": True, "size": 9, "color": BLUE})])
     y, h, w = Y0 + 0.25, 0.72, 1.62
     xs = [X0 + i * (w + 0.29) for i in range(5)]
     steps = [("Photos + message", "Tamil or English, as in WhatsApp"), ("Gemini fills the form", "multimodal, JSON schema"),
-             ("Seller checks it", "edit any field"), ("Trust screening", "Gemini vision + rules in code"),
-             ("Decision in code", "")]
-    for i, (a, b) in enumerate(steps[:4]):
+             ("Seller checks it", "+ optional vaccination card"), ("Trust screening", "Gemini vision + rules in code")]
+    for i, (a, b) in enumerate(steps):
         node(s, xs[i], y, w, h, a, b, fill=BLUE_BG)
         arrow(s, xs[i] + w, y + h / 2, xs[i + 1], y + h / 2)
     node(s, xs[4], y - 0.05, w, 0.36, "BLOCKED", "never shown to buyers", fill=RED_BG, color=RED, size=8.5)
     node(s, xs[4], y + 0.41, w, 0.36, "TRUSTED / CAUTION", "published with reasons", fill=GREEN_BG, color=GREEN, size=8.5)
-    # Buyer lane
     yb = Y0 + 1.45
     text(s, X0, yb - 0.27, 2, 0.25, [("BUYER", {"bold": True, "size": 9, "color": GREEN})])
-    bsteps = [("Browse or take the quiz", "pets near my district"), ("Listing + trust card", "reasons, fair price"),
-              ("Contact breeder", "enquiry, no contact details"), ("Seller replies", "AI draft, seller edits"),
-              ("Visit and pay in person", "see the parents first")]
+    bsteps = [("Pets with match %", "rules score your home"), ("Listing + trust card", "reasons, fair price"),
+              ("Message the breeder", "AI draft, scam shield"), ("Book a visit", "seller confirms"),
+              ("See it, pay in person", "“I bought this pet”")]
     for i, (a, b) in enumerate(bsteps):
         node(s, xs[i], yb, w, h, a, b, fill=GREEN_BG)
         if i < 4:
             arrow(s, xs[i] + w, yb + h / 2, xs[i + 1], yb + h / 2)
     arrow(s, xs[4] + w / 2, y + 0.77, xs[1] + w / 2, yb, color=GREEN, label="published listings")
-    # Aftercare + outside posts
     yc = yb + 1.1
-    node(s, xs[4], yc, w, h, "Starter kit", "cage sized for the animals", fill=AMBER_BG)
-    node(s, xs[3], yc, w, h, "14-day care plan", "vet warning signs, no doses", fill=AMBER_BG)
+    node(s, xs[4], yc, w, h, "My pets", "daily log, growth, calendar", fill=AMBER_BG)
+    node(s, xs[3], yc, w, h, "Symptom checker", "urgency + vet, never doses", fill=AMBER_BG)
     arrow(s, xs[4] + w / 2, yb + h, xs[4] + w / 2, yc)
     arrow(s, xs[4], yc + h / 2, xs[3] + w, yc + h / 2)
     node(s, xs[0], yc, w, h, "Post in a WhatsApp group", "", fill=GREY_BG)
@@ -334,14 +329,11 @@ def s_flow(s):
     node(s, xs[2], yc, w, h, "CAUTION + questions", "never pay before visiting", fill=AMBER_BG, color=AMBER)
     arrow(s, xs[0] + w, yc + h / 2, xs[1], yc + h / 2)
     arrow(s, xs[1] + w, yc + h / 2, xs[2], yc + h / 2)
-    text(s, X0, 5.08, W, 0.3, [("Every step works by tapping, or by asking BreederNear AI in chat: the same "
-                                "tools, the same checks.", {"size": 8.5, "color": MUTED})])
+    text(s, X0, 5.08, W, 0.3, [("Every step works by tapping, or by asking BreederNear AI in chat: the same tools, the same "
+                                "checks. Sellers also earn a Verified breeder badge.", {"size": 8.5, "color": MUTED})])
 
 
-def s_wireframes(s):
-    names = [("01-login", "Login: one-tap demo accounts"), ("02-pets", "Pets near me"),
-             ("03-listing-trust", "Listing + trust checks"), ("08-starter-kit", "Welfare-sized kit"),
-             ("10-ai-chat", "AI buyer guide")]
+def _phones(s, names):
     h, gap = 3.55, 0.28
     width = h * 585 / 1266
     x = X0 + (W - (len(names) * width + (len(names) - 1) * gap)) / 2
@@ -350,40 +342,45 @@ def s_wireframes(s):
         x += width + gap
 
 
+def s_wireframes(s):
+    _phones(s, [("01-login", "Sign in or one-tap demo"), ("14-pets-match", "Pets with match %"),
+                ("03-listing-trust", "Listing + trust checks"), ("17-my-visits", "Visits, then “I bought it”"),
+                ("15-my-pet", "My pets companion")])
+
+
 def s_architecture(s):
-    # Users and Firebase
-    node(s, X0, 1.35, 1.35, 0.62, "Buyers & sellers", "phone or laptop", fill=GREY_BG)
-    node(s, X0, 2.35, 1.35, 0.8, "Firebase Hosting", "web app on Google’s CDN", fill=AMBER_BG, color=AMBER)
-    arrow(s, X0 + 0.67, 1.97, X0 + 0.67, 2.35)
-    # Cloud Run container
-    cx, cy, cw, ch = X0 + 1.75, 1.25, 4.6, 3.75
+    node(s, X0, 1.3, 1.35, 0.58, "Buyers & sellers", "phone or laptop", fill=GREY_BG)
+    node(s, X0, 2.15, 1.35, 0.72, "Firebase Hosting", "web app on Google’s CDN", fill=AMBER_BG, color=AMBER)
+    node(s, X0, 3.1, 1.35, 0.72, "Firebase Auth", "Google sign-in (ID token)", fill=AMBER_BG, color=AMBER)
+    arrow(s, X0 + 0.67, 1.88, X0 + 0.67, 2.15)
+    cx, cy, cw, ch = X0 + 1.75, 1.25, 4.6, 3.8
     box(s, cx, cy, cw, ch, WHITE, line=BLUE, radius=0.1)
     text(s, cx + 0.12, cy + 0.05, cw, 0.25, [("Cloud Run (asia-south1)", {"bold": True, "size": 10, "color": BLUE})])
-    node(s, cx + 0.15, cy + 0.38, cw - 0.3, 0.42, "Gatekeeper · login · rate limits",
+    node(s, cx + 0.15, cy + 0.36, cw - 0.3, 0.4, "Gatekeeper · login · rate limits · Gemini retries",
          "only the routes the app uses; roles from the server", fill=GREY_BG, size=8.5)
-    node(s, cx + 0.15, cy + 0.92, 1.5, 0.72, "FastAPI /api", "tap screens", fill=BLUE_BG, size=9)
-    box(s, cx + 1.8, cy + 0.92, cw - 1.95, 1.55, BLUE_BG, radius=0.07)
-    text(s, cx + 1.85, cy + 0.95, cw - 2.05, 0.22, [("Google ADK agents", {"bold": True, "size": 9, "color": BLUE})],
+    node(s, cx + 0.15, cy + 0.88, 1.3, 0.8, "FastAPI /api", "tap screens", fill=BLUE_BG, size=9)
+    box(s, cx + 1.6, cy + 0.88, cw - 1.75, 1.62, BLUE_BG, radius=0.07)
+    text(s, cx + 1.65, cy + 0.9, cw - 1.85, 0.22, [("Google ADK: 7 agents", {"bold": True, "size": 9, "color": BLUE})],
          align=PP_ALIGN.CENTER)
-    ax = cx + 1.92
-    node(s, ax + 0.55, cy + 1.2, 1.4, 0.3, "Concierge", None, fill=WHITE, size=8)
-    for i, name in enumerate(["Listing", "Trust", "Match", "Care"]):
-        node(s, ax + i * 0.62, cy + 1.7, 0.56, 0.3, name, None, fill=WHITE, size=7.5)
-    text(s, cx + 1.85, cy + 2.05, cw - 2.05, 0.4, [("callbacks: context · reply guard · tool log",
-                                                    {"size": 7, "color": MUTED})], align=PP_ALIGN.CENTER)
-    node(s, cx + 0.15, cy + 2.62, cw - 0.3, 0.95, "breedernear_core",
-         "one tool layer: listings · matching · care · accounts\nsafety rules · deterministic trust score · "
-         "reused-photo hashing · distance", fill=GREEN_BG, color=GREEN, size=9)
-    arrow(s, cx + 0.9, cy + 1.64, cx + 0.9, cy + 2.62)
-    arrow(s, cx + 3.1, cy + 2.47, cx + 3.1, cy + 2.62)
-    arrow(s, X0 + 1.35, 2.75, cx, 2.75)
-    text(s, X0 + 0.05, 3.2, 1.3, 0.4, [("calls Cloud Run directly: API + streamed AI", {"size": 7, "color": MUTED})],
+    ax = cx + 1.68
+    node(s, ax + 0.75, cy + 1.14, 1.3, 0.28, "Concierge", None, fill=WHITE, size=8)
+    for i, name in enumerate(["Listing", "Trust", "Match"]):
+        node(s, ax + i * 0.95, cy + 1.52, 0.88, 0.27, name, None, fill=WHITE, size=7.5)
+    for i, name in enumerate(["Care", "Verify", "Companion"]):
+        node(s, ax + i * 0.95, cy + 1.85, 0.88, 0.27, name, None, fill=WHITE, size=7.5)
+    text(s, cx + 1.65, cy + 2.17, cw - 1.85, 0.3, [("callbacks: context · reply guard · tool log", {"size": 7, "color": MUTED})],
          align=PP_ALIGN.CENTER)
-    # Google services on the right
+    node(s, cx + 0.15, cy + 2.62, cw - 0.3, 1.05, "breedernear_core: one tool layer",
+         "listings · trust score · verification · match % · visits · care companion\nanalytics · accounts · safety rules "
+         "in code · reused-photo hashing", fill=GREEN_BG, color=GREEN, size=9)
+    arrow(s, cx + 0.8, cy + 1.68, cx + 0.8, cy + 2.62)
+    arrow(s, cx + 3.1, cy + 2.5, cx + 3.1, cy + 2.62)
+    arrow(s, X0 + 1.35, 2.5, cx, 2.5)
+    arrow(s, X0 + 1.35, 3.45, cx, 3.45)
     rx, rw = cx + cw + 0.4, W + X0 - (cx + cw + 0.4)
-    services = [("Gemini 3.8 Flash", "Vertex AI: agents, photo screening,\nextraction, care plans, replies", AMBER_BG, AMBER),
-                ("Firestore", "accounts, listings, enquiries, carts", GREEN_BG, GREEN),
-                ("Cloud Storage", "private uploads, deleted after 30 days", BLUE_BG, BLUE),
+    services = [("Gemini 3.8 Flash", "Vertex AI: agents, photos, certificates,\nlistings, care, scam scan", AMBER_BG, AMBER),
+                ("Firestore", "accounts, listings, visits, pets,\nverification, analytics events", GREEN_BG, GREEN),
+                ("Cloud Storage", "private uploads, deleted once read", BLUE_BG, BLUE),
                 ("Cloud Logging", "one JSON line per tool call", GREY_BG, INK),
                 ("Cloud Build + Artifact Registry", "deploy from source; GitHub Actions CI", GREY_BG, INK)]
     for i, (a, b, bg, col) in enumerate(services):
@@ -394,80 +391,92 @@ def s_architecture(s):
 
 def s_tech(s):
     rows = [["Google technology", "How BreederNear AI uses it"],
-            ["Gemini 3.8 Flash (Vertex AI)", "Five ADK agents; multimodal listing extraction from photos + Tamil/English text; "
-             "photo screening (species, dye, stock photos); care plans; reply drafts. JSON-schema outputs."],
-            ["Google ADK (Python)", "Concierge + listing, trust, match and care agents; tools; callbacks on every agent; "
-             "sessions; streamed replies"],
-            ["Cloud Run", "API and agents in one container; login gatekeeper; rate limits; asia-south1"],
+            ["Gemini 3.8 Flash (Vertex AI)", "Seven ADK agents; listing extraction from photos + Tamil/English; photo, facility and "
+             "certificate reading; care plans, daily-log feedback, symptom urgency; message drafts and scam scan. JSON schemas."],
+            ["Google ADK (Python)", "Concierge + listing, trust, match, care, verification and companion agents; tools; "
+             "callbacks on every agent; streamed replies"],
+            ["Cloud Run", "API and agents; login gatekeeper; rate limits; Gemini retries with backoff"],
             ["Firebase Hosting", "The web app on Google’s CDN; calls Cloud Run directly (CORS) so AI replies stream"],
-            ["Firestore", "Accounts (scrypt-hashed passwords), listings, drafts, enquiries, carts"],
-            ["Cloud Storage", "Private upload bucket, 30-day deletion"],
-            ["Cloud Build, Artifact Registry, Cloud Logging", "Deploy from source; structured tool-call logs"],
+            ["Firebase Authentication", "Continue with Google; the server verifies the Firebase ID token"],
+            ["Firestore", "Accounts, listings, enquiries, visits, sales, pets and logs, verification, analytics"],
+            ["Cloud Storage, Cloud Build, Artifact Registry, Cloud Logging", "Private uploads; deploy from source; tool-call logs"],
             ["gemini-3.1-flash-image", "Illustrative photos for the fictional sample listings (labelled in the app)"]]
-    table(s, X0, Y0, 6.1, rows, [1.9, 4.2], size=8.3, row_h=0.36)
-    card(s, X0 + 6.3, Y0, W - 6.3, 3.24, "Also used", [
+    table(s, X0, Y0, 6.25, rows, [1.95, 4.3], size=8.0, row_h=0.35)
+    card(s, X0 + 6.45, Y0, W - 6.45, 3.15, "Also used", [
         "Python 3.12, FastAPI, Pydantic",
-        "imagehash: perceptual hashing for reused photos",
-        "Plain HTML, CSS and JavaScript: no build step",
+        "imagehash: reused-photo detection",
+        "Plain HTML, CSS, JavaScript and SVG charts: no build step",
         "pytest, Playwright + axe-core, GitHub Actions",
         "Firebase CLI (deploy only)",
-    ], size=9.3)
+    ], size=9.2)
 
 
 def s_cost(s):
-    rows = [["AI action (measured, real calls)", "Gemini tokens", "Cost per action*"],
-            ["List a pet: extract listing + screen photo", "≈ 4,560 in · ≤ 1,075 out", "≈ ₹1.3"],
-            ["Check an outside post (text only; a screenshot adds ≈ ₹0.5)", "≈ 1,620 in · ≤ 445 out", "≈ ₹0.5"],
-            ["14-day care plan (cached per species and age)", "≈ 560 in · ≤ 1,680 out", "≈ ₹1.2, once per species"],
-            ["Reply draft for an enquiry", "≈ 500 in · ≤ 790 out", "≈ ₹0.6"]]
-    table(s, X0, Y0, W, rows, [3.9, 3.0, 2.4], size=9, row_h=0.32)
+    rows = [["AI action (measured, real calls)", "Gemini tokens (in · out incl. thinking)", "Cost per action*"],
+            ["List a pet: extract listing + screen photo", "≈ 4,560 · ≤ 1,075", "≈ ₹1.3"],
+            ["Check an outside post (text only; a screenshot adds ≈ ₹0.5)", "≈ 1,620 · ≤ 445", "≈ ₹0.5"],
+            ["Verification: read a certificate · review 2 facility photos", "≈ 1,640 · 400  ·  ≈ 2,630 · 645", "≈ ₹0.5 · ≈ ₹0.8"],
+            ["Buyer profile from their words · scan a message", "≈ 700 · 550  ·  ≈ 300 · 120", "≈ ₹0.5 · ≈ ₹0.1"],
+            ["14-day care plan (cached per species and age) · reply draft", "≈ 560 · ≤ 1,680  ·  ≈ 500 · ≤ 790", "≈ ₹1.2 · ≈ ₹0.6"]]
+    table(s, X0, Y0, W, rows, [3.9, 3.0, 2.4], size=8.6, row_h=0.31)
     infra = [["Running cost", "Prototype through judging", "Example: 10,000 listings a month"],
              ["Cloud Run (1 always-on instance)", "≈ ₹600–1,000 / month (estimate)", "scales per request"],
-             ["Firestore, Cloud Storage, Firebase Hosting", "within free usage at prototype scale", "pay per use (not measured)"],
+             ["Firestore, Cloud Storage, Firebase Hosting + Auth", "within free usage at prototype scale", "pay per use (not measured)"],
              ["Gemini", "a few hundred ₹ (tests + judges)", "≈ ₹13,000 / month for screening"]]
-    table(s, X0, Y0 + 1.82, W, infra, [3.9, 3.0, 2.4], size=9, row_h=0.32)
-    text(s, X0, Y0 + 3.2, W, 0.6, [
-        ("Screening a listing costs about ₹1.3, against animals priced from ₹400 to ₹25,000 in our sample "
-         "listings, so trust checks are affordable on every listing.", {"size": 9.5, "bold": True, "color": GREEN})])
-    footnote(s, ["*Measured tokens (10 Oct 2026); thinking tokens counted as output",
-                 "Gemini 3.8 Flash at $1.50 in / $7.50 out per 1M tokens (list price from 1 Jan 2027, as reported "
-                 "by price trackers; introductory price until then is half)", "₹88 = $1 (assumption)",
-                 "Estimates are labelled"])
+    table(s, X0, Y0 + 2.05, W, infra, [3.9, 3.0, 2.4], size=8.6, row_h=0.3)
+    text(s, X0, Y0 + 3.3, W, 0.5, [
+        ("Screening a listing costs about ₹1.3 against animals priced ₹400–₹25,000 in our sample listings, so every "
+         "listing can be checked.", {"size": 9.5, "bold": True, "color": GREEN})])
+    footnote(s, ["*Measured tokens (10–11 Oct 2026); thinking tokens counted as output",
+                 "Gemini 3.8 Flash at $1.50 in / $7.50 out per 1M tokens (list price from 1 Jan 2027 as reported by price "
+                 "trackers; introductory price until then is half)", "₹88 = $1 (assumption)", "Estimates are labelled"])
 
 
 def s_snapshots(s):
-    names = [("04-post-check", "“Is this post safe?”"), ("06-blocked", "Protected species: blocked"),
-             ("05-seller-dashboard", "Seller dashboard"), ("07-reply-draft", "AI-drafted reply"),
-             ("09-care-plan", "14-day care plan")]
-    h, gap = 3.55, 0.28
-    width = h * 585 / 1266
-    x = X0 + (W - (len(names) * width + (len(names) - 1) * gap)) / 2
-    for name, cap in names:
-        picture(s, name, x, Y0, h, cap)
-        x += width + gap
+    _phones(s, [("11-seller-charts", "Seller analytics"), ("12-verification", "Verified breeder"),
+                ("06-blocked", "Protected species: blocked"), ("04-post-check", "“Is this post safe?”"),
+                ("18-symptom-check", "Symptom urgency, no doses")])
+
+
+def _eval_numbers() -> tuple[str, str]:
+    """('84/84', '28 cases × 3 runs') from evals/RESULTS.md, so the deck always matches the measured results."""
+    import re as _re
+    text_ = (ROOT / "evals" / "RESULTS.md").read_text()
+    m = _re.search(r"(\d+) full runs: (\d+)/(\d+) case runs passed", text_)
+    cases = len(_re.findall(r"^\| E\d+ \|", text_, _re.M))
+    return (f"{m.group(2)}/{m.group(3)} passed", f"{cases} cases × {m.group(1)} runs") if m else ("see RESULTS.md", "")
+
+
+def _unit_tests() -> str:
+    out = subprocess.run(["python", "-m", "pytest", "-m", "not live", "-q", "--collect-only", "-p", "no:cacheprovider"],
+                         cwd=ROOT, capture_output=True, text=True).stdout
+    import re as _re
+    m = _re.search(r"(\d+)/\d+ tests collected|(\d+) tests? collected", out)
+    return (m.group(1) or m.group(2)) if m else "?"
 
 
 def s_performance(s):
-    q = [["Quality (real Gemini, 10 Oct 2026)", "Result"],
-         ["Agent evals: 18 cases × 3 runs (listing, Tamil, blocking, scams, reused photos, prompt injection, "
-          "no medicine advice, roles, explanations, reply drafts)", [("54/54 passed", {"bold": True, "color": GREEN})]],
+    evals, runs = _eval_numbers()
+    q = [["Quality (real Gemini, 10–11 Oct 2026)", "Result"],
+         [f"Agent evals: {runs} (listing, Tamil, blocking, scams, reused photos, prompt injection, no medicine advice, "
+          "roles, verification, visits, care companion)", [(evals, {"bold": True, "color": GREEN})]],
          ["Protected species blocked from the photo alone", [("8/8", {"bold": True, "color": GREEN})]],
          ["Ordinary pets wrongly flagged as protected", [("0/37", {"bold": True, "color": GREEN})]],
          ["All photo checks: species, dye, blur, no animal, watermark, screenshot", [("202/202*", {"bold": True})]],
-         ["Accessibility: axe-core, WCAG 2.2 AA, light + dark, 320–1280 px", [("0 problems", {"bold": True, "color": GREEN})]],
-         ["Unit tests in CI · live smoke test", [("249 · 17/17", {"bold": True})]]]
-    table(s, X0, Y0, 5.75, q, [4.55, 1.2], size=8.3, row_h=0.4)
+         ["Accessibility: axe-core, WCAG 2.2 AA, light + dark, 320–1280 px, all screens", [("0 problems", {"bold": True, "color": GREEN})]],
+         ["Unit tests in CI · live smoke test", [(f"{_unit_tests()} · 17/17", {"bold": True})]]]
+    table(s, X0, Y0, 5.75, q, [4.55, 1.2], size=8.2, row_h=0.4)
     p = [["Speed (live)", "Time"],
          ["List a pet: upload, AI fill, publish with trust check", "17–27 s"],
          ["Check a pasted post", "5–7 s"],
          ["Web app load (Firebase CDN)", "≈ 0.7 s"],
-         ["Gemini: extract a listing", "3–7 s"],
-         ["Gemini: screen a photo", "4–5 s"]]
-    table(s, X0 + 5.95, Y0, W - 5.95, p, [2.45, 0.9], size=8.3, row_h=0.4)
+         ["Gemini: read a certificate · scan a message", "≈ 4.5 s · ≈ 2 s"],
+         ["Gemini: symptom urgency · daily-log feedback", "≈ 8 s"]]
+    table(s, X0 + 5.95, Y0, W - 5.95, p, [2.45, 0.9], size=8.2, row_h=0.4)
     text(s, X0 + 5.95, Y0 + 2.55, W - 5.95, 1.2, [
         ("How we test", {"bold": True, "size": 9.5, "after": 2}),
-        ("Gemini isn’t deterministic, so each eval runs three times and we report the count. Trust decisions are "
-         "made by tested code, so the model can’t be talked out of them.", {"size": 8.5})])
+        ("Gemini isn’t deterministic, so each eval runs three times and we report the count. Decisions (trust, "
+         "verification, match %, urgency floor) are made by tested code.", {"size": 8.5})])
     footnote(s, ["*Test photos are AI-generated and the screening prompt was tuned on them (first run 196/202), "
                  "so treat this as an upper bound", "Reproduce: scripts/run_evals.sh 3 · scripts/vision_accuracy.py · "
                  "pytest -m ui tests/ui", "evals/RESULTS.md, evals/VISION_RESULTS.md"])
@@ -477,20 +486,21 @@ def s_future(s):
     cw = (W - 0.3) / 2
     card(s, X0, Y0, cw, 3.6, "Roadmap (not in the prototype)", [
         "Pilot with real breeders in Coimbatore and Tiruppur, from the founder’s network",
+        "Real SMS and email delivery for one-time codes",
         "List by sending a WhatsApp message (WhatsApp Business Platform)",
         "Live State Animal Welfare Board and PARIVESH registry checks; the platform registrations India’s "
         "pet-trade rules require",
         "Chat history in Agent Engine sessions, so Cloud Run can scale past one instance",
-        "Breeder ratings from buyer feedback and the pet’s health after sale",
-        "Hindi, Telugu, Kannada and more districts; vet and pet-pharmacy partners",
-    ], fill=BLUE_BG, title_color=BLUE, size=10.8, title_size=12.5)
+        "Breeder ratings from buyers’ care-companion outcomes; vet and pet-pharmacy partners; more languages",
+    ], fill=BLUE_BG, title_color=BLUE, size=10.4, title_size=12.5)
     card(s, X0 + cw + 0.3, Y0, cw, 3.6, "Responsible by design (already built)", [
         "Protected species blocked in code, whatever the model says",
         "No medicine names or doses: checked on every AI reply, even while streaming",
-        "Health signs are “ask the seller”, never a diagnosis",
-        "No addresses, ID documents or payment details collected; sellers never see buyers’ logins",
+        "Verification without ID documents or selfies; photos deleted once read",
+        "Codes shown on screen only open new or demo accounts, never someone else’s",
+        "Symptom checker: red flags are always an emergency; never a diagnosis",
         "Synthetic sample data, clearly labelled; simulated registry numbers start with SIM-",
-    ], fill=GREEN_BG, title_color=GREEN, size=10.8, title_size=12.5)
+    ], fill=GREEN_BG, title_color=GREEN, size=10.4, title_size=12.5)
 
 
 def s_links(s):

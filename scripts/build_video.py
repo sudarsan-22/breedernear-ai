@@ -37,21 +37,34 @@ GAP = 0.35                                      # silence after each scene's nar
 HOLD_MS = 3000                                  # the last result stays on screen at least this long (before speed-up)
 FONTS = Path.home() / ".local/share/fonts/googlesansflex"
 
+# The closing line's numbers come from evals/RESULTS.md and evals/VISION_RESULTS.md (see close_line()).
 SCENES = [
-    ("title", "/", "Buying a pet in India usually happens in WhatsApp groups, with no checks at all. Our founder spent five years as a bird breeder in Coimbatore, watching buyers overpay in shops while healthy birds waited a street away."),
-    ("login", "/", "BreederNear AI connects buyers with trusted local breeders. It runs on Google Cloud: Gemini agents built with the Agent Development Kit on Cloud Run, with Firestore and Firebase Hosting. This is the live app. We log in as our demo buyer, Priya, in Tiruppur."),
-    ("pets", "/#pets", "Trusted pets nearby come first, and every card shows the distance and whether the price is fair. Open a listing to see why it is trusted: each check, the health notes, and the questions to ask the breeder."),
-    ("kit", "/#pets", "Tap Starter kit. The cage is sized for the animals, never smaller. Gemini writes a fourteen-day care plan with the warning signs that need a vet, and it never suggests medicine doses."),
-    ("quiz", "/#pets", "Not sure which pet fits? Which pet suits me takes a few taps, and rules in code match species to your home, family, time and budget."),
-    ("breeders", "/#breeders", "Local Breeders is the direct-from-farm directory: breeders near you, what they breed, and how much you can trust them. Buy straight from the farm, without a broker."),
-    ("check", "/#pets", "Most pets are still sold in WhatsApp groups. Paste any post into Is this post safe. Gemini reads it, and our rules flag a price far below the market, a demand for full advance payment, and courier-only delivery. Nothing is stored."),
-    ("chat", "/#ai", "Prefer to talk? BreederNear AI is five Gemini agents that understand English and Tamil. The buyer guide recommends pets that suit a flat and a young child, using the same tools as the screens."),
-    ("dashboard", "/#dashboard", "Now the seller side. Karthik's dashboard shows his live listings, buyer enquiries, listing views and trust status at a glance."),
-    ("sell", "/#sell", "A breeder posts the way they do on WhatsApp: a photo and a quick message in Tamil. Gemini fills in the listing form. Karthik checks it and publishes, and every listing is screened first. This one is trusted, with the reasons shown."),
-    ("blocked", "/#sell", "Now try to sell native rose-ringed parakeet chicks. The listing is blocked. Trading protected Indian birds is illegal, and this decision is made in code, so no prompt can talk the AI into it."),
-    ("reply", "/#enquiries", "When a buyer asks a question, Gemini drafts a reply from the listing's facts only, and flags what only the seller can answer. Karthik edits it and sends it."),
-    ("close", "/", "Under the hood: five agents on Cloud Run, Gemini on Vertex AI, Firestore and Firebase Hosting. In testing, every protected species photo was blocked and all fifty-four agent test runs passed. BreederNear AI: find the trusted breeder next door."),
+    ("title", "/", "Most pets in India are sold in WhatsApp groups, with no checks at all. Our founder, a bird breeder from Coimbatore, watched buyers overpay while healthy birds waited a street away."),
+    ("login", "/", "BreederNear AI connects buyers with trusted local breeders. It runs on Google Cloud, with Gemini agents on Cloud Run, Firestore and Firebase. We log in as our demo buyer, Priya."),
+    ("pets", "/#pets", "Every pet shows a match score for Priya's home, worked out by fixed rules, and trusted breeders nearby come first. Open a listing to see each trust check and the questions to ask."),
+    ("kit", "/#pets", "Tap Starter kit: the cage is sized for the animals, never smaller, and Gemini writes a fourteen-day care plan with the signs that need a vet."),
+    ("visit", "/#pets", "Priya can message the breeder with an AI-drafted note, and book a visit. There is no delivery and no payment in the app: she sees the birds and their parents first."),
+    ("companion", "/#account", "After the visit she taps I bought this pet, and the care companion starts: a daily log with AI feedback, a growth tracker, a health calendar, and a symptom checker that says how urgently to see a vet, never which medicine."),
+    ("check", "/#pets", "Pets are still sold in WhatsApp groups, so paste any post into Is this post safe. Our rules flag a price far below the market, full advance payment and courier-only delivery."),
+    ("chat", "/#ai", "Prefer to talk? Seven Gemini agents understand English and Tamil, and use the same tools as the screens."),
+    ("dashboard", "/#dashboard", "Now the seller side. Karthik's dashboard charts his views, enquiries, visits and sales, week by week."),
+    ("verify", "/#farm", "He is a Verified breeder: a phone code and facility photos checked by Gemini, with no ID documents."),
+    ("sell", "/#sell", "A breeder posts the way they do on WhatsApp: a photo and a quick message in Tamil. Gemini fills in the listing form, and every listing is screened before it goes live. This one is trusted."),
+    ("blocked", "/#sell", "Try to sell native rose-ringed parakeet chicks, and the listing is blocked. Trading protected Indian birds is illegal, and this decision is made in code."),
+    ("reply", "/#enquiries", "Visit requests and messages arrive here. Gemini drafts a reply from the listing's facts, and Karthik edits and sends it."),
+    ("close", "/", ""),
 ]
+
+
+def close_line() -> str:
+    import re as _re
+
+    evals = (ROOT / "evals" / "RESULTS.md").read_text()
+    m = _re.search(r"(\d+) full runs: (\d+)/(\d+) case runs passed", evals)
+    runs = (f"{m.group(2)} of {m.group(3)} agent test runs passed" if m and m.group(2) != m.group(3)
+            else f"all {m.group(3)} agent test runs passed" if m else "the agent tests passed")
+    return ("Under the hood: seven agents on Cloud Run, Gemini on Vertex AI, Firestore and Firebase. In testing, "
+            f"every protected species photo was blocked and {runs}. BreederNear AI: find the trusted breeder next door.")
 
 
 # ---------------------------------------------------------------- tools
@@ -230,11 +243,68 @@ def act_breeders(page, d):
 
 def act_dashboard(page, d):
     goto(page, WEB + "/#dashboard")
-    page.wait_for_selector("text=Buyer enquiries")
+    page.wait_for_selector(".chart", timeout=30000)
 
     def go():
-        page.wait_for_timeout(int(d * 450))
-        page.mouse.wheel(0, 380)
+        page.wait_for_timeout(int(d * 200))
+        page.evaluate("document.querySelector('.chart-card').scrollIntoView({block: 'start', behavior: 'smooth'})")
+        page.wait_for_timeout(int(d * 300))
+        page.evaluate("document.querySelector('.funnel').scrollIntoView({block: 'center', behavior: 'smooth'})")
+    return go
+
+
+def act_visit(page, d):
+    goto(page, WEB + "/#pets")
+    page.wait_for_selector(".pet")
+
+    def go():
+        page.locator(".pet").nth(1).click()
+        page.wait_for_selector("#sheet[open] .fact")
+        page.wait_for_timeout(int(d * 120))
+        page.get_by_role("button", name="Contact").click()
+        page.get_by_role("button", name="Draft with AI").click()
+        page.wait_for_function("document.querySelector('#sheet textarea').value.length > 40 && !document.querySelector('#sheet textarea').value.startsWith('Hello, is your')", timeout=60000)
+        page.wait_for_timeout(1500)
+        page.get_by_role("button", name="Back").click()
+        page.wait_for_selector("#sheet[open] .fact")
+        page.get_by_role("button", name="Book a visit").click()
+        page.wait_for_selector("text=Request visit")
+        page.wait_for_timeout(1200)
+        page.get_by_role("button", name="Request visit").click()
+        page.wait_for_selector("text=See my visits")
+    return go
+
+
+def act_companion(page, d):
+    goto(page, WEB + "/#account")
+    page.wait_for_selector("text=My visits")
+    page.wait_for_selector("button:has-text('I bought this pet')", timeout=20000)
+
+    def go():
+        page.evaluate("document.querySelector('button.btn.small.primary').scrollIntoView({block: 'center', behavior: 'smooth'})")
+        page.wait_for_timeout(1200)
+        page.get_by_role("button", name="I bought this pet").first.click()
+        page.wait_for_selector("#sheet[open] input")
+        slow_type(page, "#sheet input", "Kiwi", 60)
+        page.get_by_role("button", name="Yes, I bought this pet").click()
+        page.wait_for_selector("text=Today's log", timeout=20000)
+        page.wait_for_timeout(1500)
+        goto(page, WEB + "/#mypets/PET_DEMO_MANGO")
+        page.wait_for_selector("text=Today's log", timeout=20000)
+        page.wait_for_timeout(int(d * 120))
+        for anchor in ("Recent days", "Growth", "Symptom checker"):
+            page.evaluate(f"[...document.querySelectorAll('.h-sub')].find(e => e.textContent === '{anchor}')?.scrollIntoView({{block: 'start', behavior: 'smooth'}})")
+            page.wait_for_timeout(int(d * 150))
+    return go
+
+
+def act_verify(page, d):
+    goto(page, WEB + "/#farm")
+    page.wait_for_selector("text=Mobile number")
+
+    def go():
+        page.wait_for_timeout(600)
+        page.evaluate("[...document.querySelectorAll('b')].find(e => e.textContent === 'Verification')?.scrollIntoView({block: 'start', behavior: 'smooth'})")
     return go
 
 
@@ -412,7 +482,8 @@ def main(out_dir: Path) -> None:
     work.mkdir(parents=True, exist_ok=True)
     chromium = os.environ.get("CHROMIUM")
     durations = []
-    for name, _, narration in SCENES:
+    scenes = [(n, path, close_line() if n == "close" else t) for n, path, t in SCENES]
+    for name, _, narration in scenes:
         d = tts(narration, work / f"{name}.wav")
         durations.append(d)
         print(f"voice {name}: {d:.1f}s")
@@ -424,6 +495,8 @@ def main(out_dir: Path) -> None:
     title_card(work / "title.png")
     deck_slide(7, work / "architecture.png")
     actions = {"login": ("customer", act_login), "pets": ("customer", act_pets), "kit": ("customer", act_kit),
+               "visit": ("customer", act_visit), "companion": ("customer", act_companion),
+               "verify": ("seller", act_verify),
                "quiz": ("customer", act_quiz), "breeders": ("customer", act_breeders),
                "dashboard": ("seller", act_dashboard),
                "check": ("customer", act_check), "chat": ("customer", act_chat),
@@ -433,7 +506,7 @@ def main(out_dir: Path) -> None:
     with sync_playwright() as pw:
         save_state(pw, "customer", "priya.customer@example.com", work, chromium)
         save_state(pw, "seller", "karthik.seller@example.com", work, chromium)
-        for (name, path_part, _), d in zip(SCENES, durations, strict=True):
+        for (name, path_part, _), d in zip(scenes, durations, strict=True):
             target = d + GAP
             clip = work / f"clip-{name}.mp4"
             if name == "title":
@@ -450,7 +523,7 @@ def main(out_dir: Path) -> None:
     # audio: each scene's narration followed by GAP seconds of silence
     concat_audio = work / "audio.txt"
     lines = []
-    for name, _, _ in SCENES:
+    for name, _, _ in scenes:
         padded = work / f"{name}-pad.wav"
         run("-i", work / f"{name}.wav", "-af", f"apad=pad_dur={GAP}", padded)
         lines.append(f"file '{padded}'")
@@ -460,7 +533,7 @@ def main(out_dir: Path) -> None:
     concat_video.write_text("\n".join(f"file '{c}'" for c in clips))
     run("-f", "concat", "-safe", "0", "-i", concat_video, "-c", "copy", work / "silent.mp4")
     srt = out_dir / "BreederNear-AI-demo.srt"
-    srt.write_text(captions(SCENES, durations))
+    srt.write_text(captions(scenes, durations))
     style = "FontName=Google Sans Flex,FontSize=15,PrimaryColour=&H00FFFFFF,BackColour=&H99000000,BorderStyle=4,Outline=0,Shadow=0,MarginV=28"
     out = out_dir / "BreederNear-AI-demo.mp4"
     run("-i", work / "silent.mp4", "-i", work / "narration.wav", "-vf", f"subtitles={srt}:force_style='{style}'",

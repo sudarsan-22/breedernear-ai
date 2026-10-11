@@ -59,13 +59,16 @@ def test_e04_protected_blocked(harness):
 
 
 def test_e05_buyer_match(harness):
-    """Family in a flat in Tiruppur, ₹3000 → rule-based species shortlist, budgie first"""
+    """Family in a flat in Tiruppur, ₹3000 → rule-based species shortlist (quiz or profile), budgie first"""
     t, _ = harness.chat(
         ["Pet bird for my 8 year old daughter, we live in a flat in Tiruppur, budget ₹3000"], "buyer"
     )
-    assert t.called("recommend_species") or t.called("search_listings")
+    assert t.called("recommend_species") or t.called("save_buyer_profile") or t.called("search_listings")
     if t.called("recommend_species"):
         assert t.last("recommend_species")["options"][0]["species_key"] == "budgerigar"
+    if t.called("save_buyer_profile"):  # match % calculated in code from the same rules
+        ranked = t.last("save_buyer_profile")["compatibility"]
+        assert "budgerigar" in [m["species_key"] for m in ranked if m["percent"] == ranked[0]["percent"]]
     for a in t.args("search_listings"):
         assert "tirup" in a.get("district", "").lower()
 

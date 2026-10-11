@@ -91,6 +91,16 @@ def _own_draft(guest_id: str, draft_id: str) -> dict:
     return record
 
 
+def attach_vaccination(guest_id: str, draft_id: str, upload_id: str) -> dict:
+    """Attach a vaccination card photo to a draft; Gemini reads it when the listing is published (F19)."""
+    record = _own_draft(guest_id, draft_id)
+    if deps.get_uploads().get(guest_id, upload_id) is None:
+        raise ListingError("That photo was not found. Please upload it again.")
+    record["vaccination_upload_id"] = upload_id
+    deps.get_store().save_draft(draft_id, record)
+    return {"status": "ok", "draft_id": draft_id, "vaccination_attached": True}
+
+
 def update_draft(guest_id: str, draft_id: str, field: str, value: str) -> dict:
     if field not in EDITABLE_FIELDS:
         allowed = ", ".join(sorted(EDITABLE_FIELDS))
@@ -108,8 +118,13 @@ def update_draft(guest_id: str, draft_id: str, field: str, value: str) -> dict:
 
 
 def _screen(guest_id: str, draft: ListingDraft, raw_text: str, upload_ids: list[str],
-            exclude_listing: str | None = None) -> tuple[Screening, list[str]]:
+            exclude_listing: str | None = None, vaccination_upload_id: str | None = None,
+            ) -> tuple[Screening, list[str]]:
     images = _load_images(guest_id, upload_ids)
+    vaccination = None
+    if vaccination_upload_id:
+        card = _load_images(guest_id, [vaccination_upload_id])
+        vaccination = deps.get_vision().read_vaccination(card)
     photo = deps.get_vision().screen_photos(images) if images else None
     hashes = [dhash(data) for data, _ in images]
     known = {
@@ -127,6 +142,7 @@ def _screen(guest_id: str, draft: ListingDraft, raw_text: str, upload_ids: list[
         duplicate_of=duplicate.split("#")[0] if duplicate else None,
         price_range=_fair_range(draft, raw_text),
         sawb_status=sawb_status(draft.sawb_registration_no) if draft.animal_group == "dog" else None,
+        vaccination=vaccination,
     ))
     return screening, hashes
 
@@ -135,7 +151,8 @@ def publish_listing(guest_id: str, draft_id: str, device_id: str | None = None,
                     seller_name: str | None = None) -> dict:
     record = _own_draft(guest_id, draft_id)
     draft = ListingDraft.model_validate(record["draft"])
-    screening, hashes = _screen(guest_id, draft, record["raw_text"], record["upload_ids"])
+    screening, hashes = _screen(guest_id, draft, record["raw_text"], record["upload_ids"],
+                                vaccination_upload_id=record.get("vaccination_upload_id"))
     listing_id = f"LST_{uuid.uuid4().hex[:10]}"
     status = "BLOCKED" if screening.trust_level == "BLOCKED" else "PUBLISHED"
     deps.get_store().save_listing(listing_id, {

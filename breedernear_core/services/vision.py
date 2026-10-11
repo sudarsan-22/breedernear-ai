@@ -133,9 +133,11 @@ Do not add vaccines that are not written. Use null when a date is unreadable.
 
 PROFILE_PROMPT = f"""\
 You turn a pet buyer's own description of their home and life (English, Tamil or mixed) into a profile.
-Use only what they said; keep the default for anything they did not mention. hours_away_per_day: hours
-nobody is home. activity: how active the family is. allergies: true only if someone has pet allergies.
-budget_inr: the budget for the animal itself in rupees, or null.
+Use only what they said. For anything they did not mention, use exactly these defaults: animal_group "any",
+home_type "flat", has_young_children false, first_time_owner true, time_per_day_minutes 60,
+hours_away_per_day 8, noise_ok true, activity "medium", allergies false, budget_inr null, district null.
+hours_away_per_day: hours nobody is home. activity: how active the family is. allergies: true only if someone
+has pet allergies. budget_inr: the budget for the animal itself in rupees.
 {DATA_ONLY}
 """
 

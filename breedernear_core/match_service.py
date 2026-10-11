@@ -325,8 +325,12 @@ def create_enquiry(guest_id: str, listing_id: str, message: str) -> dict:
     buyer = as_viewer(guest_id).user_id
     if sum(e.get("buyer_user_id") == buyer for e in store.all_enquiries()) >= MAX_ENQUIRIES_PER_GUEST:
         raise ListingError("You have sent the maximum number of demo enquiries.")
+    from breedernear_core.buyer_service import scan_text  # here: buyer_service imports this module
+
+    scan = scan_text(message)
     enquiry_id = f"ENQ_{uuid.uuid4().hex[:10]}"
     store.save_enquiry(enquiry_id, {
+        "scan": scan,
         "id": enquiry_id,
         "listing_id": listing_id,
         "breeder_id": listing.get("breeder_id"),
@@ -361,7 +365,7 @@ def sent_enquiries(guest_id: str) -> dict:
 def _enquiry(e: dict) -> dict:
     """What either side sees: never the other side's login or contact details."""
     return {"enquiry_id": e["id"], "listing_id": e["listing_id"], "message": e["message"],
-            "created_at": e["created_at"], "reply": e.get("reply")}
+            "created_at": e["created_at"], "reply": e.get("reply"), "scan": e.get("scan")}
 
 
 def _received(seller_id: str, enquiry_id: str) -> dict:
@@ -403,7 +407,9 @@ def send_reply(seller_id: str, enquiry_id: str, text: str) -> dict:
         raise ListingError("Please write a reply first.")
     if len(text) > MAX_REPLY_CHARS:
         raise ListingError(f"Please keep the reply under {MAX_REPLY_CHARS} characters.")
+    from breedernear_core.buyer_service import scan_text
+
     enquiry = _received(seller_id, enquiry_id)
-    enquiry["reply"] = {"text": text, "created_at": _now()}
+    enquiry["reply"] = {"text": text, "created_at": _now(), "scan": scan_text(text)}
     deps.get_store().save_enquiry(enquiry_id, enquiry)
     return {"status": "ok", "enquiry": _enquiry(enquiry)}

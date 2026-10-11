@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from breedernear_core.safety.price_rules import assess_price
 from breedernear_core.safety.scam_rules import find_scam_signals
 from breedernear_core.safety.species_rules import find_cites, find_protected
-from breedernear_core.schemas import Check, ListingDraft, PhotoScreen, Screening
+from breedernear_core.schemas import Check, ListingDraft, PhotoScreen, Screening, VaccinationRead
 
 TRUSTED_MIN_SCORE = 75
 MAJOR_PENALTY = 25
@@ -23,6 +23,7 @@ class ScreeningInputs:
     duplicate_of: str | None = None          # listing ID whose photo matches
     price_range: tuple[int, int] | None = None
     sawb_status: str | None = None           # "valid" | "expired" | "unknown" | "missing" (dogs)
+    vaccination: VaccinationRead | None = None   # what Gemini read from an uploaded vaccination card
 
 
 def photo_shows_protected(photo: PhotoScreen) -> bool:
@@ -114,6 +115,23 @@ def screen(inputs: ScreeningInputs) -> Screening:
                             detail=f"{cites[0].common_name} is CITES-listed: possession and transfer "
                                    "must be registered on PARIVESH 2.0. No registration ID given."))
         questions.append("Ask for the PARIVESH registration of the bird and its parents.")
+
+    # 8. Vaccination record (optional upload): a readable record passes; a wrong file costs points;
+    # a missing record for a dog or cat is a question to ask, not a penalty.
+    vac = inputs.vaccination
+    if vac is not None and vac.is_vaccination_record and vac.readable and vac.entries:
+        names = ", ".join(dict.fromkeys(e.vaccine for e in vac.entries))[:120]
+        checks.append(Check(name="vaccination", result="pass", detail=f"Vaccination record read: {names}."))
+    elif vac is not None and not vac.is_vaccination_record:
+        checks.append(Check(name="vaccination", result="warn", penalty=10,
+                            detail="The uploaded file is not a vaccination record."))
+    elif vac is not None:
+        checks.append(Check(name="vaccination", result="info",
+                            detail="The vaccination record couldn't be read."))
+        questions.append("Ask to see the vaccination record in person.")
+    elif d.animal_group in ("dog", "cat"):
+        checks.append(Check(name="vaccination", result="info", detail="No vaccination record uploaded."))
+        questions.append("Ask for the vaccination record and the vet's name.")
 
     score = max(0, 100 - sum(c.penalty for c in checks))
     has_major = any(c.result == "warn" and c.penalty >= MAJOR_PENALTY for c in checks)

@@ -1,0 +1,45 @@
+{
+  "_about": "General guidance for the pet care companion (F20): typical healthy weight ranges and a general vaccination and deworming outline. Approximate values from common breed standards and general veterinary guidance, for orientation only; each vet's schedule comes first. Never medicine names or doses.",
+  "confirmed_by_founder": false,
+  "weights": {
+    "budgerigar": {"unit": "g", "adult": [30, 45]},
+    "lovebird_peach_faced": {"unit": "g", "adult": [45, 60]},
+    "lovebird_fischers": {"unit": "g", "adult": [40, 55]},
+    "cockatiel": {"unit": "g", "adult": [80, 110]},
+    "zebra_finch": {"unit": "g", "adult": [10, 16]},
+    "society_finch": {"unit": "g", "adult": [12, 18]},
+    "canary": {"unit": "g", "adult": [15, 28]},
+    "labrador": {"unit": "kg", "by_age_months": {"2": [4.5, 8], "3": [9, 14], "4": [13, 18], "6": [18, 27], "9": [23, 32], "12": [25, 36]}},
+    "beagle": {"unit": "kg", "by_age_months": {"2": [2.5, 4], "3": [4, 6], "4": [5, 7.5], "6": [7, 10], "9": [8.5, 12], "12": [9, 14]}},
+    "shih_tzu": {"unit": "kg", "by_age_months": {"2": [1, 1.8], "3": [1.5, 2.5], "4": [2, 3.2], "6": [3, 5], "9": [3.8, 6.5], "12": [4, 7.5]}},
+    "persian_cat": {"unit": "kg", "by_age_months": {"2": [0.8, 1.2], "3": [1.2, 1.8], "4": [1.6, 2.4], "6": [2.3, 3.5], "9": [2.8, 4.5], "12": [3, 5.5]}}
+  },
+  "vaccination": {
+    "dog": [
+      {"age_weeks": 6, "what": "First core puppy vaccine"},
+      {"age_weeks": 9, "what": "Second core puppy vaccine"},
+      {"age_weeks": 12, "what": "Third core puppy vaccine and rabies vaccine"},
+      {"age_weeks": 16, "what": "Puppy booster (if your vet advises)"},
+      {"age_weeks": 52, "what": "Yearly boosters, as your vet advises"}
+    ],
+    "cat": [
+      {"age_weeks": 8, "what": "First core kitten vaccine"},
+      {"age_weeks": 12, "what": "Second core kitten vaccine and rabies vaccine"},
+      {"age_weeks": 16, "what": "Kitten booster (if your vet advises)"},
+      {"age_weeks": 52, "what": "Yearly boosters, as your vet advises"}
+    ],
+    "bird": [
+      {"age_weeks": 0, "what": "No routine vaccines for pet budgies, lovebirds, cockatiels, finches or canaries in India. Book a first check with an avian vet in the first month, then yearly."}
+    ]
+  },
+  "deworming": {
+    "dog": "Puppies are usually dewormed every 2 weeks until 3 months old, then monthly until 6 months, then as your vet advises. Ask your vet which product and amount.",
+    "cat": "Kittens are usually dewormed every 2 weeks until 3 months old, then monthly until 6 months, then as your vet advises. Ask your vet which product and amount.",
+    "bird": "Only if an avian vet finds worms, for example after a droppings test. Never deworm a bird without a vet."
+  },
+  "red_flags": {
+    "bird": ["Sitting fluffed up at the bottom of the cage", "Breathing with the tail bobbing, or clicking sounds", "Not eating or drinking for a day", "Bleeding or a broken blood feather", "Watery droppings for more than a day"],
+    "dog": ["Repeated vomiting or blood in vomit or stool", "Swollen, hard belly or trying to vomit with nothing coming up", "Collapse, seizures or trouble breathing", "Not drinking, or no urine for a day", "Suspected poisoning (chocolate, grapes, rat poison)"],
+    "cat": ["Straining in the litter box without passing urine", "Breathing with the mouth open", "Not eating for a day", "Repeated vomiting", "Collapse or seizures"]
+  }
+}

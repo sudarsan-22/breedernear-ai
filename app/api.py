@@ -325,6 +325,15 @@ def sell_edit(draft_id: str, body: dict, user: dict = Depends(seller)) -> dict:
     return result
 
 
+class VaccinationIn(BaseModel):
+    upload_id: str
+
+
+@router.post("/sell/drafts/{draft_id}/vaccination")
+def sell_vaccination(draft_id: str, body: VaccinationIn, user: dict = Depends(seller)) -> dict:
+    return _call(svc.attach_vaccination, user["id"], draft_id, body.upload_id)
+
+
 @router.post("/sell/drafts/{draft_id}/publish")
 def sell_publish(draft_id: str, user: dict = Depends(seller)) -> dict:
     return _call(svc.publish_listing, user["id"], draft_id, user.get("session_device_id"), _farm_name(user))

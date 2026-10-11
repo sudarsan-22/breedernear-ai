@@ -9,7 +9,7 @@ Gemini on Vertex AI powers five Google ADK agents: multimodal listing extraction
 
 Cloud Run runs the API and agents (FastAPI + ADK, streamed replies). Firestore stores accounts, listings, enquiries and carts. Firebase Hosting serves the web app from Google's CDN. Cloud Storage keeps uploads private; Cloud Build deploys.
 
-Measured: agent evals 54/54 over 3 runs; 8/8 protected species blocked from photos alone with 0/37 false alarms; 0 accessibility issues (WCAG 2.2 AA).
+Measured: agent evals 66/66 over 3 runs; 8/8 protected species blocked from photos alone with 0/37 false alarms; 0 accessibility issues (WCAG 2.2 AA).
 ```
 
 Every claim above is checked: the numbers come from [evals/RESULTS.md](../../evals/RESULTS.md), [evals/VISION_RESULTS.md](../../evals/VISION_RESULTS.md) and the accessibility audit (`pytest -m ui tests/ui`). Update them if a later run changes.

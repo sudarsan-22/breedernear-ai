@@ -549,7 +549,7 @@ async function addToCart(ids) {
 
 // ---------------------------------------------------------------- views
 const main = $("main");
-const CUSTOMER_TABS = [["pets", "Pets", "paw"], ["breeders", "Local Breeders", "barn"], ["mypets", "My pets", "heart"], ["ai", "BreederNear AI", "sparkles"], ["account", "Account", "user"]];
+const CUSTOMER_TABS = [["pets", "Pets", "paw"], ["breeders", "Local Breeders", "barn", "Breeders"], ["mypets", "My pets", "heart"], ["ai", "BreederNear AI", "sparkles", "AI"], ["account", "Account", "user"]];
 const SELLER_TABS = [["dashboard", "Dashboard", "grid"], ["listings", "Listings", "list"], ["enquiries", "Enquiries", "mail"], ["ai", "AI", "sparkles"], ["farm", "Farm", "barn"]];
 const tabs = () => (isSeller() ? SELLER_TABS : CUSTOMER_TABS);
 
@@ -1562,9 +1562,10 @@ function renderHeader() {
   $("tabbar").style.gridTemplateColumns = `repeat(${tabs().length}, 1fr)`;
 }
 function renderTabs(active) {
-  const make = () => tabs().map(([key, label, ico]) => h("a", { class: "tab", href: `#${key}`, "aria-current": key === active ? "page" : null }, icon(ico), h("span", {}, label)));
-  $("tabbar").replaceChildren(...make());
-  $("top-tabs").replaceChildren(...make());
+  const make = (short) => tabs().map(([key, label, ico, shortLabel]) => h("a", { class: "tab", href: `#${key}`, "aria-current": key === active ? "page" : null,
+    "aria-label": short && shortLabel ? label : null }, icon(ico), h("span", {}, (short && shortLabel) || label)));
+  $("tabbar").replaceChildren(...make(true));
+  $("top-tabs").replaceChildren(...make(false));
 }
 function go(path) { if (location.hash === `#${path}`) route(); else location.hash = path; }
 function route() {

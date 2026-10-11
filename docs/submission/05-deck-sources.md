@@ -18,10 +18,10 @@ We found no reliable Indian statistics on pet-sale scams, so the deck describes 
 
 | Measure | Result | How |
 |---|---|---|
-| Agent evals | 54/54 (18 cases × 3 runs) | `scripts/run_evals.sh 3` → `evals/RESULTS.md` |
+| Agent evals | 66/66 (22 cases × 3 runs) | `scripts/run_evals.sh 3` → `evals/RESULTS.md` |
 | Photo screening | 8/8 protected blocked, 0/37 false alarms, 202/202 checks (AI-generated photos; prompt tuned on them) | `scripts/vision_accuracy.py` → `evals/VISION_RESULTS.md` |
 | Accessibility | 0 axe-core problems, WCAG 2.2 AA, light/dark, 320/390/1280 px | `pytest -m ui tests/ui` |
-| Unit tests / smoke test | 249 / 17 of 17 | CI; `scripts/smoke_test.py` |
+| Unit tests / smoke test | 317 / 17 of 17 | CI; `scripts/smoke_test.py` |
 | List a pet on the live app (upload + AI fill + publish with trust check) | 17.1 s and 27.3 s (two runs) | live API calls, seller demo account |
 | Check a pasted post | 7.0 s and 4.8 s | live API |
 | Web app load from Firebase Hosting | ≈ 0.6–0.7 s (index + app.js) | `curl` |

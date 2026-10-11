@@ -497,7 +497,14 @@ select option:checked { background-color: var(--accent-tint); }
 .presets { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 6px; }
 .preset { height: 30px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 600; background: var(--fill-2); color: var(--label-2); }
 .preset[aria-pressed="true"] { background: var(--teal-tint); color: var(--teal); }
-@media (max-width: 699px) { .filterbar .sep { display: none; } .filterbar .select { margin-left: auto; } }
+@media (max-width: 699px) {
+  .filterbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 12px; }
+  .filterbar .sep { display: none; }
+  .filterbar .switch { grid-column: 1; grid-row: 1; }
+  .filterbar .select { grid-column: 2; grid-row: 1; height: 38px; }
+  .filterbar .price-range { grid-column: 1 / -1; grid-row: 2; }
+  .price-range input { flex: 1 1 0; width: auto; min-width: 0; }
+}
 
 /* pet cards */
 .pet { border-radius: 20px; }
@@ -601,3 +608,4 @@ button.tag { border: 0; font: inherit; font-size: 12px; font-weight: 700; }
 @media (prefers-color-scheme: dark) { .media .float .tag { background: rgba(24, 18, 13, .9); } }
 .price-range input::-webkit-inner-spin-button, .price-range input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .price-range input { -moz-appearance: textfield; appearance: textfield; }
+@media (max-width: 699px) { .presets { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px 6px; padding: 0 16px 2px; scrollbar-width: none; } .preset { flex: none; } }

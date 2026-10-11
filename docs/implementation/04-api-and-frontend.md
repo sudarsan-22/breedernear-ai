@@ -260,3 +260,20 @@ The existing multi-agent chat (concierge → listing / trust / match / care agen
 - `aria-live="polite"` for streaming text
 - Loading states: "Reading your photos…", "Running trust checks…"
 - Human-readable errors only
+
+## October additions (`app/api_features.py`, plus sign-in in `app/api.py`)
+
+| Method & path | Who | Purpose | AI? |
+|---|---|---|---|
+| `POST /api/auth/code/request`, `/api/auth/code/verify` | anyone | One-time-code sign-in (new and demo accounts only) | — |
+| `POST /api/auth/google` | anyone | Google sign-in with a Firebase ID token | — |
+| `GET /api/seller/analytics` | seller | 8-week chart series and totals | — |
+| `GET /api/seller/verification`; `POST …/phone/request`, `…/phone/verify`, `…/facility`, `…/certificate` | seller | Verification layers | **Gemini** (facility, certificate) |
+| `GET /api/seller/visits`, `POST /api/seller/visits/{id}` | seller | Visit requests; confirm or decline | — |
+| `POST /api/sell/drafts/{id}/vaccination` | seller | Attach a vaccination card, read at publish | **Gemini** at publish |
+| `GET`/`POST /api/buyer/profile`, `GET /api/buyer/compatibility` | customer | Profile from words or quiz; match % | **Gemini** (words) |
+| `POST /api/listings/{id}/opening-message` | customer | AI-drafted first message | **Gemini** |
+| `GET`/`POST /api/visits`, `POST /api/purchases` | customer | Book a visit; "I bought this pet" | — |
+| `GET /api/companion/pets`, `/pets/{id}`; `POST …/log`, `…/weight`, `…/symptoms` | customer | Care companion | **Gemini** (log, symptoms) |
+
+Every Gemini route is rate-limited. Web files: `web/charts.js` (SVG charts) and `web/journey.js` (match %, visits, My pets, sign-in), both loaded before `app.js`; customers get a **My pets** tab.

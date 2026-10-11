@@ -60,6 +60,18 @@ Delegation uses ADK agent transfer (`transfer_to_agent`) based on each agent's `
 - **Tools:** `build_starter_kit`, `care_plan`, `add_to_cart`, `view_cart`
 - **Behaviour:** show the kit as product cards with a total, then the care plan by phase, then the vet warning signs. The disclaimer is appended by code.
 
+## October additions: verification guide and care companion
+
+Two more sub-agents (seven agents in all), each with the same callbacks, tools wrapping the same services as the screens:
+
+| Agent | Tools | Rules |
+|---|---|---|
+| `verification_agent` (sellers) | `verification_status`, `check_facility_photos`, `check_registration_certificate` | Never asks for ID documents or selfies; never promises a badge; pass/fail is decided in `verification_service.py` |
+| `companion_agent` (customers who bought a pet) | `my_pets`, `pet_overview`, `log_today`, `add_pet_weight`, `check_pet_symptoms` | Gives the urgency and first step exactly as the tool returns; never medicines, doses or a diagnosis |
+| `match_agent` gains | `save_buyer_profile`, `draft_first_message`, `book_visit`, `my_visits`, `mark_pet_bought` | Match % comes from code; the buyer sends the drafted message themselves; payment only in person |
+
+Gemini tasks behind them (`services/vision.py`, each with its own prompt and JSON schema): `read_certificate`, `review_facility`, `read_vaccination`, `read_profile`, `opening_message`, `scan_message`, `review_daily_log`, `check_symptom`. Models per task: `BREEDERNEAR_MODEL_VISION` (photos and documents) and `BREEDERNEAR_MODEL_AGENTS` (chat), both defaulting to `BREEDERNEAR_MODEL`. Spec: [../product/04-feature-spec-oct.md](../product/04-feature-spec-oct.md).
+
 ## Session state
 
 | Key | Set by | Contents |
@@ -208,7 +220,7 @@ class CarePlan(BaseModel):
 
 ## Callbacks
 
-`agents/breedernear/callbacks.py`, attached to **every** agent (the concierge and all four sub-agents):
+`agents/breedernear/callbacks.py`, attached to **every** agent (the concierge and all six sub-agents):
 
 | Callback | Function | Purpose |
 |---|---|---|

@@ -10,7 +10,7 @@ How BreederNear AI earns marks against each criterion. Weights come from T&C: Ju
 
 | What judges look for | How BreederNear AI shows it | Where it's visible |
 |---|---|---|
-| Meaningful, non-trivial GenAI | **5-agent ADK system:** concierge, listing assistant, trust & compliance, matching, care | Architecture slide; agent activity panel in the UI |
+| Meaningful, non-trivial GenAI | **7-agent ADK system:** concierge, listing assistant, trust & compliance, verification guide, care companion, matching, care | Architecture slide; agent activity panel in the UI |
 | Multimodal + multilingual | Gemini reads listing photos **and** messy Tamil/English/mixed WhatsApp-style text → one structured listing | Demo video: breeder scene |
 | Vision for safety | Species check, dye/disguise detection, visible health signs, stock-photo detection | Trust card reasons |
 | Tool calling over real data | Firestore-backed tools: search with distance, price ranges, registries, products | Activity panel; `breedernear_core/tools/` |
@@ -53,5 +53,5 @@ What existing pet marketplaces and classifieds don't do:
 | Prize | Why we have a chance |
 |---|---|
 | Most Impactful Solution | Wildlife protection + fair prices + breeder livelihoods, grounded in a real founder story |
-| Best Use of Google Cloud AI Tools | Multimodal + multilingual Gemini, 5-agent ADK system, evals, Cloud Run/Firestore |
+| Best Use of Google Cloud AI Tools | Multimodal + multilingual Gemini (listings, photos, certificates, care), 7-agent ADK system, Firebase Hosting + Authentication, evals, Cloud Run/Firestore |
 | Best UI/UX | If the phone-first breeder flow and trust cards are polished |

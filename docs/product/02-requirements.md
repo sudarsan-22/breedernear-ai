@@ -59,6 +59,7 @@ Decided 10 Oct (idea from the founder's earlier PetZonic product; fresh code). *
 | F6 | **Buyer enquiry** to the breeder (demo: saved and shown in the breeder's inbox; no payment) | **MVP** |
 | F7 | Agent activity panel ("which agent and tool ran") in the AI tab | **MVP**: cheap, shows technical depth |
 | F8 | Seller reply assistant: Gemini drafts a reply to a buyer's enquiry from the listing's facts only (no invented health claims, no contact details, invites a visit before paying) and lists what only the seller can answer; the seller edits and sends it, and the buyer sees it under Account. Also by chat (`draft_enquiry_reply`); the AI never sends on its own | **Built** (10 Oct) |
+| F14–F21 | Seller analytics, breeder verification (no ID documents), buyer profile and match %, AI first message and scam shield, visits and "I bought this pet", vaccination card, pet care companion, one-time-code and Google sign-in. Detail and owner decisions: [04-feature-spec-oct.md](04-feature-spec-oct.md) | **Built** (11 Oct) |
 | F9 | Semantic search over listings and products (Firestore vector search + embeddings) | Stretch |
 | F10 | Tamil replies when the user writes in Tamil | Stretch (input already works via Gemini) |
 | F11 | Google Maps view of nearby listings | Stretch |

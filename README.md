@@ -53,25 +53,26 @@ Or tap **Demo customer** / **Demo seller** on the login screen. These are shared
 
 ## One app, two kinds of account
 
-Customers and sellers have **separate accounts** (email or mobile + password, or one-tap demo accounts for judges). Customers get the buyer app; sellers get a seller dashboard. The server checks the role on every request, including inside the AI agents' tools.
+Customers and sellers have **separate accounts**: email or mobile + password, a one-time code (new accounts), Continue with Google (Firebase Authentication), or one-tap demo accounts for judges. Customers get the buyer app; sellers get a seller dashboard. The server checks the role on every request, including inside the AI agents' tools.
 
 ## The customer app
 
 | Tab | For | What you can do |
 |---|---|---|
-| 🐾 **Pets** | Buyers | Browse pets for sale near you, filter by species, price and trust; open a listing to see every trust check; contact the breeder; get a starter kit and care plan; take a quick "Which pet suits me?" quiz; check a post you saw on WhatsApp |
+| 🐾 **Pets** | Buyers | Browse pets near you with a **match %** for your home, filter by species, price and trust; open a listing to see every trust check; message the breeder (AI drafts the first message), **book a visit**; get a starter kit and care plan; take the "Which pet suits me?" quiz; check a post you saw on WhatsApp |
 | 🏡 **Local Breeders** | Buyers | **Direct Farm:** meet breeders near you and buy at the farm price, with no broker markup |
-| ✨ **BreederNear AI** | Buyers | Ask in English or Tamil. Five Gemini agents find a pet, check a post or plan the first two weeks, and show what they did |
-| 👤 **Account** | Buyers | Cart, enquiries sent, district, log out, delete account |
+| ❤️ **My pets** | Buyers | After "I bought this pet": a daily log with AI feedback and a streak, a growth tracker against typical weights, a vaccination and deworming calendar, and a symptom checker that says how urgently to see a vet (never medicines or doses) |
+| ✨ **BreederNear AI** | Buyers | Ask in English or Tamil. Seven Gemini agents find a pet, check a post, book a visit or help care for it, and show what they did |
+| 👤 **Account** | Buyers | My home and family (match %), visits ("I bought this pet"), enquiries and replies, cart, district, log out, delete account |
 
 ## The seller app
 
 | Tab | What sellers can do |
 |---|---|
-| 📊 **Dashboard** | Live listings, buyer enquiries, listing views, trust status, verification badge, recent activity, "Sell a pet with AI" |
-| 📋 **Listings** | Add photos and a quick message (English or Tamil), tap "✨ Fill with AI", check the form, publish with a trust check; pause, mark sold or remove |
-| ✉️ **Enquiries** | Messages from buyers. Tap Reply → "✨ Draft with AI" writes an answer from your listing's facts and flags what only you can answer; you edit and send |
-| ✨ **AI** · 🏡 **Farm** | The listing assistant by chat; farm profile and dog-breeder registration |
+| 📊 **Dashboard** | Live listings, enquiries, views and trust status; **8-week charts** (views, enquiries, visits, sales, view-to-sale funnel, sales by species); recent activity; "Sell a pet with AI" |
+| 📋 **Listings** | Add photos and a quick message (English or Tamil), tap "✨ Fill with AI", check the form, add a vaccination card (optional), publish with a trust check; pause, mark sold or remove |
+| ✉️ **Enquiries** | **Visit requests** to confirm or decline; messages from buyers, with scam warnings. Tap Reply → "✨ Draft with AI" writes an answer from your listing's facts; you edit and send |
+| ✨ **AI** · 🏡 **Farm** | The listing and verification assistants by chat; farm profile and **breeder verification** (phone code, facility photos checked by Gemini, dog-breeder certificate; no ID documents) for the Verified breeder badge |
 
 Everything works by tapping; the AI does the hard parts on every screen. Chat is there when you'd rather just ask.
 
@@ -84,6 +85,9 @@ Everything works by tapping; the AI does the hard parts on every screen. Chat is
 | **Find** | A buyer browses nearby pets, takes a short quiz or describes their home, family and budget. BreederNear suggests suitable pets and finds trusted breeders nearby, with fair-price indicators. | Rules + ADK agent with tool calls over Firestore; distance by district |
 | **Start right** | A personalised starter kit (correct cage size, food, accessories) and a first-14-days care plan with "see a vet if…" signs | Product rules + Gemini structured care plans |
 | **Is this listing safe?** | Upload a screenshot of a post seen on WhatsApp or Instagram and get the same trust screening | Same pipeline, nothing stored |
+| **Meet and buy** | A match % for every pet, an AI-drafted first message, a scam shield on messages, visit booking, and "I bought this pet" after a confirmed visit (paid in person, never in the app) | Match % computed in code from the quiz rules; Gemini drafts and scans text |
+| **Care** | A care companion for the pet at home: daily log, growth, health calendar, symptom urgency | Gemini feedback and triage; weight ranges, calendar and an emergency floor in code |
+| **Verify** | Breeders earn a Verified breeder badge | Gemini reads facility photos and certificates; pass/fail rules in code; photos deleted once read |
 
 ## Architecture
 
@@ -101,7 +105,9 @@ flowchart TD
             TRUST[Trust & compliance]
             MATCH[Buyer matching]
             CARE[Starter kit & care]
-            ROOT --> LIST & TRUST & MATCH & CARE
+            VER[Verification guide]
+            COMP[Care companion]
+            ROOT --> LIST & TRUST & MATCH & CARE & VER & COMP
         end
         CORE[Tools + safety rules + trust score]
         AG --> CORE
@@ -119,7 +125,8 @@ flowchart TD
 | Agent framework | Google Agent Development Kit (ADK), Python |
 | Web hosting | Firebase Hosting (static web app on Google's CDN); the same app is also served by Cloud Run |
 | Runtime | Google Cloud Run (API, ADK agents, streamed AI replies) |
-| Database | Firestore (accounts, listings, enquiries, carts) |
+| Database | Firestore (accounts, listings, enquiries, visits, sales, pets and care logs, verification, analytics events) |
+| Sign-in | Own accounts (scrypt-hashed passwords), one-time codes, and Google via Firebase Authentication |
 | File storage | Cloud Storage (private bucket) |
 | Build / deploy | Cloud Build, Artifact Registry |
 | Quality | pytest unit tests, live agent evals (run 3×), photo-accuracy test, axe-core accessibility audit, GitHub Actions |
@@ -162,10 +169,13 @@ This is a hackathon prototype. To be transparent:
 | Fair-price ranges | **Sample data** based on the founder's experience |
 | State Animal Welfare Board registry | **Simulated**, with clearly fake `SIM-` numbers |
 | Protected / CITES species lists | Curated from public sources (cited in the data files). Not legal advice. |
-| Enquiries, replies and cart | **Demo only**: messages stay inside the app (no SMS, WhatsApp or email), no payment is taken |
+| Enquiries, replies, visits, "I bought this pet" and cart | **Demo only**: messages stay inside the app (no SMS, WhatsApp or email), no payment is taken; visits to fictional sample breeders are confirmed automatically |
+| One-time codes (sign-in, seller phone check) | **Simulated delivery**: no SMS or email provider, so the code is shown on screen; codes are real (random, hashed, 5-minute expiry) and only work for new and demo accounts |
+| Demo seller's 8-week analytics and the demo customer's pet | **Sample history**, labelled in the app; new activity is recorded for real |
+| Weight ranges, vaccination and deworming outline | General guidance from common breed standards; a vet's advice comes first |
 | Seller and customer accounts | **Real**: hashed passwords, roles checked on the server and in the AI tools |
-| AI extraction, photo screening, matching, care plans, reply drafts | **Real**: live Gemini calls |
-| Trust score, species blocking, welfare rules | **Real**: enforced in code and covered by tests |
+| AI extraction, photo screening, certificate and facility reading, care plans, reply and message drafts, scam scan, daily-log feedback, symptom urgency | **Real**: live Gemini calls |
+| Trust score, species blocking, welfare rules, verification pass/fail, match %, emergency floor | **Real**: enforced in code and covered by tests |
 
 BreederNear AI is not a veterinary service and does not sell animals or products.
 

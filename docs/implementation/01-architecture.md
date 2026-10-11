@@ -200,3 +200,7 @@ breedernear-ai/
 | Search | Attribute filter + distance | Vector Search on Agent Platform; Maps-based radius search |
 | Insights | Sample price ranges | BigQuery over real listings: district demand, fair-price index, seasonal trends |
 | Payments | None (demo enquiry) | Escrow-protected payments after compliance review |
+
+## October additions
+
+Seven ADK agents (the concierge plus listing, trust, match, care, **verification** and **care companion**), Firebase Authentication for Google sign-in (the server verifies the Firebase ID token; our own session token takes over), and new services in `breedernear_core/`: `analytics_service.py`, `verification_service.py`, `otp_service.py`, `buyer_service.py`, `journey_service.py`, `companion_service.py`, with tools in `tools/verification.py` and `tools/companion.py`. Spec and decisions: [../product/04-feature-spec-oct.md](../product/04-feature-spec-oct.md).

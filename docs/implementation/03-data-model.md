@@ -144,3 +144,20 @@ Bucket `gs://<PROJECT_ID>-breedernear-uploads` (`asia-south1`, uniform access, *
 | `data/samples/*` | Demo/eval photos (healthy pair, dyed-looking bird, duplicate, screenshot of a "scam" post we write ourselves) | Us |
 
 `scripts/seed_firestore.py` loads the seed files idempotently. Screening for sample listings is computed by the same trust code as guest listings (`breedernear_core/catalog.py`), including pHashes of seeded listing images once they exist; re-run the script after changing trust rules. Local runs (`BREEDERNEAR_BACKEND=memory`) load the same sample data in memory.
+
+## October additions (generic records)
+
+Newer features use the store's generic `put / fetch / find / remove` on these Firestore collections (in memory for tests):
+
+| Collection | Key | Contents |
+|---|---|---|
+| `verifications` | seller user ID | `phone`, `facility`, `certificate` layers (status, reason, observations), overall `status` (verified / pending / rejected). The user doc mirrors it as `verification_status` for the badge |
+| `otps` | SHA-256 of purpose + target | `code_hash`, `salt`, `tries`, `sent_at`, `expires_at` (never the code) |
+| `events` | `EVT_…` | `seller_id`, `listing_id`, `type` (view / enquiry / visit / sale), `species`, `amount_inr`, `at`; `sample: true` on the demo history |
+| `buyer_profiles` | customer user ID | `profile` (home, children, time, hours away, noise, activity, allergies, budget, district) and the buyer's own `words` |
+| `visits` | `VIS_…` | `listing_id`, `buyer_id`, `seller_id` (null for sample breeders), `date`, `slot`, `status` (requested / confirmed / declined), `purchased`, `pet_id` |
+| `sales` | `SAL_…` | `listing_id`, `buyer_id`, `seller_id`, `visit_id`, `price_inr`, `paid_in_person: true` |
+| `pets` | `PET_…` | `owner_id`, `name`, `species_key`, `group`, `age_months_at_home`, `home_date` |
+| `pet_logs`, `pet_weights` | `LOG_…`, `WGT_…` | Daily log (food, play, note, `food_ok`, AI feedback) and weights with unit |
+
+Enquiries gain `scan` (and `reply.scan`): `{risk, signals}`. Drafts can carry `vaccination_upload_id`. Uploads gain the kinds `vaccination`, `certificate`, `facility_photo` (sellers) and `pet_photo`, `food_photo` (customers); verification and food photos are deleted after reading. General care reference data: `data/seed/pet_care.json`.

@@ -62,6 +62,20 @@ The PCA (Dog Breeding and Marketing) Rules, 2017 require dog breeders to hold a 
 - All breeders, listings, registries and products are **synthetic**, with fictional names and `SIM-` registration numbers.
 - Uploads are stored in a private Cloud Storage bucket and never served back publicly. A lifecycle rule deletes them after 30 days.
 
+## 6b. October additions (verification, sign-in, care)
+
+| Rule | Enforced by |
+|---|---|
+| Breeder verification collects **no ID documents or selfies** (no Aadhaar/PAN, no face matching): only a phone code, facility photos and, for dog breeders, the registration certificate | Code: `verification_service.py` (owner decision, 11 Oct) |
+| Facility photos and certificates are **deleted once read**; only the result and short observations are kept | Code |
+| Gemini only reads and observes; every verification pass/fail rule is in code (registry, expiry, issued-to-this-seller, crowding, cleanliness, stock photos) | Code + unit tests |
+| One-time codes are random, stored hashed, expire in 5 minutes, lock after 5 tries; in this demo the code is shown on screen, so **code sign-in works only for new accounts and the demo accounts**, never for an existing account | Code: `otp_service.py`, `accounts.py` |
+| Google sign-in accepts only a Firebase ID token with a **verified** email; the Firebase web key is public by design and restricted to this app's domains and the sign-in APIs | Code + API key restrictions |
+| The match % is calculated by fixed rules (space, time, noise, family, budget, allergies); Gemini only turns the buyer's words into a profile | Code: `buyer_service.score_species` |
+| Messages between buyers and sellers are scanned for scam patterns (rules always, plus Gemini); the other side sees a warning | Code + Gemini |
+| The care companion's symptom checker gives urgency and a first step, never a diagnosis, medicine or dose; red-flag words (breathing, bleeding, seizures, poisoning…) are always an emergency, and a change in a bird is never just "monitor" | Code floor in `companion_service.py` + reply guard on every Gemini text + eval E19 |
+| Visits and "I bought this pet": no delivery and no payment in the app; buyers see the animal and its parents first | Product design |
+
 ## 7. Transparency in the product
 
 - Footer: "Prototype — sample breeders, listings and products. No payments. Not veterinary advice."

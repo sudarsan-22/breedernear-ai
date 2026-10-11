@@ -2,6 +2,13 @@ from google.adk.agents import LlmAgent
 
 from breedernear_core.config import agents_model
 from breedernear_core.tools.care import add_to_cart, build_starter_kit, care_plan, view_cart
+from breedernear_core.tools.companion import (
+    add_pet_weight,
+    check_pet_symptoms,
+    log_today,
+    my_pets,
+    pet_overview,
+)
 from breedernear_core.tools.listing import (
     check_external_listing,
     extract_listing,
@@ -10,22 +17,34 @@ from breedernear_core.tools.listing import (
     update_draft,
 )
 from breedernear_core.tools.match import (
+    book_visit,
     create_enquiry,
     draft_enquiry_reply,
+    draft_first_message,
     explain_screening,
     get_listing,
+    mark_pet_bought,
     my_enquiries,
+    my_visits,
     recommend_species,
+    save_buyer_profile,
     search_listings,
+)
+from breedernear_core.tools.verification import (
+    check_facility_photos,
+    check_registration_certificate,
+    verification_status,
 )
 
 from .callbacks import add_context, guard_reply, log_tool
 from .prompts import (
     CARE_INSTRUCTION,
+    COMPANION_INSTRUCTION,
     CONCIERGE_INSTRUCTION,
     LISTING_INSTRUCTION,
     MATCH_INSTRUCTION,
     TRUST_INSTRUCTION,
+    VERIFICATION_INSTRUCTION,
 )
 
 MODEL = agents_model()
@@ -59,7 +78,8 @@ match_agent = LlmAgent(
     description="Helps buyers choose a suitable pet for their home and finds trusted breeder listings "
                 "nearby at fair prices; sends enquiries to breeders.",
     instruction=MATCH_INSTRUCTION,
-    tools=[recommend_species, search_listings, get_listing, create_enquiry],
+    tools=[recommend_species, search_listings, get_listing, create_enquiry, save_buyer_profile,
+           draft_first_message, book_visit, my_visits, mark_pet_bought],
     **GUARDS,
 )
 
@@ -73,11 +93,31 @@ care_agent = LlmAgent(
     **GUARDS,
 )
 
+verification_agent = LlmAgent(
+    name="verification_agent",
+    model=MODEL,
+    description="Helps sellers earn the Verified breeder badge: progress, facility photos and the "
+                "dog-breeder registration certificate (no ID documents).",
+    instruction=VERIFICATION_INSTRUCTION,
+    tools=[verification_status, check_facility_photos, check_registration_certificate],
+    **GUARDS,
+)
+
+companion_agent = LlmAgent(
+    name="companion_agent",
+    model=MODEL,
+    description="Care companion for a pet the customer has bought: daily log, weight, health calendar and "
+                "how urgently to see a vet. Never medicines or doses.",
+    instruction=COMPANION_INSTRUCTION,
+    tools=[my_pets, pet_overview, log_today, add_pet_weight, check_pet_symptoms],
+    **GUARDS,
+)
+
 root_agent = LlmAgent(
     name="breedernear_concierge",
     model=MODEL,
     description="Greets users, detects whether they are buying or breeding, and routes them.",
     instruction=CONCIERGE_INSTRUCTION,
-    sub_agents=[listing_agent, trust_agent, match_agent, care_agent],
+    sub_agents=[listing_agent, trust_agent, match_agent, care_agent, verification_agent, companion_agent],
     **GUARDS,
 )

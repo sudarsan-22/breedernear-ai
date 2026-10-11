@@ -277,3 +277,91 @@ function vaccinationButton(draftId) {
   }));
   return b;
 }
+
+// ---------------------------------------------------------------- sign-in: Google and one-time code (F21)
+const FIREBASE_SDK = "https://www.gstatic.com/firebasejs/10.14.1/";
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    document.head.append(Object.assign(document.createElement("script"), { src, onload: resolve, onerror: () => reject(new Error("Couldn't load Google sign-in. Check your connection.")) }));
+  });
+}
+
+// For a first sign-in: buy or sell, name, and the farm name for sellers. Resolves with the details or null.
+function newAccountDetails(suggestedName = "") {
+  return new Promise((resolve) => {
+    let role = "customer";
+    const name = h("input", { class: "input", maxlength: 60, value: suggestedName, placeholder: "Your name", "aria-label": "Your name", style: "width:100%" });
+    const farm = h("input", { class: "input", maxlength: 80, placeholder: "Farm or kennel name", "aria-label": "Farm or kennel name", style: "width:100%", hidden: true });
+    const seg = h("div", { class: "segmented", role: "group", "aria-label": "I want to" }, [["customer", "Buy pets"], ["seller", "Sell pets"]].map(([v, t]) =>
+      h("button", { type: "button", "aria-pressed": String(v === role), onclick: (e) => { role = v; farm.hidden = v !== "seller";
+        seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === e.currentTarget))); } }, t)));
+    const go = h("button", { class: "btn primary block", type: "button" }, "Create my account");
+    go.addEventListener("click", () => { closeSheet(); resolve({ role, name: name.value, district: state.district, farm: role === "seller" ? { farm_name: farm.value, species: [] } : null }); });
+    openSheet("Welcome to BreederNear", [h("p", { class: "muted", style: "margin-top:0" }, "First time here. One account is for buying or for selling."),
+      seg, h("div", { style: "height:10px" }), name, h("div", { style: "height:8px" }), farm], [go]);
+    $("sheet").addEventListener("close", () => resolve(null), { once: true });
+  });
+}
+
+async function googleSignIn(remember) {
+  const cfg = window.BREEDERNEAR_FIREBASE;
+  if (!cfg) { toast("Google sign-in isn't set up yet."); return; }
+  try {
+    await loadScript(FIREBASE_SDK + "firebase-app-compat.js");
+    await loadScript(FIREBASE_SDK + "firebase-auth-compat.js");
+    if (!window.firebase.apps.length) window.firebase.initializeApp(cfg);
+    const result = await window.firebase.auth().signInWithPopup(new window.firebase.auth.GoogleAuthProvider());
+    const idToken = await result.user.getIdToken();
+    const send = (extra = {}) => api("/api/auth/google", { method: "POST", body: JSON.stringify({ id_token: idToken, remember, ...extra }) });
+    let r;
+    try { r = await send(); }
+    catch (e) {
+      if (e.status !== 422) throw e;
+      const details = await newAccountDetails(result.user.displayName || "");
+      if (!details) return;
+      r = await send(details);
+    }
+    await window.firebase.auth().signOut();                       // our own session takes over from here
+    await finishLogin(r, remember);
+  } catch (e) {
+    if (e.code === "auth/popup-closed-by-user" || e.code === "auth/cancelled-popup-request") return;
+    toast(e.message || "Google sign-in failed. Please try again.");
+  }
+}
+
+function codeSignInSheet(remember) {
+  const login = h("input", { class: "input", inputmode: "email", autocomplete: "username", placeholder: "you@example.com or 98765 43210", "aria-label": "Email or mobile number", style: "width:100%" });
+  const step2 = h("div");
+  const send = h("button", { class: "btn primary block", type: "button" }, "Send code");
+  send.addEventListener("click", async () => {
+    send.disabled = true;
+    try {
+      const r = await api("/api/auth/code/request", { method: "POST", body: JSON.stringify({ login: login.value }) });
+      const code = h("input", { class: "input", inputmode: "numeric", maxlength: 6, placeholder: "6-digit code", "aria-label": "Code", style: "width:100%" });
+      const verify = h("button", { class: "btn primary block", type: "button" }, r.new_account ? "Verify and create account" : "Verify and log in");
+      verify.addEventListener("click", async () => {
+        verify.disabled = true;
+        try {
+          const details = r.new_account ? await newAccountDetails() : {};
+          if (details === null) { verify.disabled = false; return; }
+          await finishLogin(await api("/api/auth/code/verify", { method: "POST", body: JSON.stringify({ login: login.value, code: code.value, remember, ...details }) }), remember);
+          closeSheet();
+        } catch (e) { toast(e.message); verify.disabled = false; }
+      });
+      step2.replaceChildren(h("div", { class: "callout info inline", style: "margin:12px 0 10px" }, h("b", {}, "Demo code"),
+        h("div", { class: "demo-code" }, r.demo_code), h("div", { class: "small" }, "Shown here because this demo sends no SMS or email. Valid for 5 minutes.")), code, h("div", { style: "height:10px" }), verify);
+      send.hidden = true;
+    } catch (e) { toast(e.message); send.disabled = false; }
+  });
+  openSheet("Log in with a code", [h("p", { class: "muted", style: "margin-top:0" }, "For new accounts and the demo accounts. Existing accounts log in with their password or Google."),
+    login, h("div", { style: "height:10px" }), send, step2]);
+}
+
+function altLogins(remember) {
+  return h("div", {},
+    h("div", { style: "display:flex;align-items:center;gap:10px;margin:18px 0 12px;color:var(--label-3);font-size:13px" }, h("span", { style: "flex:1;border-top:.5px solid var(--sep)" }), "OR", h("span", { style: "flex:1;border-top:.5px solid var(--sep)" })),
+    h("div", { style: "display:grid;gap:8px" },
+      window.BREEDERNEAR_FIREBASE?.googleEnabled ? h("button", { class: "btn secondary block", type: "button", onclick: () => googleSignIn(remember.checked) }, h("span", { class: "g-mark", "aria-hidden": "true" }, "G"), "Continue with Google") : null,
+      h("button", { class: "btn secondary block", type: "button", onclick: () => codeSignInSheet(remember.checked) }, icon("mail"), "Use a one-time code")));
+}

@@ -99,3 +99,72 @@ def my_enquiries(tool_context: ToolContext) -> dict:
     if denied := role_error(tool_context, "seller"):
         return denied
     return _safe(svc.my_enquiries, tool_context.user_id)
+
+
+# ---------------------------------------------------------------- buyer journey (F16–F18)
+def save_buyer_profile(description: str, tool_context: ToolContext) -> dict:
+    """Save the buyer's home and family profile from their own words and return the match % per species.
+
+    Args:
+        description: The buyer's description of their home, family, time, budget and allergies.
+    """
+    from breedernear_core import buyer_service
+
+    if denied := role_error(tool_context, "customer"):
+        return denied
+    result = _safe(buyer_service.save_profile, tool_context.user_id, None, description)
+    if result.get("status") == "ok":
+        result["compatibility"] = result["compatibility"][:6]
+    return result
+
+
+def draft_first_message(listing_id: str, tool_context: ToolContext) -> dict:
+    """Draft the buyer's first message to the breeder of a listing (the buyer sends it themselves).
+
+    Args:
+        listing_id: The listing ID, e.g. "LST-0012".
+    """
+    from breedernear_core import buyer_service
+
+    if denied := role_error(tool_context, "customer"):
+        return denied
+    return _safe(buyer_service.opening_message, _viewer(tool_context), listing_id)
+
+
+def book_visit(listing_id: str, date: str, slot: str, tool_context: ToolContext) -> dict:
+    """Request a visit to see a pet and its parents in person (no delivery, no payment in the app).
+
+    Args:
+        listing_id: The listing ID.
+        date: The visit date as YYYY-MM-DD, within the next 30 days.
+        slot: "morning", "afternoon" or "evening".
+    """
+    from breedernear_core import journey_service
+
+    if denied := role_error(tool_context, "customer"):
+        return denied
+    return _safe(journey_service.request_visit, _viewer(tool_context), listing_id, date, slot)
+
+
+def my_visits(tool_context: ToolContext) -> dict:
+    """The buyer's visits with their status (waiting, confirmed, declined, bought)."""
+    from breedernear_core import journey_service
+
+    if denied := role_error(tool_context, "customer"):
+        return denied
+    return journey_service.buyer_visits(_viewer(tool_context))
+
+
+def mark_pet_bought(visit_id: str, pet_name: str, tool_context: ToolContext) -> dict:
+    """After a confirmed visit, record that the buyer bought the pet (paid in person) and start the
+    care companion.
+
+    Args:
+        visit_id: The visit ID from my_visits.
+        pet_name: The name the family gave the pet, or empty.
+    """
+    from breedernear_core import journey_service
+
+    if denied := role_error(tool_context, "customer"):
+        return denied
+    return _safe(journey_service.purchase, _viewer(tool_context), visit_id, pet_name)

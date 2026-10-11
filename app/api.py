@@ -151,6 +151,46 @@ def demo(body: DemoIn, x_device_id: str | None = Header(default=None)) -> dict:
     return _session(*_call(accounts.demo, body.role, x_device_id))
 
 
+class CodeRequestIn(BaseModel):
+    login: str
+
+
+class CodeVerifyIn(BaseModel):
+    login: str
+    code: str
+    role: str | None = None
+    name: str | None = None
+    district: str | None = None
+    farm: dict | None = None
+    remember: bool = True
+
+
+class GoogleIn(BaseModel):
+    id_token: str
+    role: str | None = None
+    name: str | None = None
+    district: str | None = None
+    farm: dict | None = None
+    remember: bool = True
+
+
+@router.post("/auth/code/request")
+def auth_code_request(body: CodeRequestIn) -> dict:
+    return _call(accounts.request_login_code, body.login)
+
+
+@router.post("/auth/code/verify")
+def auth_code_verify(body: CodeVerifyIn, x_device_id: str | None = Header(default=None)) -> dict:
+    return _session(*_call(accounts.login_with_code, body.login, body.code, x_device_id, body.role, body.name,
+                           body.district, body.farm, body.remember))
+
+
+@router.post("/auth/google")
+def auth_google(body: GoogleIn, x_device_id: str | None = Header(default=None)) -> dict:
+    return _session(*_call(accounts.login_with_google, body.id_token, x_device_id, body.role, body.name,
+                           body.district, body.farm, body.remember))
+
+
 @router.get("/auth/me")
 def me(user: dict = Depends(current_user)) -> dict:
     return {"user": user}

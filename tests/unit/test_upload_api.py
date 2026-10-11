@@ -95,5 +95,7 @@ def test_agent_tree_has_all_sub_agents():
         "listing_agent",
         "trust_agent",
         "match_agent",
+        "verification_agent",
+        "companion_agent",
         "care_agent",
     }

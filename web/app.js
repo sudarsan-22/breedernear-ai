@@ -1013,11 +1013,15 @@ function accountActions() {
 }
 
 // ---------------------------------------------------------------- AI tab (ADK agents)
-const AGENTS = { breedernear_concierge: "Concierge", listing_agent: "Listing assistant", trust_agent: "Trust checker", match_agent: "Buyer guide", care_agent: "Care guide" };
+const AGENTS = { breedernear_concierge: "Concierge", listing_agent: "Listing assistant", trust_agent: "Trust checker", match_agent: "Buyer guide", care_agent: "Care guide", verification_agent: "Verification guide", companion_agent: "Care companion" };
 const LOADING = { transfer_to_agent: "Passing you to the right assistant…", extract_listing: "Reading your photos and message…", update_draft: "Updating your draft…",
   publish_listing: "Running trust checks…", check_external_listing: "Running trust checks…", explain_screening: "Reading the trust checks…", draft_enquiry_reply: "Drafting a reply…", recommend_species: "Matching pets to your home…",
   search_listings: "Finding trusted pets near you…", get_listing: "Opening the listing…", create_enquiry: "Sending your enquiry…",
-  build_starter_kit: "Building your starter kit…", care_plan: "Writing your care plan…", add_to_cart: "Adding to your cart…" };
+  build_starter_kit: "Building your starter kit…", care_plan: "Writing your care plan…", add_to_cart: "Adding to your cart…",
+  verification_status: "Checking your verification…", check_facility_photos: "Reviewing your facility photos…", check_registration_certificate: "Reading your certificate…",
+  save_buyer_profile: "Working out your matches…", draft_first_message: "Drafting your message…", book_visit: "Booking your visit…", my_visits: "Loading your visits…",
+  mark_pet_bought: "Starting your care companion…", my_pets: "Finding your pets…", pet_overview: "Opening your pet's page…", log_today: "Checking today's log…",
+  add_pet_weight: "Saving the weight…", check_pet_symptoms: "Checking how urgent this is…" };
 const chat = { el: null, session: null, busy: false, photos: [], restored: false };
 const chatKey = () => `breedernear_ai_session_${auth.user?.id}`;
 function resetChat() { Object.assign(chat, { el: null, session: auth.user ? store.get(chatKey()) : null, busy: false, photos: [], restored: false, restoring: null }); }
@@ -1143,6 +1147,27 @@ function chatCard(name, r) {
       h("button", { class: "btn primary", type: "button", onclick: (e) => { e.currentTarget.disabled = true; addToCart(r.items.map((i) => i.product_id)); } }, "Add whole kit")); break;
     case "care_plan": card(h("h3", { style: "margin:0 0 10px;font-size:19px" }, `First 14 days: ${r.care_plan.species}`), carePlanBlock(r.care_plan)); break;
     case "add_to_cart": case "view_cart": updateCart(r); break;
+    case "verification_status": case "check_facility_photos": case "check_registration_certificate": {
+      const v = r.verification;
+      card(h("div", { class: "detail-head", style: "margin:0 0 6px" }, h("h3", { style: "font-size:19px" }, "Verification"), h("span", { class: `tag ${(OVERALL[v.status] || OVERALL.pending)[0]}` }, (OVERALL[v.status] || OVERALL.pending)[1])),
+        h("div", { class: "group" }, [["Mobile number", v.phone], ["Facility photos", v.facility], ["Registration certificate", v.certificate]].map(([t, l]) =>
+          h("div", { class: "list-row" }, h("div", { class: "grow" }, h("b", {}, t), h("div", { class: "muted small" }, l.reason)), layerTag(l.status)))),
+        h("button", { class: "btn secondary", type: "button", style: "margin-top:10px", onclick: () => go("farm") }, "Open Farm")); break;
+    }
+    case "save_buyer_profile": card(h("h3", { style: "margin:0 0 8px;font-size:19px" }, "Your best matches"),
+      h("div", { class: "group" }, r.compatibility.map((m) => h("div", { class: "list-row" }, h("div", { class: "grow" }, h("b", {}, m.species),
+        h("div", { class: "muted small" }, (m.percent ? m.reasons : m.watch_outs).join(" · "))), h("b", {}, `${m.percent}%`))))); loadCompat(true); break;
+    case "draft_first_message": card(h("b", {}, "Draft message"), h("p", { style: "margin:6px 0 0;white-space:pre-wrap" }, r.message)); break;
+    case "book_visit": card(h("b", {}, r.visit.status === "confirmed" ? "Visit confirmed" : "Visit requested"),
+      h("div", { class: "muted small" }, `${r.visit.species} · ${fmtDay(r.visit.date)} · ${r.visit.slot_label}`), h("p", { class: "small", style: "margin:6px 0 0" }, r.note),
+      h("button", { class: "btn secondary", type: "button", style: "margin-top:10px", onclick: () => go("account") }, "See my visits")); break;
+    case "mark_pet_bought": card(h("b", {}, `Welcome home, ${r.pet_name}!`), h("p", { class: "small", style: "margin:6px 0 0" }, r.note),
+      h("button", { class: "btn primary", type: "button", style: "margin-top:10px", onclick: () => go(`mypets/${r.pet_id}`) }, "Open My pets")); break;
+    case "log_today": card(h("b", {}, r.log.food_ok ? `Logged · ${r.streak}-day streak` : "Check today's food"), h("p", { style: "margin:6px 0 0" }, r.log.feedback)); break;
+    case "add_pet_weight": card(h("b", {}, `${r.weight.value} ${r.weight.unit}`), h("p", { class: "small", style: "margin:6px 0 0" }, r.verdict)); break;
+    case "check_pet_symptoms": { const u = URGENCY[r.urgency];
+      card(h("span", { class: `tag ${u[0]}` }, icon(r.urgency === "monitor" ? "info" : "warn"), u[1]), h("p", { style: "margin:8px 0 4px" }, h("b", {}, r.first_step)),
+        h("p", { class: "muted small", style: "margin:0" }, r.disclaimer)); break; }
     default: break;
   }
 }
@@ -1307,7 +1332,7 @@ function viewAuth(mode = "login", role = "customer") {
       try { await finishLogin(await api("/api/auth/login", { method: "POST", body: JSON.stringify({ login: loginInput.value, password: pw.input.value, remember: remember.checked }) }), remember.checked); }
       catch (err) { fail(err); submit.disabled = false; }
     });
-    card.append(seg, error, form, demo);
+    card.append(seg, error, form, altLogins(remember), demo);
   } else {
     let chosen = role, farm = null;
     const roleSeg = h("div", { class: "segmented", role: "group", "aria-label": "I want to" },
@@ -1333,7 +1358,7 @@ function viewAuth(mode = "login", role = "customer") {
           password: pw.input.value, district: district.value, remember: remember.checked, farm: farm?.values }) }), remember.checked);
       } catch (err) { fail(err); submit.disabled = false; window.scrollTo({ top: 0, behavior: "smooth" }); }
     });
-    card.append(seg, error, form, demo);
+    card.append(seg, error, form, altLogins(remember), demo);
   }
   main.classList.remove("ai-main");
   main.replaceChildren(h("div", { class: "view", style: "padding:28px 0 40px" },

@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     breedernear_model: str = "gemini-3.8-flash"
     breedernear_model_vision: str = ""      # photos and documents; empty = breedernear_model
     breedernear_model_agents: str = ""      # chat agents; empty = breedernear_model
+    firebase_project: str = ""              # Firebase Authentication project for Google sign-in tokens
     breedernear_bucket: str = ""
     breedernear_region: str = "asia-south1"
     rate_limit_per_hour: int = 40          # AI calls per guest per hour

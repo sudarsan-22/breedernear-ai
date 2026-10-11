@@ -27,7 +27,7 @@ LIMITED = [
     ("POST", re.compile(r"^/api/listings/[^/]+/opening-message$")),
     ("POST", re.compile(r"^/api/companion/pets/[^/]+/(log|symptoms)$")),
     ("POST", re.compile(r"^/api/(enquiries|seller/enquiries/[^/]+/reply)$")),       # Gemini scam scan
-    ("POST", re.compile(r"^/api/auth/(login|signup|demo)$")),      # slows password guessing
+    ("POST", re.compile(r"^/api/auth/(login|signup|demo|google|code/request|code/verify)$")),  # slow guesses
 ]
 MESSAGE = "You've used BreederNear a lot in the last hour. Please wait a few minutes and try again."
 

@@ -7,6 +7,7 @@ and stored only as SHA-256 hashes. Docs: docs/product/02-requirements.md (Accoun
 import base64
 import hashlib
 import hmac
+import os
 import re
 import secrets
 import uuid
@@ -198,6 +199,103 @@ def demo(role: str, device_id: str | None) -> tuple[str, dict]:
         store.claim_login(key, user["id"])
         store.save_user(user["id"], user)
     return _start_session(user, device, remember=False), public(user)
+
+
+# ---------------------------------------------------------------- one-time code and Google sign-in (F21)
+def request_login_code(login_value: str) -> dict:
+    """A code to sign in or sign up. Only for NEW logins and the demo accounts: in this prototype the code is
+    shown on screen, so it must never open someone else's existing account."""
+    from breedernear_core import otp_service
+
+    normalized, kind = normalize_login(login_value)
+    store = deps.get_store()
+    owner = store.login_owner(normalized)
+    user = store.get_user(owner) if owner else None
+    if user is not None and not user.get("default"):
+        raise AccountError("This account already exists. Log in with your password or Google.", 409)
+    try:
+        sent = otp_service.request("login", normalized)
+    except otp_service.OtpError as e:
+        raise AccountError(str(e), e.status) from e
+    return sent | {"login": normalized, "login_type": kind, "new_account": user is None}
+
+
+def login_with_code(login_value: str, code: str, device_id: str | None, role: str | None = None,
+                    name: str | None = None, district: str | None = None, farm: dict | None = None,
+                    remember: bool = True) -> tuple[str, dict]:
+    from breedernear_core import otp_service
+
+    normalized, kind = normalize_login(login_value)
+    store = deps.get_store()
+    owner = store.login_owner(normalized)
+    user = store.get_user(owner) if owner else None
+    if user is not None and not user.get("default"):
+        raise AccountError("This account already exists. Log in with your password or Google.", 409)
+    if user is None and (role not in ROLES or len((name or "").strip()) < 2):   # don't spend the code
+        raise AccountError("Choose buy or sell and enter your name.", 422)
+    try:
+        otp_service.verify("login", normalized, code)
+    except otp_service.OtpError as e:
+        raise AccountError(str(e), e.status) from e
+    return login_verified(normalized, kind, device_id, role, name, district, farm, remember)
+
+
+def login_verified(normalized: str, kind: str, device_id: str | None, role: str | None = None,
+                   name: str | None = None, district: str | None = None, farm: dict | None = None,
+                   remember: bool = True) -> tuple[str, dict]:
+    """Sign in someone who has just proved they own this email or mobile, or create their account
+    (without a password) on first use."""
+    device = _device(device_id)
+    store = deps.get_store()
+    owner = store.login_owner(normalized)
+    user = store.get_user(owner) if owner else None
+    if user is None:
+        if role not in ROLES:
+            raise AccountError("Choose whether you want to buy or sell pets.", 422)
+        name = (name or "").strip()[:60]
+        if len(name) < 2:
+            raise AccountError("Please enter your name.", 422)
+        district_key = resolve_district(district) if district else None
+        user_id = f"USR_{uuid.uuid4().hex[:16]}"
+        if not store.claim_login(normalized, user_id):
+            raise AccountError("Please try again.", 409)
+        user = {"id": user_id, "role": role, "name": name, "login": normalized, "login_type": kind,
+                "password_hash": None, "district": district_key, "device_id": device, "demo": False,
+                "created_at": _now().isoformat()}
+        if role == "seller":
+            try:
+                user["farm"] = _clean_farm(farm)
+            except AccountError:
+                store.release_login(normalized)
+                raise
+        store.save_user(user_id, user)
+    return _start_session(user, device, remember), public(user)
+
+
+def login_with_google(id_token: str, device_id: str | None, role: str | None = None,
+                      name: str | None = None,
+                      district: str | None = None, farm: dict | None = None,
+                      remember: bool = True) -> tuple[str, dict]:
+    """Verify a Firebase Authentication ID token (Google sign-in) and sign in by its verified email."""
+    claims = verify_google_token(id_token)
+    email = (claims.get("email") or "").lower()
+    if not email or not claims.get("email_verified"):
+        raise AccountError("Your Google account has no verified email.", 401)
+    return login_verified(email, "email", device_id, role, name or claims.get("name"), district, farm,
+                          remember)
+
+
+def verify_google_token(id_token: str) -> dict:
+    from google.auth.transport import requests as google_requests
+    from google.oauth2 import id_token as google_id_token
+
+    from breedernear_core.config import get_settings
+
+    project = get_settings().firebase_project or os.environ.get("GOOGLE_CLOUD_PROJECT", "")
+    try:
+        return google_id_token.verify_firebase_token(id_token, google_requests.Request(), audience=project)
+    except Exception as e:  # noqa: BLE001 - any invalid, expired or foreign token
+        raise AccountError("Google sign-in failed. Please try again.", 401) from e
 
 
 def authenticate(token: str | None) -> dict:

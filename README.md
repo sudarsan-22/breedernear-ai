@@ -9,6 +9,10 @@
 > This README describes only what is built. Future ideas are listed under [Roadmap](#roadmap).
 
 <p>
+<img src="docs/screenshots/00-desktop-pets.webp" width="740" alt="Desktop: Pets with AI shortcuts, species chips, price range, sort, trust and match badges">
+</p>
+
+<p>
 <img src="docs/screenshots/02-pets.webp" width="180" alt="Customer app: Pets tab with trusted local pets and fair prices">
 <img src="docs/screenshots/03-listing-trust.webp" width="180" alt="Listing page: fair-price bar, details and trust checks">
 <img src="docs/screenshots/04-post-check.webp" width="180" alt="Is this post safe? A pasted sale post gets CAUTION with reasons">
@@ -40,7 +44,7 @@ Or tap **Demo customer** / **Demo seller** on the login screen. These are shared
 ### See it in 2 minutes
 
 1. **Demo customer · Priya** → **Pets**: trusted pets near Tiruppur with fair-price bars. Open one: trust checks, questions to ask, **Starter kit** (cage sized for the animals) and a 14-day care plan.
-2. **Pets → "Is this post safe?"** → paste `Lovebirds pair 500 only!! Full advance GPay, courier only, all India delivery` → **CAUTION** with the reasons.
+2. **Pets → "Check a seller post"** → paste `Lovebirds pair 500 only!! Full advance GPay, courier only, all India delivery` → **CAUTION** with the reasons.
 3. **BreederNear AI** tab → ask `I want an Indian parrot that talks` → refused, with legal alternatives.
 4. Log out → **Demo seller · Karthik** → **Dashboard** → **Sell a pet with AI** → type `pachai kili kunjugal virpanaikku, 2 for 800, Kovai` → **Fill with AI** → **Publish** → **BLOCKED** (protected species, decided in code). Then try `4 jodi lutino lovebird, 5 maasam, oru jodi 1800 rubai, Kovai` → published.
 5. **Enquiries** → **Reply** → **✨ Draft with AI**: a reply written from the listing's facts, with what only the seller can answer flagged. Send it, then see it as Priya under **Account**.
@@ -49,6 +53,10 @@ Or tap **Demo customer** / **Demo seller** on the login screen. These are shared
 <img src="docs/screenshots/01-login.webp" width="160" alt="Login with one-tap demo accounts">
 <img src="docs/screenshots/05-seller-dashboard.webp" width="160" alt="Seller dashboard">
 <img src="docs/screenshots/07-reply-draft.webp" width="160" alt="AI-drafted reply to a buyer enquiry">
+</p>
+
+<p>
+<img src="docs/screenshots/00-desktop-dashboard.webp" width="740" alt="Desktop seller dashboard: weekly trend cards with sparklines, a nudge and 8-week charts">
 </p>
 
 ## One app, two kinds of account

@@ -221,7 +221,7 @@ def act_quiz(page, d):
         page.wait_for_selector("#sheet[open]")
         page.wait_for_timeout(int(d * 250))
         page.get_by_role("button", name="Show my matches").click()
-        page.wait_for_selector("text=Best match", timeout=60000)
+        page.wait_for_selector("#sheet-content >> text=Best match", timeout=60000)
     return go
 
 
@@ -314,7 +314,7 @@ def act_check(page, d):
 
     def go():
         page.wait_for_timeout(800)
-        page.get_by_role("button", name="Is this post safe?").click()
+        page.get_by_role("button", name="Check a seller post").click()
         page.wait_for_selector("#sheet[open] textarea")
         slow_type(page, "#sheet-content textarea", "Lovebirds pair 500 only!! Full advance GPay, courier only, all India delivery", 22)
         page.get_by_role("button", name="Check this post").click()

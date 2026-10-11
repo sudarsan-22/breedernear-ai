@@ -25,7 +25,9 @@ def test_both_default_accounts_log_in_with_the_documented_password(defaults):
 def test_seller_dashboard_is_preloaded(defaults):
     dash = listing_service.seller_dashboard(d.SELLER_ID)
     c = dash["counts"]
-    assert (c["active"], c["paused"], c["sold"], c["enquiries"], c["views"]) == (2, 1, 1, 4, 85)
+    assert (c["active"], c["paused"], c["sold"], c["enquiries"]) == (2, 1, 1, 4)
+    from breedernear_core import analytics_service
+    assert c["views"] == analytics_service.summary(d.SELLER_ID)["totals"]["views"] > 100   # tiles = charts
     assert dash["recent_activity"]
 
 

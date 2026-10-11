@@ -1,6 +1,8 @@
 """Persistence for accounts, sessions, drafts, listings, enquiries and demo carts.
 
-Firestore in the cloud, in-memory for tests and local runs.
+Firestore in the cloud, in-memory for tests and local runs. Newer features (verification, one-time codes,
+analytics events, visits, sales, pets) use the generic record methods: put / fetch / find / remove on a
+named collection.
 """
 
 import copy
@@ -31,6 +33,10 @@ class Store(Protocol):
     def get_session(self, key: str) -> dict | None: ...
     def delete_session(self, key: str) -> None: ...
     def delete_sessions_of(self, user_id: str) -> None: ...
+    def put(self, collection: str, doc_id: str, data: dict) -> None: ...
+    def fetch(self, collection: str, doc_id: str) -> dict | None: ...
+    def find(self, collection: str, **equals) -> list[dict]: ...
+    def remove(self, collection: str, doc_id: str) -> None: ...
 
 
 class MemoryStore:
@@ -42,6 +48,7 @@ class MemoryStore:
         self.users: dict[str, dict] = {}
         self.logins: dict[str, str] = {}
         self.sessions: dict[str, dict] = {}
+        self.records: dict[str, dict[str, dict]] = {}
 
     def save_draft(self, draft_id: str, data: dict) -> None:
         self.drafts[draft_id] = copy.deepcopy(data)
@@ -115,6 +122,21 @@ class MemoryStore:
     def delete_sessions_of(self, user_id: str) -> None:
         for key in [k for k, v in self.sessions.items() if v["user_id"] == user_id]:
             del self.sessions[key]
+
+
+    # -------------------------------------------------------------- generic records
+    def put(self, collection: str, doc_id: str, data: dict) -> None:
+        self.records.setdefault(collection, {})[doc_id] = copy.deepcopy(data)
+
+    def fetch(self, collection: str, doc_id: str) -> dict | None:
+        return copy.deepcopy(self.records.get(collection, {}).get(doc_id))
+
+    def find(self, collection: str, **equals) -> list[dict]:
+        return [copy.deepcopy(d) for d in self.records.get(collection, {}).values()
+                if all(d.get(k) == v for k, v in equals.items())]
+
+    def remove(self, collection: str, doc_id: str) -> None:
+        self.records.get(collection, {}).pop(doc_id, None)
 
 
 class FirestoreStore:
@@ -208,3 +230,22 @@ class FirestoreStore:
         query = self._db.collection("auth_sessions").where(filter=FieldFilter("user_id", "==", user_id))
         for snap in query.stream():
             snap.reference.delete()
+
+    # -------------------------------------------------------------- generic records
+    def put(self, collection: str, doc_id: str, data: dict) -> None:
+        self._db.collection(collection).document(doc_id).set(data)
+
+    def fetch(self, collection: str, doc_id: str) -> dict | None:
+        snap = self._db.collection(collection).document(doc_id).get()
+        return snap.to_dict() if snap.exists else None
+
+    def find(self, collection: str, **equals) -> list[dict]:
+        from google.cloud.firestore_v1.base_query import FieldFilter
+
+        query = self._db.collection(collection)
+        for key, value in equals.items():
+            query = query.where(filter=FieldFilter(key, "==", value))
+        return [snap.to_dict() for snap in query.stream()]
+
+    def remove(self, collection: str, doc_id: str) -> None:
+        self._db.collection(collection).document(doc_id).delete()

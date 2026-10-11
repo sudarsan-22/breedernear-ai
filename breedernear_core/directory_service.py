@@ -1,6 +1,6 @@
 """Local Breeders (Direct Farm): the breeder directory and breeder pages."""
 
-from breedernear_core import deps
+from breedernear_core import deps, verification_service
 from breedernear_core.catalog import breeders
 from breedernear_core.listing_service import ListingError
 from breedernear_core.match_service import TRUST_ORDER, _card, _distance, _species_keys, _visible
@@ -46,6 +46,8 @@ def _summary(breeder: dict, listings: list[dict], home: str | None) -> dict:
         "trust_level": "TRUSTED" if worst == 0 else "CAUTION",
         "caution_listings": sum(lst["trust_level"] != "TRUSTED" for lst in listings),
         "dog_registration": _registration(breeder, listings),
+        "verified_breeder": any(verification_service.is_verified(lst.get("owner_user_id"))
+                                for lst in listings),
         "distance_km": round(km) if km is not None else None,
         "distance": None if km is None else ("in your district" if km < 5 else f"about {round(km)} km away"),
         "from_price_inr": min((lst.get("price_inr") or 0 for lst in listings), default=None),

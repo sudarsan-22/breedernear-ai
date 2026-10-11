@@ -11,7 +11,7 @@ from breedernear_core import listing_service as svc
 from breedernear_core.config import get_settings
 from breedernear_core.data import load_seed
 from breedernear_core.match_service import Viewer
-from breedernear_core.services.uploads import ALLOWED_KINDS, ALLOWED_TYPES
+from breedernear_core.services.uploads import ALLOWED_KINDS, ALLOWED_TYPES, CUSTOMER_KINDS, SELLER_KINDS
 
 router = APIRouter(prefix="/api")
 
@@ -179,8 +179,10 @@ async def upload(file: UploadFile = File(...), kind: str = Form("listing_photo")
                  user: dict = Depends(current_user)) -> dict:
     if kind not in ALLOWED_KINDS:
         raise HTTPException(status_code=400, detail="Unknown upload kind.")
-    if kind == "listing_photo" and user["role"] != "seller":
-        raise HTTPException(status_code=403, detail="Only seller accounts can upload listing photos.")
+    if kind in SELLER_KINDS and user["role"] != "seller":
+        raise HTTPException(status_code=403, detail="Only seller accounts can upload this kind of file.")
+    if kind in CUSTOMER_KINDS and user["role"] != "customer":
+        raise HTTPException(status_code=403, detail="Only customer accounts can upload this kind of file.")
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(status_code=415, detail="Please upload a JPEG, PNG, WebP or HEIC photo.")
     limit = get_settings().max_upload_mb * 1024 * 1024

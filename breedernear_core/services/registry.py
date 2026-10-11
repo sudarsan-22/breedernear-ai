@@ -15,3 +15,12 @@ def sawb_status(registration_no: str | None, today: date | None = None) -> str:
         if reg["registration_no"].upper() == wanted:
             return "valid" if date.fromisoformat(reg["valid_until"]) >= today else "expired"
     return "unknown"
+
+
+def registry_entry(registration_no: str | None) -> dict | None:
+    """The simulated registry record for a number, or None."""
+    if not registration_no:
+        return None
+    wanted = registration_no.strip().upper()
+    return next((r for r in load_seed("sawb_registry_sample.json")["registrations"]
+                 if r["registration_no"].upper() == wanted), None)

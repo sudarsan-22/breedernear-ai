@@ -27,6 +27,7 @@ Policy:
 |---|---|---|---|
 | `web/img/listings/*.webp` (illustrative photos for the 38 sample listings that buyers can see) | Google `gemini-3.1-flash-image` on Vertex AI, via `scripts/generate_sample_images.py` (the exact prompts are in that script) | Realistic smartphone-style photo of the listed species and colour variety (birds, puppies, kittens) in a clean Indian home setting; no people, text, watermarks or logos | 10 Oct 2026 |
 | `data/samples/vision/*.webp` (test photos for the photo-screening accuracy test; not shown in the app) | Google `gemini-3.1-flash-image` on Vertex AI, via `scripts/generate_vision_samples.py` (prompts in `data/samples/vision/cases.json`). `stock-watermark.webp` is our sample listing photo LST-0003 with a watermark stamped on by that script | Protected native species (parakeets, munias, avadavats, myna, star tortoise), a dyed munia, a blurry photo, an empty cage, and a made-up sale post screenshot with no real app logos, people or phone numbers | 10 Oct 2026 |
+| `data/samples/verification/sample-certificate-kovai-paws.png` | Drawn by us with Pillow (plain text layout, no logos or seals) | A clearly marked "SAMPLE — NOT A REAL CERTIFICATE" dog-breeder registration certificate with the fictional registry number SIM-TNAWB-DB-0042, used to test certificate reading | 11 Oct 2026 |
 
 These photos illustrate fictional sample listings and are labelled "Illustrative photo" in the app. They show no real breeder's animals.
 

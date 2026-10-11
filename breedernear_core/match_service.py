@@ -7,7 +7,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
-from breedernear_core import deps
+from breedernear_core import analytics_service, deps, verification_service
 from breedernear_core.catalog import WEB_DIR, breeders
 from breedernear_core.data import contains_phrase, load_seed, normalize
 from breedernear_core.listing_service import ListingError
@@ -195,6 +195,7 @@ def _card(listing: dict, guest_id: str, km: float | None) -> dict:
         "warnings": warnings,
         "is_yours": listing.get("owner_user_id") == as_viewer(guest_id).user_id,
         "sample_data": bool(listing.get("simulated")),
+        "verified_breeder": verification_service.is_verified(listing.get("owner_user_id")),
     }
 
 
@@ -287,6 +288,7 @@ def get_listing(guest_id: str, listing_id: str) -> dict:
     if listing.get("owner_user_id") and listing["owner_user_id"] != as_viewer(guest_id).user_id:
         listing["views"] = listing.get("views", 0) + 1          # seller dashboard insight
         deps.get_store().save_listing(listing_id, listing)
+        analytics_service.record(listing["owner_user_id"], listing, "view")
     breeder = breeders().get(listing.get("breeder_id") or "")
     return {
         "status": "ok",
@@ -334,6 +336,7 @@ def create_enquiry(guest_id: str, listing_id: str, message: str) -> dict:
         "demo": True,
         "created_at": _now(),
     })
+    analytics_service.record(listing.get("owner_user_id"), listing, "enquiry")
     return {"status": "ok", "enquiry_id": enquiry_id,
             "note": "Demo: the enquiry is saved to the breeder's inbox in this prototype. "
                     "No SMS or WhatsApp message is sent."}

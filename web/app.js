@@ -235,7 +235,7 @@ function petCard(c) {
       h("div", { class: "name" }, [c.species, c.variety].filter(Boolean).join(" · ")),
       h("div", { class: "price" }, inr(c.price_inr), h("small", {}, ` / ${unitWord(c.unit)}`)),
       h("div", { class: "meta" }, c.distance ? sentence(c.distance) : titleCase(c.district)),
-      h("div", { class: "meta" }, c.breeder)));
+      h("div", { class: "meta" }, c.breeder, c.verified_breeder ? h("span", { class: "verified-dot", title: "Verified breeder", "aria-label": "Verified breeder" }, icon("shield")) : null)));
 }
 const petGrid = (cards) => h("div", { class: "pet-grid" }, cards.map(petCard));
 
@@ -280,7 +280,8 @@ function breederTags(b) {
   return h("div", { class: "tags" },
     b.trust_level === "TRUSTED" ? h("span", { class: "tag TRUSTED" }, icon("check"), "All listings trusted")
       : h("span", { class: "tag CAUTION" }, icon("warn"), `${b.caution_listings} listing${b.caution_listings > 1 ? "s" : ""} need caution`),
-    regTag(b.dog_registration));
+    regTag(b.dog_registration),
+    b.verified_breeder ? h("span", { class: "tag TRUSTED" }, icon("shield"), "Verified breeder") : null);
 }
 function loading(text) { return h("div", { class: "loading-line" }, h("span", { class: "spinner" }), text); }
 function errorCallout(e) { return h("div", { class: "callout bad" }, e.message || "Something went wrong. Please try again."); }
@@ -645,6 +646,7 @@ async function viewDashboard() {
     h("div", { style: "display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0" },
       stat("Live listings", c.active, "list", "green"), stat("Buyer enquiries", c.enquiries, "mail", "blue"),
       stat("Listing views", c.views, "search", "amber"), stat("Trusted & live", d.trusted, "shield", "green")),
+    analyticsSection(),
     c.blocked ? h("div", { class: "callout bad", style: "margin-bottom:12px" }, `${c.blocked} listing${c.blocked > 1 ? "s were" : " was"} blocked by the trust check (protected species). Buyers never see blocked listings.`) : null,
     d.farm?.verification === "missing" ? h("div", { class: "callout warn", style: "margin-bottom:12px" }, h("b", {}, "Add your registration"),
       "Dog breeders must be registered with the State Animal Welfare Board. Add your number in Farm to earn the verified badge.",
@@ -656,6 +658,104 @@ async function viewDashboard() {
         h("button", { class: "btn small primary", type: "button", onclick: () => go("sell") }, "Sell a pet")),
     h("div", { class: "callout info", style: "margin-top:16px" }, h("b", {}, "How trust works"),
       "Every listing gets a trust check: AI reads your photos, and fixed rules check the species, price, wording and registrations. Fair prices and clear photos keep you Trusted.")].filter(Boolean));
+}
+
+// ---------------------------------------------------------------- seller analytics (F14)
+const CHART = { views: "var(--info)", enquiries: "var(--accent)", visits: "var(--warn)", sales: "var(--chart-4)" };
+function analyticsSection() {
+  const box = h("div", {}, loading("Loading your numbers…"));
+  api("/api/seller/analytics").then((a) => {
+    const t = a.totals;
+    box.replaceChildren(
+      h("div", { class: "h-sub", style: "display:flex;gap:8px;align-items:center" }, "Last 8 weeks",
+        a.sample_history ? h("span", { class: "tag neutral" }, "Sample history") : null),
+      h("p", { class: "muted", style: "margin:0 0 12px" }, `${t.enquiries} enquiries from ${t.views} views (${t.enquiry_rate_pct}%), `
+        + `${t.visits} visit requests, ${t.sales} sales worth ${inr(t.revenue_inr)} paid in person.`),
+      barChart({ title: "Listing views per week", labels: a.weeks, series: [{ name: "Views", values: a.activity.view, color: CHART.views }] }),
+      barChart({ title: "Enquiries, visits and sales", labels: a.weeks, series: [
+        { name: "Enquiries", values: a.activity.enquiry, color: CHART.enquiries },
+        { name: "Visits", values: a.activity.visit, color: CHART.visits },
+        { name: "Sales", values: a.activity.sale, color: CHART.sales }] }),
+      funnelChart({ title: "From view to sale", rows: a.funnel.map((f) => ({ label: f.stage, value: f.count })) }),
+      barChart({ title: "Sales value per week", labels: a.weeks, format: (v) => `₹${fmtNum(v)}`,
+        series: [{ name: "Sales value", values: a.revenue_inr, color: CHART.sales }] }),
+      a.revenue_by_species.length ? h("div", { class: "group", style: "margin-bottom:12px" }, a.revenue_by_species.map((r) =>
+        h("div", { class: "list-row" }, h("div", { class: "grow" }, r.species), h("b", {}, inr(r.amount_inr))))) : null,
+      h("p", { class: "muted small" }, a.note));
+  }).catch((e) => box.replaceChildren(errorCallout(e)));
+  return box;
+}
+
+// ---------------------------------------------------------------- breeder verification (F15)
+const LAYER_TAG = { pass: ["TRUSTED", "check", "Passed"], fail: ["BLOCKED", "x", "Not passed"], pending: ["CAUTION", "warn", "Pending"],
+  not_started: ["neutral", "info", "Not started"], not_required: ["neutral", "info", "Not needed"] };
+function layerTag(status) { const t = LAYER_TAG[status] || LAYER_TAG.not_started; return h("span", { class: `tag ${t[0]}` }, icon(t[1]), t[2]); }
+const OVERALL = { verified: ["TRUSTED", "Verified breeder", "Buyers see the Verified breeder badge on your farm and listings."],
+  pending: ["CAUTION", "Verification in progress", "Finish the steps below to earn the Verified breeder badge."],
+  rejected: ["BLOCKED", "Not verified yet", "Fix the steps marked below and try again."] };
+
+function verificationCard() {
+  const box = h("div", { class: "card", style: "margin-bottom:16px" }, loading("Loading verification…"));
+  const load = () => api("/api/seller/verification").then(render).catch((e) => box.replaceChildren(errorCallout(e)));
+  const busy = (btn, text) => { btn.disabled = true; btn.textContent = text; };
+  function render(r) {
+    const v = r.verification, o = OVERALL[v.status] || OVERALL.pending;
+    const phone = h("input", { class: "input", type: "tel", inputmode: "tel", placeholder: "10-digit mobile", "aria-label": "Mobile number", style: "flex:1;min-width:0" });
+    const codeBox = h("div");
+    const send = h("button", { class: "btn small secondary", type: "button" }, "Send code");
+    send.addEventListener("click", async () => {
+      busy(send, "Sending…");
+      try {
+        const c = await api("/api/seller/verification/phone/request", { method: "POST", body: JSON.stringify({ phone: phone.value }) });
+        const code = h("input", { class: "input", inputmode: "numeric", maxlength: 6, placeholder: "6-digit code", "aria-label": "Code", style: "flex:1;min-width:0" });
+        const ok = h("button", { class: "btn small primary", type: "button" }, "Confirm");
+        ok.addEventListener("click", async () => {
+          busy(ok, "Checking…");
+          try { await api("/api/seller/verification/phone/verify", { method: "POST", body: JSON.stringify({ phone: phone.value, code: code.value }) }); toast("Mobile number confirmed"); load(); }
+          catch (e) { toast(e.message); ok.disabled = false; ok.textContent = "Confirm"; }
+        });
+        codeBox.replaceChildren(h("div", { class: "callout info inline", style: "margin-top:10px" }, h("b", {}, "Demo code"),
+          h("div", { class: "demo-code" }, c.demo_code), h("div", { class: "small" }, "Shown here because this demo sends no SMS.")),
+          h("div", { style: "display:flex;gap:8px;margin-top:8px" }, code, ok));
+      } catch (e) { toast(e.message); }
+      send.disabled = false; send.textContent = "Send again";
+    });
+    const facility = [];
+    const facilityBtn = h("button", { class: "btn small secondary", type: "button" }, icon("camera"), "Add facility photos");
+    facilityBtn.addEventListener("click", () => pickPhotos(facility, async () => {
+      if (!facility.length) return;
+      busy(facilityBtn, `Checking ${facility.length} photo${facility.length > 1 ? "s" : ""} with AI…`);
+      try {
+        const ids = await uploadPhotos(facility.slice(0, 5), "facility_photo");
+        await api("/api/seller/verification/facility", { method: "POST", body: JSON.stringify({ upload_ids: ids }) }); load();
+      } catch (e) { toast(e.message); facilityBtn.disabled = false; facilityBtn.replaceChildren(icon("camera"), "Add facility photos"); }
+    }));
+    const cert = [];
+    const certBtn = h("button", { class: "btn small secondary", type: "button" }, icon("camera"), "Upload certificate");
+    certBtn.addEventListener("click", () => pickPhotos(cert, async () => {
+      if (!cert.length) return;
+      busy(certBtn, "Reading the certificate with AI…");
+      try {
+        const [id] = await uploadPhotos(cert.slice(-1), "certificate");
+        await api("/api/seller/verification/certificate", { method: "POST", body: JSON.stringify({ upload_id: id }) }); load();
+      } catch (e) { toast(e.message); certBtn.disabled = false; certBtn.replaceChildren(icon("camera"), "Upload certificate"); }
+    }));
+    const row = (title, layer, ...actions) => h("div", { class: "layer-row" }, h("div", { class: "grow" },
+      h("div", { style: "display:flex;gap:8px;align-items:center;flex-wrap:wrap" }, h("b", {}, title), layerTag(layer.status)),
+      h("div", { class: "muted small", style: "margin-top:3px" }, layer.reason),
+      layer.observations?.length ? h("div", { class: "small", style: "margin-top:3px" }, layer.observations.join(" · ")) : null,
+      layer.status !== "pass" && layer.status !== "not_required" ? h("div", { style: "margin-top:8px" }, ...actions) : null));
+    box.replaceChildren(
+      h("div", { style: "display:flex;gap:10px;align-items:center;flex-wrap:wrap" }, h("b", { style: "font-size:18px" }, "Verification"),
+        h("span", { class: `tag ${o[0]}` }, icon(o[0] === "TRUSTED" ? "check" : o[0] === "BLOCKED" ? "x" : "warn"), o[1])),
+      h("p", { class: "muted", style: "margin:6px 0 4px" }, o[2]),
+      row("Mobile number", v.phone, h("div", { style: "display:flex;gap:8px" }, phone, send), codeBox),
+      row("Facility photos", v.facility, facilityBtn),
+      row("Dog-breeder registration certificate", v.certificate, certBtn),
+      h("p", { class: "muted small", style: "margin:8px 0 0" }, "No ID documents are collected. Photos and certificates are deleted once read. " + r.note));
+  }
+  load();
+  return box;
 }
 
 async function viewSellerListings(filter = "all") {
@@ -883,6 +983,7 @@ async function viewFarm() {
     hero("Seller account", "Farm", "How buyers see your farm on BreederNear."),
     h("div", { class: "card", style: "display:flex;gap:14px;align-items:center;margin-bottom:16px" }, avatar(u.farm?.farm_name || u.name, "avatar lg"),
       h("div", {}, h("b", { style: "font-size:19px" }, u.farm?.farm_name || "Your farm"), h("div", { class: "muted small" }, `${u.name} · ${u.login || "demo account"}`), h("div", { style: "margin-top:6px" }, verifyTag(u.farm)))),
+    verificationCard(),
     u.default ? h("div", { class: "callout info", style: "margin-bottom:12px" }, "This is the shared demo seller. Farm details are fixed; sign up to create your own farm.") : null,
     form.el, h("div", { class: "h-sub" }, "District"), district, h("div", { style: "height:16px" }), save,
     accountActions(), disclaimer()));

@@ -12,6 +12,8 @@ class Settings(BaseSettings):
 
     breedernear_backend: Literal["memory", "gcp"] = "memory"   # "gcp" = Firestore + Cloud Storage
     breedernear_model: str = "gemini-3.8-flash"
+    breedernear_model_vision: str = ""      # photos and documents; empty = breedernear_model
+    breedernear_model_agents: str = ""      # chat agents; empty = breedernear_model
     breedernear_bucket: str = ""
     breedernear_region: str = "asia-south1"
     rate_limit_per_hour: int = 40          # AI calls per guest per hour
@@ -23,13 +25,21 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["https://breedernear-ai-2026.web.app",
                                "https://breedernear-ai-2026.firebaseapp.com"]
 
-    @field_validator("breedernear_model")
+    @field_validator("breedernear_model", "breedernear_model_vision", "breedernear_model_agents")
     @classmethod
     def reject_retiring_models(cls, value: str) -> str:
         # gemini-2.x retires on 20 Oct 2026, during judging (rule R2).
         if value.startswith("gemini-2") or value.startswith("gemini-1"):
             raise ValueError(f"{value} is retired or retiring; use a current Gemini Flash model")
         return value
+
+
+def vision_model() -> str:
+    return get_settings().breedernear_model_vision or get_settings().breedernear_model
+
+
+def agents_model() -> str:
+    return get_settings().breedernear_model_agents or get_settings().breedernear_model
 
 
 @lru_cache

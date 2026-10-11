@@ -8,6 +8,9 @@ data (scripts/seed_firestore.py; local runs seed automatically). The accounts ar
 deleted or renamed, and their sample listings can't be removed.
 """
 
+import random
+from datetime import UTC, datetime, timedelta
+
 from breedernear_core.accounts import hash_password
 
 PASSWORD = "demo12345"
@@ -44,7 +47,7 @@ def default_users() -> list[dict]:
     seller = {
         "id": SELLER_ID, "role": "seller", "name": "Karthik", "login": SELLER_LOGIN, "login_type": "email",
         "password_hash": hash_password(PASSWORD), "district": "coimbatore", "device_id": None,
-        "demo": True, "default": True, "created_at": CREATED,
+        "demo": True, "default": True, "created_at": CREATED, "verification_status": "verified",
         "farm": {"farm_name": "Karthik's Aviary", "seller_type": "home_breeder", "locality": "Saibaba Colony",
                  "species": ["budgerigar", "lovebird", "cockatiel"], "sawb_registration_no": None,
                  "verification": "not_required"},
@@ -89,3 +92,43 @@ def seed_default_accounts(store) -> None:
             "demo": True, "created_at": created})
     store.save_cart(CUSTOMER_ID, {"items": [{"product_id": p, "quantity": q} for p, q in CART],
                                   "updated_at": CREATED})
+    seed_seller_extras(store)
+
+
+def seed_seller_extras(store, today: datetime | None = None) -> None:
+    """The demo seller's verified status and 8 weeks of SAMPLE analytics (labelled as sample in the app)."""
+    now = today or datetime.now(UTC)
+    for ev in store.find("events", seller_id=SELLER_ID):
+        store.remove("events", ev["id"])
+    rng = random.Random(2026)
+    listings = [store.get_listing(lid) for lid in LISTING_STATE]
+    listings = [lst for lst in listings if lst]
+    n = 0
+    for week in range(8, 0, -1):
+        start = now - timedelta(weeks=week)
+        views = rng.randint(14, 34) + (8 - week) * 2          # a gently growing farm
+        plan = [("view", views), ("enquiry", max(1, views // rng.randint(6, 9))),
+                ("visit", max(0, views // rng.randint(12, 18))),
+                ("sale", max(0, views // rng.randint(22, 34)))]
+        for kind, count in plan:
+            for _ in range(count):
+                lst = rng.choice(listings)
+                n += 1
+                store.put("events", f"EVT_DEMO_{n:04d}", {
+                    "id": f"EVT_DEMO_{n:04d}", "seller_id": SELLER_ID, "listing_id": lst["id"], "type": kind,
+                    "species": lst["draft"]["species_common"], "sample": True,
+                    "amount_inr": lst.get("price_inr", 0) if kind == "sale" else 0,
+                    "at": (start + timedelta(days=rng.randint(0, 6), hours=rng.randint(8, 19))).isoformat()})
+    for lst in listings:                                   # dashboard tiles agree with the charts
+        lst["views"] = sum(1 for ev in store.find("events", seller_id=SELLER_ID, listing_id=lst["id"])
+                           if ev["type"] == "view")
+        store.save_listing(lst["id"], lst)
+    layer = {"updated_at": now.isoformat()}
+    store.put("verifications", SELLER_ID, {
+        "user_id": SELLER_ID, "status": "verified", "open_items": [], "updated_at": now.isoformat(),
+        "phone": {**layer, "status": "pass", "reason": "Mobile number confirmed.", "masked": "+91•••••••210"},
+        "facility": {**layer, "status": "pass", "reason": "Facility photos show clean, roomy housing.",
+                     "observations": ["spacious flight cages", "fresh water and seed", "natural perches"]},
+        "certificate": {**layer, "status": "not_required",
+                        "reason": "Only dog breeders need a registration certificate."},
+        "sample": True})

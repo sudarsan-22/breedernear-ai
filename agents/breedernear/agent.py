@@ -1,6 +1,6 @@
 from google.adk.agents import LlmAgent
 
-from breedernear_core.config import get_settings
+from breedernear_core.config import agents_model
 from breedernear_core.tools.care import add_to_cart, build_starter_kit, care_plan, view_cart
 from breedernear_core.tools.listing import (
     check_external_listing,
@@ -28,7 +28,7 @@ from .prompts import (
     TRUST_INSTRUCTION,
 )
 
-MODEL = get_settings().breedernear_model
+MODEL = agents_model()
 # Every agent: context note before the model, reply guard after it, a log line before each tool.
 GUARDS = {"before_model_callback": add_context, "after_model_callback": guard_reply,
           "before_tool_callback": log_tool}

@@ -4,12 +4,16 @@ import uuid
 from typing import Protocol
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/heic"}
-ALLOWED_KINDS = {"listing_photo", "external_listing"}
+ALLOWED_KINDS = {"listing_photo", "external_listing", "vaccination", "certificate", "facility_photo",
+                 "pet_photo", "food_photo"}
+SELLER_KINDS = {"listing_photo", "vaccination", "certificate", "facility_photo"}
+CUSTOMER_KINDS = {"pet_photo", "food_photo"}
 
 
 class UploadStore(Protocol):
     def put(self, guest_id: str, data: bytes, content_type: str, kind: str) -> str: ...
     def get(self, guest_id: str, upload_id: str) -> tuple[bytes, str] | None: ...
+    def delete(self, guest_id: str, upload_id: str) -> None: ...
 
 
 def new_upload_id() -> str:
@@ -27,6 +31,9 @@ class MemoryUploads:
 
     def get(self, guest_id: str, upload_id: str) -> tuple[bytes, str] | None:
         return self._files.get((guest_id, upload_id))
+
+    def delete(self, guest_id: str, upload_id: str) -> None:
+        self._files.pop((guest_id, upload_id), None)
 
 
 class GcsUploads:
@@ -50,3 +57,8 @@ class GcsUploads:
             return None
         blob.reload()
         return blob.download_as_bytes(), blob.content_type or "image/jpeg"
+
+    def delete(self, guest_id: str, upload_id: str) -> None:
+        blob = self._bucket.blob(f"uploads/{guest_id}/{upload_id}")
+        if blob.exists():
+            blob.delete()

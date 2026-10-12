@@ -2,14 +2,18 @@
 
 Every number in `BreederNear-AI-deck.pdf` (built by `scripts/build_deck.py` on the organisers' template) comes from here.
 
-## Problem statistics (cited on the "Brief about the idea" slide)
+## Problem statistics (cited on the "Brief about the idea" and "Business case" slides)
 
 | Claim | Source |
 |---|---|
 | About 39 million pets in India (2025) | [Euromonitor, Pet Care in India](https://www.euromonitor.com/pet-care-in-india/report) |
 | OLX India does not allow pets or any live animals | [OLX: items not allowed](https://help.olx.in/hc/en-us/articles/10910969828637-Items-Services-not-allowed-on-OLX), [Deccan Herald](https://www.deccanherald.com/business/olx-india-has-removed-all-animal-listings-from-its-website-peta-india-880590.html) |
 | 300+ of India's ~1,200 bird species found in illegal trade | [WWF-India / TRAFFIC newsletter (c. 2014)](http://awsassets.wwfindia.org/downloads/traffic_panda_8_oct.pdf) |
-| Munias dyed to disguise them | [Wildlife SOS, Delhi seizure](https://news.wildlifesos.org/large-scale-illegal-trade-of-birds-exposed-in-new-delhi/) |
+| Munias dyed to disguise them | [Deccan Herald, Aug 2023: 95 munias dipped in textile dye rescued in Bengaluru](https://www.deccanherald.com/india/karnataka/bengaluru/95-munias-dipped-in-textile-dye-rescued-from-pet-shop-owner-in-south-bengaluru-2657076); [Wildlife SOS, Delhi seizure](https://news.wildlifesos.org/large-scale-illegal-trade-of-birds-exposed-in-new-delhi/) |
+| Still happening in 2026: dyed chicks on sale in an unlicensed Bengaluru pet shop; 50+ animals rescued | [PETA India press release, 25 Jun 2026](https://www.petaindia.com/?p=96269) (an advocacy group's own account; the shop was served a notice under the Pet Shop Rules, 2018) |
+| Dog breeders must register with the State Animal Welfare Board | PCA (Dog Breeding and Marketing) Rules 2017, e.g. [SCC Online](https://www.scconline.com/blog/post/2017/01/11/mandatory-for-dog-breeders-marketers-to-register-with-state-animal-welfare-board/) |
+| India pet care products market: USD 8.6 B (2025), 9.2 B (2026), 13.9 B by 2034 (5.24% CAGR) | [IMARC Group](https://www.imarcgroup.com/india-pet-care-products-market), checked 12 Oct 2026 |
+| Founder: five years as breeder, shop owner and broker in Coimbatore; ₹750 setup → over ₹4 lakh; knew about 100 people | Sudarsan's own experience, labelled as such on the slide |
 | Trade in all Indian bird species banned since 1990–91; munias and parakeets most traded | [TRAFFIC Post, May 2018](http://awsassets.wwfindia.org/downloads/traffic_post_may_20181.pdf), [Down to Earth](https://www.downtoearth.org.in/coverage/free-as-a---bird-24828) |
 
 We found no reliable Indian statistics on pet-sale scams, so the deck describes the pattern without a number.

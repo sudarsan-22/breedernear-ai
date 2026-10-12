@@ -212,28 +212,77 @@ def title_of(slide):
 
 # ---------------------------------------------------------------- slides
 def s_brief(s):
-    text(s, X0, Y0 - 0.05, W, 0.4, [[("BreederNear AI: ", {"bold": True, "size": 15, "color": GREEN}),
-                                    ("find the trusted breeder next door.", {"bold": True, "size": 15})]])
-    card(s, X0, 1.68, 4.55, 3.35, "The problem", [
-        "India has about 39 million pets¹, but buying one is a gamble. OLX stopped live-animal listings², "
-        "so the trade moved to WhatsApp and Facebook groups with no checks at all.",
-        "Buyers overpay in shops or lose money to “full advance, courier only” posts with stolen photos.",
-        "Protected native birds are still sold: 300+ of India’s ~1,200 bird species are found in illegal "
-        "trade³, and munias are dyed to disguise them⁴.",
-        "Real local breeders, often a street away, are invisible and lose hours to manual selling.",
-    ], fill=RED_BG, title_color=RED, size=10.8, title_size=12.5)
-    card(s, X0 + 4.75, 1.68, 4.55, 3.35, "Our solution", [
-        "A breeder-to-buyer pet marketplace where every listing is screened by Gemini and rules in code "
-        "before any buyer sees it, and breeders can earn a Verified badge.",
-        "Sellers list from photos and a casual Tamil or English message in under a minute.",
-        "Buyers see a match % for their home, book a visit, pay in person, then get a care companion for "
-        "the pet at home.",
-        "“Is this post safe?”: buyers can check any post they saw in a WhatsApp or Instagram group.",
-        ("Built from our founder’s five years as a bird breeder and broker in Coimbatore.",
-         {"size": 10, "color": GREEN, "bold": True}),
-    ], fill=GREEN_BG, title_color=GREEN, size=10.8, title_size=12.5)
-    footnote(s, ["¹ Euromonitor, Pet Care in India (2025)", "² OLX India: items not allowed",
-                 "³ WWF-India / TRAFFIC", "⁴ Wildlife SOS, Delhi seizure report"])
+    text(s, X0, Y0 - 0.08, W, 0.4, [[("“The breeder is 50 metres away. The customer never finds them.”",
+                                     {"bold": True, "size": 15, "color": RED})]])
+    box(s, X0, 1.62, W, 0.78, AMBER_BG)
+    text(s, X0 + 0.12, 1.66, W - 0.24, 0.72, [
+        ("Why we are building this", {"bold": True, "size": 11, "color": AMBER, "after": 2}),
+        [("Our founder Sudarsan N spent five years as a bird breeder, pet-shop owner and broker in Coimbatore. "
+          "He started with a ₹750 setup and earned over ₹4 lakh while knowing only about 100 people. Every week he "
+          "watched buyers walk past a breeder on their own street into a shop, pay more for a weaker bird, or lose "
+          "money to a stranger in a WhatsApp group.", {"size": 10})],
+    ])
+    cw = (W - 0.4) / 3
+    cols = [
+        ("Buyers lose money and trust", [
+            "Can’t find the breeder next door, so they pay shop prices",
+            "Can’t tell a real seller from a scam: “full advance, courier only”, stolen photos",
+            "Don’t know which birds are protected or that dog breeders must register⁵",
+            "Alone after buying: wrong cage, wrong food, late to the vet",
+        ]),
+        ("Breeders lose time and reach", [
+            "Sell only inside their own small circle and district groups",
+            "Hours of calls every day, the same 20 questions, the same post retyped in every group",
+            "Good breeders look exactly like bad ones: no way to prove it",
+        ]),
+        ("Animals and the law lose most", [
+            "300+ of India’s ~1,200 bird species are found in illegal trade³",
+            "Munias are dyed to disguise them⁴; dyed chicks were still on sale in an unlicensed Bengaluru shop in "
+            "June 2026⁶",
+            "Sick animals are sold because nobody checks before the sale",
+        ]),
+    ]
+    for i, (title, lines) in enumerate(cols):
+        card(s, X0 + i * (cw + 0.2), 2.5, cw, 2.05, title, lines, fill=RED_BG, title_color=RED, size=9.6,
+             title_size=11)
+    box(s, X0, 4.63, W, 0.45, INK)
+    text(s, X0 + 0.12, 4.63, W - 0.24, 0.45, [[
+        ("Still unsolved in 2026: ", {"bold": True, "size": 10.2, "color": WHITE}),
+        ("OLX stopped live-animal listings², big pet platforms sell food and accessories, so India’s ~39 million-pet "
+         "market¹ still buys animals through WhatsApp, Facebook and Instagram groups with no checks at all.",
+         {"size": 10.2, "color": WHITE})]], anchor=MSO_ANCHOR.MIDDLE)
+    footnote(s, ["Founder figures are his own experience", "¹ Euromonitor 2025", "² OLX India: items not allowed",
+                 "³ WWF-India / TRAFFIC", "⁴ Deccan Herald, Aug 2023", "⁵ PCA (Dog Breeding and Marketing) Rules 2017",
+                 "⁶ PETA India, 25 Jun 2026"])
+
+
+def s_journey(s):
+    """Every pain on the problem slide, mapped to what the product does and what we measured."""
+    G = {"color": GREEN, "bold": True}
+    rows = [
+        ["Step", "Today, in groups and shops", "With BreederNear AI", "Built and measured"],
+        ["Find", "Walk into the nearest shop; the breeder next door is invisible",
+         "Pets near you, trusted first, a match % for your home, a fair-price bar", [("Match % calculated in code; 16 breeders, 36 pets", {})]],
+        ["List", "Breeder retypes the same post in every group",
+         "Photos + a Tamil or English message become a full listing", [("17–27 s live: upload, AI fill, trust check", {})]],
+        ["Trust", "No checks: stolen photos, scam prices, protected birds",
+         "Every listing screened before it goes live; Verified breeder badge", [("8/8 protected species blocked, 0/37 false alarms", G)]],
+        ["Check", "Pay a stranger in a group in full, in advance",
+         "Paste any outside post: “Is this post safe?”", [("5–7 s per post; nothing stored", {})]],
+        ["Talk", "Endless calls and the same answers",
+         "AI drafts the buyer’s first message and the breeder’s reply; scam shield on both", [("Scam scan on every enquiry and reply", {})]],
+        ["Buy", "“Courier only”, no handover",
+         "Book a visit, see the pet, pay in person, tap “I bought this pet”", [("No payments in the app, by design", {})]],
+        ["After", "New owner on their own",
+         "Starter kit sized for welfare, 14-day plan, daily log, growth, symptom urgency", [("Never a medicine or dose (evals E11, E19)", G)]],
+        ["Grow", "Breeder has no data",
+         "Dashboard: views, enquiries, visits and sales, week on week", [("8-week charts and trend cards", {})]],
+    ]
+    table(s, X0, Y0 - 0.02, W, rows, [0.75, 2.55, 3.45, 2.55], size=8.8, row_h=0.39)
+    text(s, X0, 4.82, W, 0.3, [[
+        ("One tool layer, two ways in: ", {"bold": True, "size": 10, "color": GREEN}),
+        ("every step works by tapping or by asking seven Gemini agents in English or Tamil. "
+         "Live now: 66/66 agent eval runs, 332 unit tests, 0 accessibility problems.", {"size": 10})]])
 
 
 def s_opportunities(s):
@@ -243,24 +292,27 @@ def s_opportunities(s):
         p._p.getparent().remove(p._p)
     cols = [
         ("How is it different?", BLUE, BLUE_BG, [
-            "Classifieds such as OLX stopped live-animal listings; big pet platforms sell food and accessories.",
-            "A few kennel websites sell dogs, checking only themselves.",
-            ("No platform we found checks every listing for wildlife law, registration, scam prices and "
-             "reused photos before it goes live, or checks posts from outside groups.", {"bold": True, "size": 10.4}),
+            [("WhatsApp / Facebook groups: ", {"bold": True, "size": 10}), ("reach, but no checks, no records, no recourse", {"size": 10})],
+            [("Classifieds (OLX): ", {"bold": True, "size": 10}), ("stopped live-animal listings", {"size": 10})],
+            [("Pet super-apps: ", {"bold": True, "size": 10}), ("food, accessories and vets, not the animal", {"size": 10})],
+            [("Kennel websites: ", {"bold": True, "size": 10}), ("one seller vouching for itself", {"size": 10})],
+            ("No platform we found checks every listing for wildlife law, registration, scam prices and reused "
+             "photos before it goes live, and then stays with the buyer after the sale.", {"bold": True, "size": 10}),
         ]),
         ("How does it solve the problem?", GREEN, GREEN_BG, [
-            "Gemini turns photos and a messy message into a structured, fairly priced listing.",
-            "Trust is decided by transparent code: protected species blocked, dog registration checked, "
-            "price and scam-language warnings, reused-photo detection.",
-            "Buyers see why: every badge lists its reasons and the questions to ask.",
-            "In-person handover; AI-drafted replies; starter kit and care plan.",
+            [("Invisible breeders → ", {"bold": True, "size": 10}), ("listed in a minute from photos and a Tamil message", {"size": 10})],
+            [("Scams → ", {"bold": True, "size": 10}), ("price, wording and reused-photo checks; outside posts checked too", {"size": 10})],
+            [("Illegal birds → ", {"bold": True, "size": 10}), ("blocked in code from the photo alone", {"size": 10})],
+            [("Unproven breeders → ", {"bold": True, "size": 10}), ("Verified badge: phone, facility photos, registration", {"size": 10})],
+            [("Lost hours → ", {"bold": True, "size": 10}), ("AI drafts replies; visits booked in the app", {"size": 10})],
+            [("Alone after buying → ", {"bold": True, "size": 10}), ("starter kit, care plan, daily log, vet urgency", {"size": 10})],
         ]),
         ("USP", AMBER, AMBER_BG, [
             ("Trust built in, not bolted on.", {"bold": True, "size": 10.4}),
+            "Rules in code decide; Gemini reads and explains. A prompt injection still ends in CAUTION (eval E12).",
             "Protected species blocked from the photo alone: 8/8 in testing, 0/37 false alarms.",
-            "The AI can’t override the rules: prompt injection still ends in CAUTION (eval E12).",
-            "Works where the trade happens: Tamil/English messages and outside posts.",
-            "One tool layer for tap screens and the AI chat.",
+            "Works where the trade already happens: Tamil and English messages, posts from groups.",
+            "Founder–market fit: designed from five years inside this exact trade.",
         ]),
     ]
     cw = (W - 0.4) / 3
@@ -525,30 +577,59 @@ def s_links(s):
 
 
 def s_business(s):
+    box(s, X0, Y0 - 0.02, W, 0.42, GREEN_BG)
+    text(s, X0 + 0.12, Y0 - 0.02, W - 0.24, 0.42, [[
+        ("Market: ", {"bold": True, "size": 10.5, "color": GREEN}),
+        ("India’s pet care products market is USD 9.2 B in 2026, heading to USD 13.9 B by 2034⁷, with about "
+         "39 million pets¹. The animals themselves are still sold with no checks: that is our wedge.", {"size": 10.5})]],
+        anchor=MSO_ANCHOR.MIDDLE)
     cw = (W - 0.4) / 3
-    card(s, X0, Y0, cw, 2.6, "Revenue (planned)", [
+    card(s, X0, 1.74, cw, 2.42, "Revenue (planned)", [
         "Verified-breeder subscription: badge, dashboard insights, more listings",
-        "Featured listings in a district",
-        "Commission on starter kits and accessories from partner brands",
-        "B2B: trust-screening API for classifieds and pet shops",
-    ], fill=GREEN_BG, title_color=GREEN, size=10.6, title_size=12.5)
-    card(s, X0 + cw + 0.2, Y0, cw, 2.6, "Why it works", [
-        "Screening costs about ₹1.3 per listing (measured tokens)",
-        "Serverless: Cloud Run and Firestore cost little when idle and scale per district",
-        "Trust is the product: OLX left this market because it couldn’t police sellers",
-    ], fill=BLUE_BG, title_color=BLUE, size=10.6, title_size=12.5)
-    card(s, X0 + 2 * (cw + 0.2), Y0, cw, 2.6, "Go-to-market", [
-        "Start where the founder trades: Coimbatore and Tiruppur breeder groups",
-        "Breeders onboard with one message and their phone photos",
-        "Buyers arrive via “Is this post safe?” links shared in the same groups",
-        "Then district by district across Tamil Nadu",
-    ], fill=AMBER_BG, title_color=AMBER, size=10.6, title_size=12.5)
-    text(s, X0, Y0 + 2.75, W, 1.0, [
-        ("Who benefits", {"bold": True, "size": 10, "after": 2}),
-        ("Buyers: fair prices and healthier, legal pets.  Breeders: hours saved and buyers beyond their own "
-         "contacts.  Wildlife: fewer protected birds traded, because illegal listings never go live.", {"size": 10.5}),
-        ("Revenue lines and the rollout are plans and assumptions, not results.", {"size": 8, "color": MUTED}),
+        "Featured listings per district",
+        "Starter-kit and accessory commerce after every sale (cart already built)",
+        "B2B trust-screening API for classifieds and pet shops",
+    ], fill=GREEN_BG, title_color=GREEN, size=9.8, title_size=11.5)
+    card(s, X0 + cw + 0.2, 1.74, cw, 2.42, "Built to scale", [
+        "Trust costs ≈ ₹1.3 per listing (measured) against pets priced ₹400–₹25,000",
+        "Serverless Cloud Run + Firestore: near zero when idle, scales out per request",
+        "Districts, species, fair prices and protected lists are data, not code: a new district is a data file",
+        "Gemini already reads Tamil, English and mixed messages",
+    ], fill=BLUE_BG, title_color=BLUE, size=9.8, title_size=11.5)
+    card(s, X0 + 2 * (cw + 0.2), 1.74, cw, 2.42, "Go-to-market", [
+        "1 · Pilot in Coimbatore and Tiruppur with the founder’s breeder network",
+        "2 · Tamil Nadu, district by district; list by sending a WhatsApp message",
+        "3 · Other states and languages; the trust API for other marketplaces",
+        "Buyers arrive through “Is this post safe?” links shared in the same groups",
+    ], fill=AMBER_BG, title_color=AMBER, size=9.8, title_size=11.5)
+    box(s, X0, 4.26, W, 0.62, GREY_BG)
+    text(s, X0 + 0.12, 4.28, W - 0.24, 0.6, [
+        [("Growth loop: ", {"bold": True, "size": 10, "color": GREEN}),
+         ("verified breeders → trusted listings → more buyers → more sales and care data → sharper fair prices and trust "
+          "scores → more breeders join.", {"size": 10})],
+        [("Who benefits: ", {"bold": True, "size": 10, "color": GREEN}),
+         ("buyers pay fair prices for healthy, legal pets; breeders win hours and reach; protected birds never get listed.",
+          {"size": 10})],
     ])
+    footnote(s, ["Revenue lines and rollout are plans, not results", "¹ Euromonitor 2025",
+                 "⁷ IMARC Group, India Pet Care Products Market (2026)", "Cost: docs/submission/05-deck-sources.md"])
+
+
+def duplicate_slide(prs, src):
+    """A copy of a template slide with its branding (header band, logos), placed at the end."""
+    dup = prs.slides.add_slide(src.slide_layout)
+    for ph in list(dup.placeholders):
+        ph._element.getparent().remove(ph._element)
+    rid_map = {rel.rId: dup.part.relate_to(rel._target, rel.reltype)
+               for rel in src.part.rels.values() if "notesSlide" not in rel.reltype and "slideLayout" not in rel.reltype}
+    for shape in src.shapes:
+        el = copy.deepcopy(shape._element)
+        for node in el.iter():
+            for attr in (qn("r:embed"), qn("r:link"), qn("r:id")):
+                if node.get(attr) in rid_map:
+                    node.set(attr, rid_map[node.get(attr)])
+        dup.shapes._spTree.append(el)
+    return dup
 
 
 def add_slide_title(slide, title, like):
@@ -580,11 +661,15 @@ def build() -> Path:
             "Additional Details/Future Development (if any)": s_future, "Provide links to your:": s_links}
     for title, fn in fill.items():
         fn(by_title[title])
-    blank = slides[14]                     # the template's spare content slide: used for the business case
-    add_slide_title(blank, "Business case and go-to-market", by_title["Snapshots of the prototype"])
+    blank = slides[14]                     # the template's spare content slide: business case and the journey
+    journey = duplicate_slide(prs, blank)
+    add_slide_title(blank, "Business case, scale and go-to-market", by_title["Snapshots of the prototype"])
     s_business(blank)
+    add_slide_title(journey, "From pain to product: the whole journey, end to end", by_title["Snapshots of the prototype"])
+    s_journey(journey)
     delete_slide(prs, 1)                   # the template's "how to download" note
     move_after(prs, blank, by_title["Estimated implementation cost (optional)"])
+    move_after(prs, journey, by_title["Brief about the idea"])
     pptx = OUT / "BreederNear-AI-deck.pptx"
     prs.save(pptx)
     subprocess.run(["soffice", "--headless", "--convert-to", "pdf", "--outdir", str(OUT), str(pptx)],

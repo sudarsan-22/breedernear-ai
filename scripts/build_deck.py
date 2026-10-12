@@ -463,27 +463,6 @@ def s_tech(s):
     ], size=9.2)
 
 
-def s_cost(s):
-    rows = [["AI action (measured, real calls)", "Gemini tokens (in · out incl. thinking)", "Cost per action*"],
-            ["List a pet: extract listing + screen photo", "≈ 4,560 · ≤ 1,075", "≈ ₹1.3"],
-            ["Check an outside post (text only; a screenshot adds ≈ ₹0.5)", "≈ 1,620 · ≤ 445", "≈ ₹0.5"],
-            ["Verification: read a certificate · review 2 facility photos", "≈ 1,640 · 400  ·  ≈ 2,630 · 645", "≈ ₹0.5 · ≈ ₹0.8"],
-            ["Buyer profile from their words · scan a message", "≈ 700 · 550  ·  ≈ 300 · 120", "≈ ₹0.5 · ≈ ₹0.1"],
-            ["14-day care plan (cached per species and age) · reply draft", "≈ 560 · ≤ 1,680  ·  ≈ 500 · ≤ 790", "≈ ₹1.2 · ≈ ₹0.6"]]
-    table(s, X0, Y0, W, rows, [3.9, 3.0, 2.4], size=8.6, row_h=0.31)
-    infra = [["Running cost", "Prototype through judging", "Example: 10,000 listings a month"],
-             ["Cloud Run (1 always-on instance)", "≈ ₹600–1,000 / month (estimate)", "scales per request"],
-             ["Firestore, Cloud Storage, Firebase Hosting + Auth", "within free usage at prototype scale", "pay per use (not measured)"],
-             ["Gemini", "a few hundred ₹ (tests + judges)", "≈ ₹13,000 / month for screening"]]
-    table(s, X0, Y0 + 2.05, W, infra, [3.9, 3.0, 2.4], size=8.6, row_h=0.3)
-    text(s, X0, Y0 + 3.3, W, 0.5, [
-        ("Screening a listing costs about ₹1.3 against animals priced ₹400–₹25,000 in our sample listings, so every "
-         "listing can be checked.", {"size": 9.5, "bold": True, "color": GREEN})])
-    footnote(s, ["*Measured tokens (10–11 Oct 2026); thinking tokens counted as output",
-                 "Gemini 3.8 Flash at $1.50 in / $7.50 out per 1M tokens (list price from 1 Jan 2027 as reported by price "
-                 "trackers; introductory price until then is half)", "₹88 = $1 (assumption)", "Estimates are labelled"])
-
-
 def s_snapshots(s):
     _phones(s, [("11-seller-charts", "Seller analytics"), ("12-verification", "Verified breeder"),
                 ("06-blocked", "Protected species: blocked"), ("04-post-check", "“Is this post safe?”"),
@@ -656,7 +635,7 @@ def build() -> Path:
             "Wireframes/Mock diagrams of the proposed solution (optional)": s_wireframes,
             "Architecture diagram of the proposed solution": s_architecture,
             "Technologies to be used in the solution": s_tech,
-            "Estimated implementation cost (optional)": s_cost, "Snapshots of the prototype": s_snapshots,
+            "Snapshots of the prototype": s_snapshots,     # the optional cost slide is left blank on purpose
             "Prototype Performance report/Benchmarking": s_performance,
             "Additional Details/Future Development (if any)": s_future, "Provide links to your:": s_links}
     for title, fn in fill.items():

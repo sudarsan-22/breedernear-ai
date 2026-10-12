@@ -11,7 +11,7 @@ Use this from **16 Oct** onward. Every box must be ticked before pressing Submit
 - [x] ID and employment proof ready for both members (confirmed 10 Oct)
 - [ ] Neither member is on any other AI Builder Cup team
 - [x] Team stays at 2 members (Sudarsan N, Shreya Azad); no 3rd/4th member (decided 9 Oct)
-- [ ] Both members joined the official Discord (Sudarsan ✅ 10 Oct; Shreya pending)
+- [x] Both members joined the official Discord (Sudarsan 10 Oct, Shreya 12 Oct)
 - [x] Organisers confirmed in writing that the startup background is fine (R25, 10 Oct); reply email saved
 
 ## B. Live prototype URL
@@ -111,4 +111,4 @@ A full top-to-bottom check against the live T&C, the FAQ and our risk tracker. R
 | Advertising | Links to the startup, waitlist, investors | None; PetZonic is mentioned only as the source of the idea, as the organisers allowed |
 | CI | GitHub Actions on `main` | Green on every recent push |
 
-Still open (owners): the YouTube link; deleting the 8 old test listings from 9–10 Oct in the live database; a real Google sign-in test; Shreya joining the Discord; the first-time-user test; `MIN_INSTANCES=1` release on 17 Oct; the T&C re-reads on 15, 17 and 18 Oct.
+Still open (owners): the YouTube link; deleting the 8 old test listings from 9–10 Oct in the live database; a real Google sign-in test; the first-time-user test; `MIN_INSTANCES=1` release on 17 Oct; the T&C re-reads on 15, 17 and 18 Oct.

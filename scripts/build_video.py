@@ -29,6 +29,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 ROOT = Path(__file__).resolve().parent.parent
 WEB = "https://breedernear-ai-2026.web.app"
+VOICE_NOTE = ROOT / "tests" / "evals" / "data" / "tamil_voice_note.ogg"   # synthetic Text-to-Speech, not a real voice
+VOICE_SECONDS = 15
 HOST = "breedernear-ai-2026.web.app"
 PROJECT = "breedernear-ai-2026"
 VOICE = "en-IN-Chirp3-HD-Kore"
@@ -50,7 +52,7 @@ SCENES = [
     ("chat", "/#ai", "Prefer to talk? Seven Gemini agents understand English and Tamil, and use the same tools as the screens."),
     ("dashboard", "/#dashboard", "Now the seller side. Karthik sees this week against last, a nudge to answer a waiting visit, and charts of his views, enquiries and sales."),
     ("verify", "/#farm", "He is a Verified breeder: a phone code and facility photos checked by Gemini, with no ID documents."),
-    ("sell", "/#sell", "A breeder lists the way they already post on social media: a photo and a quick message in Tamil. Gemini fills in the listing form, and every listing is screened before it goes live. This one is trusted."),
+    ("sell", "/#sell", "A breeder doesn't even need to type. Karthik adds a photo and records a voice note in Tamil. Gemini listens, writes out what it heard, and fills in the listing. Every listing is screened before it goes live. This one is trusted."),
     ("blocked", "/#sell", "Try to sell native rose-ringed parakeet chicks, and the listing is blocked. Trading protected Indian birds is illegal, and this decision is made in code."),
     ("reply", "/#enquiries", "Visit requests and messages arrive here. Gemini drafts a reply from the listing's facts, and Karthik edits and sends it."),
     ("close", "/", ""),
@@ -352,10 +354,16 @@ def act_sell(page, d, photo):
         fc.value.set_files(str(photo))
         page.wait_for_timeout(600)
         page.fill(".big-input", "")
-        slow_type(page, ".big-input", "4 jodi lutino lovebird, 5 maasam, oru jodi 1800 rubai. Saibaba Colony, Kovai. Healthy, parents on site.", 18)
+        page.get_by_role("button", name="Record a voice note instead").click()   # the fake microphone plays VOICE_NOTE
+        page.wait_for_selector(".voice-live")
+        page.wait_for_timeout(int(VOICE_SECONDS * 1000) + 400)
+        page.get_by_role("button", name="Stop").click()
+        page.wait_for_selector(".voice-clip")
+        page.wait_for_timeout(600)
         page.get_by_role("button", name="Fill with AI").click()
         page.wait_for_selector("#f-price_inr", timeout=120000)
-        page.wait_for_timeout(1800)
+        page.locator(".callout.info", has_text="What Gemini heard").scroll_into_view_if_needed()
+        page.wait_for_timeout(2600)
         page.mouse.wheel(0, 500)
         page.wait_for_timeout(1500)
         page.get_by_role("button", name="Publish with trust check").click()
@@ -399,9 +407,16 @@ def act_reply(page, d):
 
 def record(pw, name, role, act, duration, work: Path, chromium) -> tuple[Path, float]:
     """Record one scene; returns the video and the offset where the scene's action starts."""
-    browser = pw.chromium.launch(executable_path=chromium) if chromium else pw.chromium.launch()
+    args, permissions = [], []
+    if name == "sell":            # the sell scene records a Tamil voice note through a fake microphone
+        wav = work / "voice-note.wav"
+        run("-i", VOICE_NOTE, "-ar", "48000", "-ac", "1", wav)
+        args = ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream",
+                f"--use-file-for-fake-audio-capture={wav}"]
+        permissions = ["microphone"]
+    browser = pw.chromium.launch(executable_path=chromium, args=args) if chromium else pw.chromium.launch(args=args)
     state = work / f"state-{role}.json"
-    ctx = browser.new_context(viewport={"width": VW, "height": VH},
+    ctx = browser.new_context(viewport={"width": VW, "height": VH}, permissions=permissions,
                               storage_state=str(state) if state.exists() and name != "login" else None,
                               record_video_dir=str(work / f"rec-{name}"), record_video_size={"width": VW, "height": VH})
     page = ctx.new_page()

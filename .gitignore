@@ -35,3 +35,4 @@ sessions.db
 .adk/
 .firebase/
 build/
+.~lock.*#

@@ -36,7 +36,7 @@ MEMBERS = ["Shreya Azad"]
 WEB_URL = "https://breedernear-ai-2026.web.app"
 API_URL = "https://breedernear-655711985039.asia-south1.run.app"
 REPO_URL = "https://github.com/sudarsan-22/breedernear-ai"
-VIDEO_URL = "[add the YouTube link on 17 Oct]"
+VIDEO_URL = "https://drive.google.com/file/d/1R4uJceUVbF6Lt0R7gGpk-nVUlvT33xrd/view?usp=sharing"
 
 FONT = "Google Sans Flex"
 INK, MUTED = RGBColor(0x1D, 0x1D, 0x1F), RGBColor(0x5F, 0x5F, 0x64)

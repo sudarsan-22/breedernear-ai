@@ -73,7 +73,7 @@ The "Prototype Submission" module (read 10 Oct). Every field is required; nothin
 | Prototype Link Deployed on GCP or Cloud Run | URL | `https://breedernear-655711985039.asia-south1.run.app` (Cloud Run, as the field asks; the Firebase Hosting URL `https://breedernear-ai-2026.web.app` is in the README and deck) |
 | Final Prototype PPT/Deck converted into PDF | **PDF, up to 5 MB**; must use the organisers' template (R47) | `BreederNear-AI-deck.pdf` |
 | GitHub Repository Link (Public Access) | URL with `https://` | `https://github.com/sudarsan-22/breedernear-ai` |
-| Demo Video Link (up to 3 minutes) | URL | YouTube (Unlisted) |
+| Demo Video Link (up to 3 minutes) | URL | https://drive.google.com/file/d/1R4uJceUVbF6Lt0R7gGpk-nVUlvT33xrd/view?usp=sharing (Google Drive, anyone with the link can view; checked logged out 12 Oct) |
 | Brief Description of Your Solution (how we use Google services) | **1024 characters**; must cover Firebase, Firestore, Cloud Run and Gemini (R46) | [../submission/04-brief-description.md](../submission/04-brief-description.md) |
 
 - [ ] Live URL pasted and clicked from the form preview

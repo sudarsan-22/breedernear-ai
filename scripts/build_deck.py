@@ -591,6 +591,7 @@ def s_links(s):
             p.runs[-1].font.name = FONT
             p.runs[-1].font.size = Pt(11)
             p.runs[-1].font.color.rgb = GREEN
+            p.runs[-1].hyperlink.address = values[p.runs[0].text.strip()].split()[0]   # clickable in the PDF
     card(s, X0, 2.35, W, 1.05, "Try it in 2 minutes: demo accounts with preloaded data", [
         [("Customer: ", {"bold": True, "size": 11}), ("priya.customer@example.com", {"size": 11}),
          ("    Seller: ", {"bold": True, "size": 11}), ("karthik.seller@example.com", {"size": 11}),

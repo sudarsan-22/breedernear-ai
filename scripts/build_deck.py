@@ -32,6 +32,7 @@ TEMPLATE_URL = ("https://docs.google.com/presentation/d/13rg7vW43mEH6DkpuusAE6fd
 
 TEAM_NAME = "BreederNear AI"
 LEADER = "Sudarsan N"
+MEMBERS = ["Shreya Azad"]
 WEB_URL = "https://breedernear-ai-2026.web.app"
 API_URL = "https://breedernear-655711985039.asia-south1.run.app"
 REPO_URL = "https://github.com/sudarsan-22/breedernear-ai"
@@ -180,13 +181,20 @@ def set_title_slide(slide):
     values = {"Team name": TEAM_NAME, "Team leader name": LEADER,
               "Problem Statement": "Retail & Commerce: trusted, legal breeder-to-buyer pet commerce in India "
                                    "(BreederNear AI)"}
-    for p in tb.text_frame.paragraphs:
+    for p in list(tb.text_frame.paragraphs):
         for key, value in values.items():
             if p.runs and p.runs[0].text.strip().startswith(key):
                 r = copy.deepcopy(p.runs[0]._r)
                 p._p.append(r)
                 p.runs[-1].text = value
                 p.runs[-1].font.name = f"{FONT} Medium"
+                if key == "Team leader name":   # the team's other members, in the template's own list style
+                    for member in reversed(MEMBERS):
+                        line = copy.deepcopy(p._p)
+                        p._p.addnext(line)
+                        runs = line.findall(qn("a:r"))
+                        runs[0].find(qn("a:t")).text = "Team member: "
+                        runs[-1].find(qn("a:t")).text = member
 
 
 def delete_slide(prs, index):

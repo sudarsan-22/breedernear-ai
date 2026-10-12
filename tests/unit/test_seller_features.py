@@ -156,6 +156,19 @@ def test_events_become_weekly_series(fakes):
     assert [f["count"] for f in s["funnel"]] == [2, 1, 1, 1]
 
 
+def test_last_7_days_do_not_reset_on_a_monday(fakes):
+    uid = new_seller()
+    listing = {"id": "LST-X", "draft": {"species_common": "Lovebird"}}
+    monday = datetime(2026, 10, 12, 9, tzinfo=UTC)                     # a new calendar week has just begun
+    for days_ago in (1, 2, 3):
+        analytics_service.record(uid, listing, "view", 0, monday - timedelta(days=days_ago))
+    analytics_service.record(uid, listing, "view", 0, monday - timedelta(days=9))
+    analytics_service.record(uid, listing, "sale", 1800, monday - timedelta(days=2))
+    s = analytics_service.summary(uid, monday.date())
+    assert s["activity"]["view"][-2:] == [1, 3]                         # 7 days before, last 7 days
+    assert s["revenue_inr"][-1] == 1800 and s["weeks"][-1] == "06 Oct"
+
+
 def test_viewing_and_enquiring_record_events_for_the_owner(seeded):
     from breedernear_core import match_service
     uid = new_seller()

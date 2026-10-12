@@ -718,7 +718,7 @@ function trendOf(values) {
 }
 function metric(label, value, values, color, format = String) {
   const t = values ? trendOf(values) : null;
-  return h("div", { class: "card metric", role: "group", "aria-label": `${label}: ${format(value)}${t ? `, ${t[2]} on the previous week` : ""}` },
+  return h("div", { class: "card metric", role: "group", "aria-label": `${label}: ${format(value)}${t ? `, ${t[2]} on the 7 days before` : ""}` },
     h("div", { class: "top" }, h("span", { class: "label" }, label), t ? h("span", { class: `trend ${t[0]}`, "aria-hidden": "true" }, t[1]) : null),
     h("div", { class: "value" }, format(value)),
     values ? sparkline(values, color) : h("div", { class: "spark" }));
@@ -752,7 +752,7 @@ async function viewDashboard() {
   const waiting = (vis?.visits || []).filter((v) => v.status === "requested").length;
   const views = act ? trendOf(act.view) : null;
   nudge.replaceChildren(waiting ? h("span", {}, `You have ${waiting} visit request${waiting > 1 ? "s" : ""} waiting. `, h("button", { class: "link", type: "button", onclick: () => go("enquiries") }, "Answer now"))
-    : views?.[0] === "up" ? `Views are ${views[2]} on last week. Clear photos and fair prices keep buyers coming.`
+    : views?.[0] === "up" ? `Views are ${views[2]} on the week before. Clear photos and fair prices keep buyers coming.`
       : "Listings with clear photos and fair prices get the most enquiries.");
   const v = ver?.verification;
   const steps = [
@@ -765,7 +765,7 @@ async function viewDashboard() {
   body.replaceChildren(...[
     v?.status === "verified" ? h("div", { style: "margin:-4px 0 14px" }, h("span", { class: "tag TRUSTED" }, icon("shield"), "Verified breeder")) : verifyTag(d.farm) ? h("div", { style: "margin:-4px 0 14px" }, verifyTag(d.farm)) : null,
     v ? checklist(steps) : null,
-    h("div", { class: "h-sub", style: "display:flex;gap:8px;align-items:center" }, "This week", h("span", { class: "muted small", style: "font-weight:500" }, "vs the week before")),
+    h("div", { class: "h-sub", style: "display:flex;gap:8px;align-items:center" }, "Last 7 days", h("span", { class: "muted small", style: "font-weight:500" }, "vs the 7 days before")),
     h("div", { class: "metrics" },
       act ? [metric("Listing views", act.view.at(-1), act.view, CHART.views), metric("Enquiries", act.enquiry.at(-1), act.enquiry, CHART.enquiries),
         metric("Visit requests", act.visit.at(-1), act.visit, CHART.visits), metric("Sales", act.sale.at(-1), act.sale, CHART.sales),

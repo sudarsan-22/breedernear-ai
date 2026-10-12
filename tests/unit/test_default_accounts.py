@@ -83,3 +83,18 @@ def test_reset_removes_what_visitors_added(defaults):
     ids = {e["id"] for e in defaults.all_enquiries()}
     assert "ENQ_visitor" not in ids and "ENQ_other" in ids and {e[0] for e in d.ENQUIRIES} <= ids
     assert defaults.get_enquiry("ENQ_DEMO_1").get("reply") is None
+
+
+@pytest.mark.parametrize("hour", [0, 23])
+@pytest.mark.parametrize("day", range(12, 19))            # Monday 12 Oct to Sunday 18 Oct 2026
+def test_sample_history_fills_the_charts_on_any_day(defaults, day, hour):
+    from datetime import UTC, datetime
+
+    from breedernear_core import analytics_service
+
+    now = datetime(2026, 10, day, hour, 30, tzinfo=UTC)
+    d.seed_seller_extras(defaults, now)
+    s = analytics_service.summary(d.SELLER_ID, now.date())
+    assert all(s["activity"]["view"])                         # no empty week, including the latest
+    tiles = sum(lst["views"] for lst in map(defaults.get_listing, d.LISTING_STATE) if lst)
+    assert tiles == s["totals"]["views"]                       # dashboard tiles agree with the charts

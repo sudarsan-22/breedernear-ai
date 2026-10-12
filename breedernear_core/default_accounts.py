@@ -157,7 +157,7 @@ def seed_seller_extras(store, today: datetime | None = None) -> None:
     listings = [lst for lst in listings if lst]
     n = 0
     for week in range(8, 0, -1):
-        start = now - timedelta(weeks=week)
+        start = now - timedelta(weeks=week - 1)       # bucket `week` of the rolling 8-week charts
         views = rng.randint(14, 34) + (8 - week) * 2  # a gently growing farm
         plan = [
             ("view", views),
@@ -181,7 +181,7 @@ def seed_seller_extras(store, today: datetime | None = None) -> None:
                         "sample": True,
                         "amount_inr": lst.get("price_inr", 0) if kind == "sale" else 0,
                         "at": (
-                            start + timedelta(days=rng.randint(0, 6), hours=rng.randint(8, 19))
+                            (start - timedelta(days=rng.randint(1, 6))).replace(hour=rng.randint(8, 19))
                         ).isoformat(),
                     },
                 )

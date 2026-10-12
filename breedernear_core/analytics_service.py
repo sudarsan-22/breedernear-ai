@@ -28,29 +28,25 @@ def record(seller_id: str | None, listing: dict, kind: str, amount_inr: int = 0,
         "at": (when or datetime.now(UTC)).isoformat()})
 
 
-def _week_start(d: date) -> date:
-    return d - timedelta(days=d.weekday())
-
-
 def summary(seller_id: str, today: date | None = None) -> dict:
+    """Charts in 8 rolling 7-day buckets ending today (oldest first), so a new week never starts empty."""
     today = today or datetime.now(UTC).date()
-    first = _week_start(today) - timedelta(weeks=WEEKS - 1)
-    weeks = [first + timedelta(weeks=i) for i in range(WEEKS)]
-    counts = {w: Counter() for w in weeks}
-    revenue = dict.fromkeys(weeks, 0)
+    weeks = [today - timedelta(days=7 * (WEEKS - 1 - i) + 6) for i in range(WEEKS)]  # each bucket's first day
+    counts = [Counter() for _ in weeks]
+    revenue = [0] * WEEKS
     by_species: defaultdict[str, int] = defaultdict(int)
     totals = Counter()
     sample = False
     for ev in deps.get_store().find(COLLECTION, seller_id=seller_id):
         sample = sample or bool(ev.get("sample"))
-        day = datetime.fromisoformat(ev["at"]).date()
-        week = _week_start(day)
-        if week < first or day > today:
+        back = (today - datetime.fromisoformat(ev["at"]).date()).days // 7
+        if not 0 <= back < WEEKS:
             continue
-        counts[week][ev["type"]] += 1
+        i = WEEKS - 1 - back
+        counts[i][ev["type"]] += 1
         totals[ev["type"]] += 1
         if ev["type"] == "sale":
-            revenue[week] += ev["amount_inr"]
+            revenue[i] += ev["amount_inr"]
             by_species[ev["species"]] += ev["amount_inr"]
     labels = [w.strftime("%d %b") for w in weeks]
     funnel = [{"stage": name, "count": totals[key]} for key, name in
@@ -58,13 +54,13 @@ def summary(seller_id: str, today: date | None = None) -> dict:
     rate = round(100 * totals["enquiry"] / totals["view"], 1) if totals["view"] else 0.0
     return {
         "status": "ok", "weeks": labels,
-        "activity": {key: [counts[w][key] for w in weeks] for key in TYPES},
-        "revenue_inr": [revenue[w] for w in weeks],
+        "activity": {key: [c[key] for c in counts] for key in TYPES},
+        "revenue_inr": revenue,
         "funnel": funnel,
         "revenue_by_species": sorted(({"species": k, "amount_inr": v} for k, v in by_species.items()),
                                      key=lambda r: -r["amount_inr"]),
         "totals": {"views": totals["view"], "enquiries": totals["enquiry"], "visits": totals["visit"],
-                   "sales": totals["sale"], "revenue_inr": sum(revenue.values()), "enquiry_rate_pct": rate},
+                   "sales": totals["sale"], "revenue_inr": sum(revenue), "enquiry_rate_pct": rate},
         "sample_history": sample,
         "note": "Sales are what buyers marked as bought; payment happens in person, never in the app.",
     }

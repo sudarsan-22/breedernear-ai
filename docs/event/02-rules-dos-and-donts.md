@@ -15,8 +15,8 @@ Every risk below has a status. **✅ Resolved** = done and checked. **🔧 Built
 
 | # | Risk | Status | Resolution / next action | Owner | By |
 |---|---|---|---|---|---|
-| R1 | README makes false or unbuilt claims (public repo) | ✅ Resolved | README rewritten 9 Oct (see §5). Final accuracy pass on 16 Oct. | Sudarsan | 16 Oct |
-| R2 | README names Gemini 2.0 (retiring during judging) | ✅ Resolved | Removed. Model comes from `BREEDERNEAR_MODEL` in [.env.example](../../.env.example) (`gemini-3.8-flash`). Re-check the newest GA Flash ID before the final deploy. | Sudarsan | 17 Oct |
+| R1 | README makes false or unbuilt claims (public repo) | ✅ Resolved | README rewritten 9 Oct (see §5); line-by-line accuracy audit of the README, deck, video narration and brief description on 12 Oct (fixed: "five agents" → seven, the imagehash claim, unmeasured timings, "no dedicated platform" wording, the synthetic voice disclosed). Repeat after any change. | Sudarsan | 16 Oct |
+| R2 | README names Gemini 2.0 (retiring during judging) | ✅ Resolved | Removed. Model comes from `BREEDERNEAR_MODEL` in [.env.example](../../.env.example) (`gemini-3.8-flash`). Checked 12 Oct on the Vertex AI model-versions page: released 2 Sep 2026, **no retirement date announced** (2.5 Flash retires 20 Oct, 3.6 Flash 19 Nov: not used). Re-check on 17 Oct. | Sudarsan | 17 Oct |
 | R3 | README says MIT but there was no LICENSE | ✅ Resolved | [LICENSE](../../LICENSE) added (MIT, 2026, Sudarsan N and Shreya Azad) | — | — |
 | R4 | README's setup steps (`npm`, `.env.example`) didn't exist | ✅ Resolved | Wrong npm steps removed; `.env.example` added; real setup steps go in with the code | Sudarsan | 16 Oct |
 | R5 | Secrets accidentally committed to the public repo | ✅ Resolved (guard) | [.gitignore](../../.gitignore) blocks `.env`, keys and service-account JSON. Run the secrets check in the [submission checklist](04-submission-checklist.md) before submitting. | Sudarsan | 18 Oct |

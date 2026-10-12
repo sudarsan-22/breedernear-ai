@@ -270,9 +270,10 @@ def s_journey(s):
     rows = [
         ["Step", "Today, in groups and shops", "With BreederNear AI", "Built and measured"],
         ["Find", "Walk into the nearest shop; the breeder next door is invisible",
-         "Pets near you, trusted first, a match % for your home, a fair-price bar", [("Match % calculated in code; 16 breeders, 36 pets", {})]],
+         "Pets near you, trusted first, a match % for your home, a fair-price bar", [("Match % calculated in code; 16 sample breeders, 36 sample pets", {})]],
         ["List", "Breeder retypes the same post in every group",
-         "Photos + a Tamil or English message become a full listing", [("17–27 s live: upload, AI fill, trust check", {})]],
+         "Photos + a Tamil or English message, typed or as a voice note, become a full listing",
+         [("17–27 s live: upload, AI fill, trust check", {})]],
         ["Trust", "No checks: stolen photos, scam prices, protected birds",
          "Every listing screened before it goes live; Verified breeder badge", [("8/8 protected species blocked, 0/37 false alarms", G)]],
         ["Check", "Pay a stranger on social media in full, in advance",
@@ -340,10 +341,10 @@ def s_features(s):
         "Book a visit; “I bought this pet” after it (paid in person)",
         "My pets: daily log with AI feedback, growth, health calendar",
         "Symptom checker: how urgently to see a vet (never medicines)",
-        "“Is this post safe?”, starter kit, Local Breeders directory",
+        "“Is this post safe?” with share and report; starter kit; Local Breeders",
     ], fill=GREEN_BG, title_color=GREEN, size=10.2, title_size=12.5)
     card(s, X0 + cw + 0.3, Y0, cw, 2.95, "For sellers (seller app)", [
-        "“Fill with AI”: photos + a Tamil/English message become a listing",
+        "“Fill with AI”: photos + a Tamil/English message or voice note become a listing",
         "Publish with trust check: TRUSTED, CAUTION or BLOCKED, with reasons",
         "Dashboard charts: views, enquiries, visits, sales, funnel",
         "Verified breeder badge: phone code, facility photos read by Gemini, dog-breeder certificate (no ID documents)",
@@ -466,7 +467,7 @@ def s_tech(s):
     table(s, X0, Y0, 6.25, rows, [1.95, 4.3], size=8.0, row_h=0.35)
     card(s, X0 + 6.45, Y0, W - 6.45, 3.15, "Also used", [
         "Python 3.12, FastAPI, Pydantic",
-        "imagehash: reused-photo detection",
+        "Pillow: our own perceptual hash (dHash) for reused photos",
         "Plain HTML, CSS, JavaScript and SVG charts: no build step",
         "pytest, Playwright + axe-core, GitHub Actions",
         "Firebase CLI (deploy only)",
@@ -532,7 +533,7 @@ def _unit_tests() -> str:
 
 def s_performance(s):
     evals, runs = _eval_numbers()
-    q = [["Quality (real Gemini, 10–11 Oct 2026)", "Result"],
+    q = [["Quality (real Gemini, 10–12 Oct 2026)", "Result"],
          [f"Agent evals: {runs} (listing, Tamil, blocking, scams, reused photos, prompt injection, no medicine advice, "
           "roles, verification, visits, care companion)", [(evals, {"bold": True, "color": GREEN})]],
          ["Protected species blocked from the photo alone", [("8/8", {"bold": True, "color": GREEN})]],
@@ -545,8 +546,8 @@ def s_performance(s):
          ["List a pet: upload, AI fill, publish with trust check", "17–27 s"],
          ["Check a pasted post", "5–7 s"],
          ["Web app load (Firebase CDN)", "≈ 0.7 s"],
-         ["Gemini: read a certificate · scan a message", "≈ 4.5 s · ≈ 2 s"],
-         ["Gemini: symptom urgency · daily-log feedback", "≈ 8 s"]]
+         ["Gemini: read a certificate · scan a message", "8–9 s · 2–3 s"],
+         ["Gemini: symptom urgency · daily-log feedback", "7–8 s · 4–10 s"]]
     table(s, X0 + 5.95, Y0, W - 5.95, p, [2.45, 0.9], size=8.2, row_h=0.4)
     text(s, X0 + 5.95, Y0 + 2.55, W - 5.95, 1.2, [
         ("How we test", {"bold": True, "size": 9.5, "after": 2}),

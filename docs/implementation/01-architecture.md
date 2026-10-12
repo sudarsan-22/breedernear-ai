@@ -123,7 +123,7 @@ Not used, to keep it simple: load balancer, CDN, Cloud SQL, BigQuery, Pub/Sub, M
 | Agent framework | ADK | Raw Gemini SDK: less structure, no built-in evals or sessions |
 | Model | Newest GA Gemini Flash (`gemini-3.8-flash` as of 9 Oct 2026), via `BREEDERNEAR_MODEL` | Pro: slower and costlier. `gemini-2.x`: retiring 20 Oct. |
 | Trust decision | Deterministic scoring in code from individual checks | Letting the LLM decide: not auditable, can be talked out of it |
-| Duplicate photos | Perceptual hashing (`imagehash` + Pillow) | Asking the LLM: unreliable and costly |
+| Duplicate photos | Perceptual hashing (our own dHash on Pillow) | Asking the LLM: unreliable and costly |
 | Distance | District centroids (lat/lng) + haversine in code | Maps API: stretch only |
 | Frontend | Vanilla HTML/CSS/JS served by FastAPI, no build step | React/Next: more tooling and risk. ADK dev UI: a developer tool, not end-user UX. |
 | ADK sessions | **MVP:** in-memory, `--max-instances=1`, session affinity. **Upgrade if time:** persistent session service (`agentengine://` or Cloud SQL), then raise `max-instances` | Chat history loss is acceptable; business data is in Firestore |

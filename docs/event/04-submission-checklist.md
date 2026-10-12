@@ -91,3 +91,24 @@ The "Prototype Submission" module (read 10 Oct). Every field is required; nothin
 - [ ] Billing and credits checked weekly
 - [ ] Email, dashboard and Discord checked daily
 - [ ] If shortlisted on 7 Nov: decide the 2 travellers immediately and start Singapore visas (~4 weeks' notice)
+
+## H. Pre-submission audit (12 Oct)
+
+A full top-to-bottom check against the live T&C, the FAQ and our risk tracker. Re-run the commands before submitting.
+
+| Area | Check | Result |
+|---|---|---|
+| T&C and FAQ | Re-read live on 12 Oct | Only change: roster changes allowed until 14 Oct; deliverables say "Cloud Run/GCP/Firebase". Logged in the [compliance matrix](06-terms-compliance-matrix.md#tc-re-check-log) |
+| Fresh code | `git log --reverse` | First commit 23 Sep 2026, 80+ commits, all by team members; nothing from the earlier platform or from outside the team (R11, R25, R48) |
+| Attribution | `git log --all --format=%B` and `git grep` for co-author or assistant traces | None |
+| Secrets | `git log -p --all` for private keys and API keys; tracked files | Only the Firebase web API key, which is public by design and restricted to our domains and the sign-in APIs. A second, unused Firebase browser key exists without a domain restriction (not in the repo); restrict or delete it in the console (optional) |
+| Personal data | Emails, phone numbers, employer names in the repo | None (only example.com logins and the organiser's public support line) |
+| Google Cloud only | `requirements.txt`, imports, external hosts | Google ADK, Gemini on Vertex AI, Firestore, Cloud Storage, Firebase; fonts from Google Fonts; no other AI provider (R35) |
+| Model lifecycle | Vertex AI model-versions page | `gemini-3.8-flash`, released 2 Sep 2026, no retirement date announced |
+| Third-party assets | `ATTRIBUTIONS.md` | Added Plus Jakarta Sans, Google Sans Flex (OFL), the Firebase JS SDK (Apache-2.0), the organisers' deck template, the synthetic Tamil voice note and the Text-to-Speech narration |
+| False statements | README, deck, video narration, brief description, app text, line by line | Fixed: "five agents" → seven (brief description); `imagehash` → our own dHash; Gemini timings re-measured (certificate 8–9 s, not 4.5 s); "no dedicated platform" → "no dedicated platform we found checks every listing"; the demo voice note is said to be generated; counts labelled "sample"; eval summary fixed so it never mixes old and new case sets |
+| Statistics | Each cited number re-checked against its source | Euromonitor 39 million pets; IMARC USD 9.2 B (2026) → 13.9 B (2034); Deccan Herald Aug 2023; PETA India 25 Jun 2026; reporting channels (Tamil Nadu wildlife-crime portal, 1930, cybercrime.gov.in) |
+| Advertising | Links to the startup, waitlist, investors | None; PetZonic is mentioned only as the source of the idea, as the organisers allowed |
+| CI | GitHub Actions on `main` | Green on every recent push |
+
+Still open (owners): the YouTube link; deleting the 8 old test listings from 9–10 Oct in the live database; a real Google sign-in test; Shreya joining the Discord; the first-time-user test; `MIN_INSTANCES=1` release on 17 Oct; the T&C re-reads on 15, 17 and 18 Oct.

@@ -42,7 +42,7 @@ FONTS = Path.home() / ".local/share/fonts/googlesansflex"
 
 # The closing line's numbers come from evals/RESULTS.md and evals/VISION_RESULTS.md (see close_line()).
 SCENES = [
-    ("title", "/", "In India, pets are sold on social media like WhatsApp, Instagram and Facebook, but there is no dedicated, trusted platform for this market. BreederNear AI is that platform. Our founder, a bird breeder from Coimbatore, watched buyers overpay while healthy birds waited a street away."),
+    ("title", "/", "In India, pets are sold on social media like WhatsApp, Instagram and Facebook, with no checks at all, and no dedicated platform we found checks every listing before it goes live. BreederNear AI does. Our founder, a bird breeder from Coimbatore, watched buyers overpay while healthy birds waited a street away."),
     ("login", "/", "BreederNear AI connects buyers with trusted local breeders. It runs on Google Cloud, with Gemini agents on Cloud Run, Firestore and Firebase. We log in as our demo buyer, Priya."),
     ("pets", "/#pets", "Every pet shows a match score for Priya's home, worked out by fixed rules, and trusted breeders nearby come first. Open a listing to see each trust check and the questions to ask."),
     ("kit", "/#pets", "Tap Starter kit: the cage is sized for the animals, never smaller, and Gemini writes a fourteen-day care plan with the signs that need a vet."),
@@ -50,9 +50,9 @@ SCENES = [
     ("companion", "/#account", "After the visit she taps I bought this pet, and the care companion starts: a daily log with AI feedback, a growth tracker, a health calendar, and a symptom checker that says how urgently to see a vet, never which medicine."),
     ("check", "/#pets", "Saw a pet for sale on social media? Paste the post into Is this post safe. Our rules flag a price far below the market, full advance payment and courier-only delivery."),
     ("chat", "/#ai", "Prefer to talk? Seven Gemini agents understand English and Tamil, and use the same tools as the screens."),
-    ("dashboard", "/#dashboard", "Now the seller side. Karthik sees this week against last, a nudge to answer a waiting visit, and charts of his views, enquiries and sales."),
+    ("dashboard", "/#dashboard", "Now the seller side. Karthik sees the last seven days against the week before, a nudge to answer a waiting visit, and charts of his views, enquiries and sales."),
     ("verify", "/#farm", "He is a Verified breeder: a phone code and facility photos checked by Gemini, with no ID documents."),
-    ("sell", "/#sell", "A breeder doesn't even need to type. Karthik adds a photo and records a voice note in Tamil. Gemini listens, writes out what it heard, and fills in the listing. Every listing is screened before it goes live. This one is trusted."),
+    ("sell", "/#sell", "A breeder doesn't even need to type. Karthik adds a photo and a voice note in Tamil, a generated voice for this demo. Gemini listens, writes out what it heard, and fills in the listing. Every listing is screened before it goes live. This one is trusted."),
     ("blocked", "/#sell", "Try to sell native rose-ringed parakeet chicks, and the listing is blocked. Trading protected Indian birds is illegal, and this decision is made in code."),
     ("reply", "/#enquiries", "Visit requests and messages arrive here. Gemini drafts a reply from the listing's facts, and Karthik edits and sends it."),
     ("close", "/", ""),

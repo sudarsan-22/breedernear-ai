@@ -29,6 +29,8 @@ We found no reliable Indian statistics on pet-sale scams, so the deck describes 
 | List a pet on the live app (upload + AI fill + publish with trust check) | 17.1 s and 27.3 s (two runs) | live API calls, seller demo account |
 | Check a pasted post | 7.0 s and 4.8 s | live API |
 | Web app load from Firebase Hosting | ≈ 0.6–0.7 s (index + app.js) | `curl` |
+| Gemini: read a certificate / scan a message / symptom urgency / daily-log feedback | 9.4 and 7.6 s / 2.4 and 3.3 s / 7.5 and 6.7 s / 4.3 and 10.4 s (two runs each, 12 Oct, measured while an eval run was also calling Gemini) | `GeminiVision` called directly with the sample certificate and short texts |
+| Gemini: listing from a Tamil voice note (15 s audio, no photo) | 13.2 s (12 Oct) | `GeminiVision.extract_listing` with `tests/evals/data/tamil_voice_note.ogg` |
 | Gemini tokens: extract listing (1 photo + message) | 2,691 in; 153 out + up to 487 thinking | `usage_metadata`, 2 runs |
 | Gemini tokens: screen a photo | 1,869 in; ≈150 out + up to 281 thinking | same |
 | Gemini tokens: care plan | 562 in; ≈600 out + up to 1,077 thinking | same |

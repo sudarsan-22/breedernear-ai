@@ -67,7 +67,7 @@ Customers and sellers have **separate accounts**: email or mobile + password, a 
 
 | Tab | For | What you can do |
 |---|---|---|
-| 🐾 **Pets** | Buyers | Browse pets near you with a **match %** for your home, filter by species, price and trust; open a listing to see every trust check; message the breeder (AI drafts the first message), **book a visit**; get a starter kit and care plan; take the "Which pet suits me?" quiz; check a post you saw on WhatsApp |
+| 🐾 **Pets** | Buyers | Browse pets near you with a **match %** for your home, filter by species, price and trust; open a listing to see every trust check; message the breeder (AI drafts the first message), **book a visit**; get a starter kit and care plan; take the "Which pet suits me?" quiz; check a post you saw on social media and share the warning; see **Impact so far** |
 | 🏡 **Local Breeders** | Buyers | **Direct Farm:** meet breeders near you and buy at the farm price, with no broker markup |
 | ❤️ **My pets** | Buyers | After "I bought this pet": a daily log with AI feedback and a streak, a growth tracker against typical weights, a vaccination and deworming calendar, and a symptom checker that says how urgently to see a vet (never medicines or doses) |
 | ✨ **BreederNear AI** | Buyers | Ask in English or Tamil. Seven Gemini agents find a pet, check a post, book a visit or help care for it, and show what they did |
@@ -77,8 +77,8 @@ Customers and sellers have **separate accounts**: email or mobile + password, a 
 
 | Tab | What sellers can do |
 |---|---|
-| 📊 **Dashboard** | Live listings, enquiries, views and trust status; **8-week charts** (views, enquiries, visits, sales, view-to-sale funnel, sales by species); recent activity; "Sell a pet with AI" |
-| 📋 **Listings** | Add photos and a quick message (English or Tamil), tap "✨ Fill with AI", check the form, add a vaccination card (optional), publish with a trust check; pause, mark sold or remove |
+| 📊 **Dashboard** | Last-7-days cards with trends (views, enquiries, visit requests, sales, sales value, live listings); a nudge such as a visit waiting; a getting-started checklist for new sellers; **8-week charts** (views, enquiries, visits, sales, view-to-sale funnel, sales by species); recent activity; Impact so far; "Sell a pet with AI" |
+| 📋 **Listings** | Add photos and a quick message or a **voice note** (English or Tamil), tap "✨ Fill with AI", check the form, add a vaccination card (optional), publish with a trust check; pause, mark sold or remove |
 | ✉️ **Enquiries** | **Visit requests** to confirm or decline; messages from buyers, with scam warnings. Tap Reply → "✨ Draft with AI" writes an answer from your listing's facts; you edit and send |
 | ✨ **AI** · 🏡 **Farm** | The listing and verification assistants by chat; farm profile and **breeder verification** (phone code, facility photos checked by Gemini, dog-breeder certificate; no ID documents) for the Verified breeder badge |
 

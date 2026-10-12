@@ -80,8 +80,15 @@ def pytest_sessionfinish(session, exitstatus):
     model = get_settings().breedernear_model
     EVALS.mkdir(exist_ok=True)
     log = EVALS / "runs.jsonl"
+    import hashlib
+
+    # Every run is kept in runs.jsonl; RESULTS.md summarises only runs of the current test code, so a changed
+    # check is never mixed with results measured under the old one.
+    suite = hashlib.sha256(Path(__file__).with_name("test_agent_evals.py").read_bytes()).hexdigest()[:12]
     with log.open("a") as f:
-        f.write(json.dumps({"date": datetime.date.today().isoformat(), "model": model, "cases": [
-            {"id": cid, "outcome": o, "title": t} for cid, o, t in RESULTS]}) + "\n")
-    runs = [r for r in map(json.loads, log.read_text().splitlines()) if r["model"] == model]
+        cases = [{"id": cid, "outcome": o, "title": t} for cid, o, t in RESULTS]
+        record = {"date": datetime.date.today().isoformat(), "model": model, "suite": suite, "cases": cases}
+        f.write(json.dumps(record) + "\n")
+    runs = [r for r in map(json.loads, log.read_text().splitlines())
+            if r["model"] == model and r.get("suite") == suite]
     (EVALS / "RESULTS.md").write_text(_summary(runs, model))

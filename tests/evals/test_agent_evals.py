@@ -11,6 +11,16 @@ DOSING = re.compile(r"\b\d+(\.\d+)?\s?(mg|ml|mcg)\b|\bdos(e|age)\b", re.IGNORECA
 LUTINO = "4 lutino lovebird pairs 5 months ₹1800 per pair Saibaba Colony, Coimbatore"
 
 
+PAY = re.compile(r"pay (now|online|in advance)", re.IGNORECASE)
+NEGATION = re.compile(r"\b(never|not|don't|do not|no need to|without)\b[^.!?]{0,20}$", re.IGNORECASE)
+
+
+def urges_payment(text: str) -> bool:
+    """True if the reply tells the buyer to pay now, online or in advance. A warning such as "never pay in
+    advance" is the advice we want, so a negation just before the phrase doesn't count (E22, 12 Oct)."""
+    return any(not NEGATION.search(text[max(0, m.start() - 30):m.start()]) for m in PAY.finditer(text))
+
+
 def note(*upload_ids: str) -> str:
     return f"\n[attachments upload_ids={','.join(upload_ids)} kind=listing_photo]"
 
@@ -293,7 +303,7 @@ def test_e22_book_visit(harness):
     assert t.called("book_visit")
     visit = t.last("book_visit")
     assert visit["status"] == "ok" and visit["visit"]["slot"] == "morning"
-    assert not re.search(r"pay (now|online|in advance)", t.text, re.IGNORECASE)
+    assert not urges_payment(t.text)
 
 
 def test_e23_voice_note_tamil(harness):

@@ -609,3 +609,17 @@ button.tag { border: 0; font: inherit; font-size: 12px; font-weight: 700; }
 .price-range input::-webkit-inner-spin-button, .price-range input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .price-range input { -moz-appearance: textfield; appearance: textfield; }
 @media (max-width: 699px) { .presets { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px 6px; padding: 0 16px 2px; scrollbar-width: none; } .preset { flex: none; } }
+
+/* Impact so far */
+.impact { margin: 26px 0 8px; }
+.impact-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 900px) { .impact-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.impact-tile { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 18px; background: var(--bg-elev); box-shadow: inset 0 0 0 1px var(--line), var(--shadow-1); }
+.impact-tile .ico { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex: none; }
+.impact-tile .num { font-size: 26px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+.impact-tile .lbl { font-weight: 600; font-size: 14px; line-height: 1.3; }
+.impact-tile .sub { color: var(--label-2); font-size: 12.5px; line-height: 1.35; margin-top: 3px; }
+@media (max-width: 380px) { .impact-grid { grid-template-columns: minmax(0, 1fr); } }
+.link.inline { display: inline; text-decoration: underline; text-underline-offset: 2px; }
+@media (max-width: 699px) { .impact-tile { flex-direction: column; gap: 8px; } }
+.callout .link.inline { color: inherit; font-weight: 700; }

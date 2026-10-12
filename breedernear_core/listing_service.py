@@ -187,6 +187,9 @@ def check_external_listing(guest_id: str, text: str, upload_ids: list[str]) -> d
     images = _load_images(guest_id, upload_ids)
     draft = _normalise(deps.get_vision().extract_listing(text, images))
     screening, _ = _screen(guest_id, draft, text, upload_ids)
+    from breedernear_core import impact_service  # here: impact_service reads the directory, which imports us
+
+    impact_service.record_post_check(screening.model_dump())
     return {"status": "ok", "extracted": draft.model_dump(), "screening": screening.model_dump()}
 
 

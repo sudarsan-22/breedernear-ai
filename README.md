@@ -28,7 +28,7 @@
 Our founder spent five years as a bird breeder and broker in Coimbatore, India. Over and over he saw the same thing:
 
 - **New buyers walk into a pet shop and overpay**, often for a less healthy animal, because the breeder down the street is invisible online.
-- **The real market is hidden** in district WhatsApp and Facebook groups, visible only to insiders.
+- **The real market is hidden on social media** (WhatsApp, Instagram and Facebook groups), visible only to insiders. None of them is a dedicated, trusted marketplace for pets, and nothing is checked.
 - **Buyers can't tell good sellers from bad.** Scams are common, and protected native birds are still traded illegally, sometimes dyed to disguise them.
 - **Breeders lose hours every day** to manual selling: repeating answers, confirming stock, negotiating.
 
@@ -92,10 +92,23 @@ Everything works by tapping; the AI does the hard parts on every screen. Chat is
 | **Check** | Every listing is screened before buyers see it. Protected species are **blocked**. Dyed birds, visible health concerns, reused photos, suspicious prices and scam language are flagged. Buyers see an explainable trust score. | Gemini vision + deterministic rules (perceptual hashing, price rules, species lists) → trust score **computed in code** |
 | **Find** | A buyer browses nearby pets, takes a short quiz or describes their home, family and budget. BreederNear suggests suitable pets and finds trusted breeders nearby, with fair-price indicators. | Rules + ADK agent with tool calls over Firestore; distance by district |
 | **Start right** | A personalised starter kit (correct cage size, food, accessories) and a first-14-days care plan with "see a vet if…" signs | Product rules + Gemini structured care plans |
-| **Is this listing safe?** | Upload a screenshot of a post seen on WhatsApp or Instagram and get the same trust screening | Same pipeline, nothing stored |
+| **Is this listing safe?** | Upload a screenshot of a post seen on social media and get the same trust screening. **Share this warning** sends the reasons back to the group where the post was seen; a protected species shows how to **report it** (Tamil Nadu's wildlife-crime complaint portal); a scam shows the 1930 cyber-fraud helpline | Same pipeline, nothing stored (only a count) |
 | **Meet and buy** | A match % for every pet, an AI-drafted first message, a scam shield on messages, visit booking, and "I bought this pet" after a confirmed visit (paid in person, never in the app) | Match % computed in code from the quiz rules; Gemini drafts and scans text |
 | **Care** | A care companion for the pet at home: daily log, growth, health calendar, symptom urgency | Gemini feedback and triage; weight ranges, calendar and an emergency floor in code |
 | **Verify** | Breeders earn a Verified breeder badge | Gemini reads facility photos and certificates; pass/fail rules in code; photos deleted once read |
+
+## Impact, measured in the app
+
+The impact is counted live from the platform's own data (`GET /api/impact`, shown as **Impact so far** on the Pets tab and the seller dashboard):
+
+| What we count | Why it matters |
+|---|---|
+| Listings checked before going live, and how many were marked Caution with reasons | Every animal is checked before any buyer sees it |
+| Protected or illegal animals stopped: blocked listings, plus protected species found in outside posts | Wildlife that never reaches a buyer |
+| Scam warnings raised: risky outside posts and scam-like messages between buyers and breeders | Money that is not paid to a stranger |
+| Verified breeders and registered dog breeders | Good breeders can prove it |
+
+Detection leads to action: a buyer can **share the warning** back into the social-media group the post came from, and a protected species comes with a link to **report it**. In the prototype the numbers include the sample listings and breeders, and outside posts are never stored, only counted.
 
 ## Architecture
 
@@ -164,7 +177,7 @@ Measured on 10–11 Oct 2026 with real Gemini (`gemini-3.8-flash`). Each command
 | Ordinary pet photos wrongly flagged as protected | **0/37** | same |
 | All photo checks (species, dye, blur, no animal, watermark, screenshot) | **202/202** | same; test photos are AI-generated and the prompt was tuned on them, so treat this as an upper bound |
 | Accessibility: axe-core WCAG 2.2 AA on every screen and sheet, light and dark, 320 / 390 / 1280 px | **0 problems** | `pytest -m ui tests/ui` |
-| Unit tests (CI on every push) | **332 passed** | `pytest -m "not live"` |
+| Unit tests (CI on every push) | **335 passed** | `pytest -m "not live"` |
 | Live smoke test | **17/17** | `scripts/smoke_test.py <URL>` |
 
 ## Simulated vs real

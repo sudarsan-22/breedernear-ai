@@ -6,7 +6,7 @@ The routes call the same service functions as the agents' tools; roles are check
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, UploadFile
 from pydantic import BaseModel
 
-from breedernear_core import accounts, care_service, deps, directory_service, match_service
+from breedernear_core import accounts, care_service, deps, directory_service, impact_service, match_service
 from breedernear_core import listing_service as svc
 from breedernear_core.config import get_settings
 from breedernear_core.data import load_seed
@@ -274,6 +274,11 @@ def breeder_page(breeder_id: str, district: str | None = None, user: dict = Depe
 @router.post("/check")
 def check_post(body: TextAndPhotosIn, user: dict = Depends(current_user)) -> dict:
     return _call(svc.check_external_listing, user["id"], body.text, body.upload_ids)
+
+
+@router.get("/impact")
+def impact(user: dict = Depends(current_user)) -> dict:
+    return _call(impact_service.summary, viewer(user))
 
 
 @router.get("/starter-kit")

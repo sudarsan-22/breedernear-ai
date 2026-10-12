@@ -303,6 +303,22 @@ function empty(iconName, title, text, action) {
   return h("div", { class: "empty" }, h("div", { class: "ico green" }, icon(iconName)), h("b", {}, title), h("div", {}, text),
     action ? h("div", { style: "margin-top:14px" }, action) : null);
 }
+function impactSection() {
+  const box = h("section", { class: "impact", "aria-labelledby": "impact-title" }, h("h2", { id: "impact-title", class: "h-sub" }, "Impact so far"), loading("Counting…"));
+  const fmt = (n) => Number(n).toLocaleString("en-IN");
+  const tile = (ico, value, label, sub) => h("div", { class: "impact-tile" }, h("span", { class: "ico teal" }, icon(ico)),
+    h("div", {}, h("div", { class: "num" }, fmt(value)), h("div", { class: "lbl" }, label), sub ? h("div", { class: "sub" }, sub) : null));
+  api("/api/impact").then((r) => box.replaceChildren(
+    h("h2", { id: "impact-title", class: "h-sub" }, "Impact so far"),
+    h("div", { class: "impact-grid" },
+      tile("shield", r.listings_screened, "listings checked before going live", `${fmt(r.listings_caution)} marked Caution with reasons`),
+      tile("x", r.listings_blocked + r.posts_protected, "protected or illegal animals stopped", `${fmt(r.listings_blocked)} listings never shown · ${fmt(r.posts_protected)} in outside posts`),
+      tile("warn", r.posts_flagged + r.messages_flagged, "scam warnings raised", `${fmt(r.posts_flagged)} of ${fmt(r.posts_checked)} outside posts · ${fmt(r.messages_flagged)} messages`),
+      tile("check", r.verified_breeders, "verified breeders", `${fmt(r.registered_dog_breeders)} registered dog breeders`)),
+    h("p", { class: "muted small", style: "margin:6px 0 0" }, r.note)))
+    .catch(() => box.remove());
+  return box;
+}
 const disclaimer = () => h("p", { class: "disclaimer" }, "Prototype — sample breeders, listings and products, with illustrative photos. No payments. Not veterinary advice.");
 
 // ---------------------------------------------------------------- sheet
@@ -488,6 +504,29 @@ function describeAnswers(a) {
 }
 
 // "Is this post safe?"
+// Turning a check into action: share the warning back where the post was seen, and report protected animals.
+function shareText(sc) {
+  const reasons = (sc.checks || []).filter((c) => c.result !== "pass").slice(0, 3).map((c) => `• ${c.detail}`);
+  return [`⚠️ I checked this pet post with BreederNear AI: ${LEVEL_WORD[sc.trust_level] || sc.trust_level}.`, ...reasons,
+    "Before you pay: see the animal in person, never pay the full amount in advance.", `Check a post yourself: ${location.origin}`].join("\n");
+}
+function shareWarningButton(sc) {
+  const btn = h("button", { class: "btn primary block", type: "button" }, icon("up"), "Share this warning");
+  btn.addEventListener("click", async () => {
+    const text = shareText(sc);
+    try {
+      if (navigator.share) { await navigator.share({ title: "Pet post warning", text }); return; }
+      await navigator.clipboard.writeText(text); toast("Warning copied: paste it in the group where you saw the post");
+    } catch (e) { if (e?.name !== "AbortError") toast("Couldn't share. Select and copy the reasons above instead."); }
+  });
+  return btn;
+}
+function reportWildlife() {
+  return h("div", { class: "callout bad", style: "margin-top:12px" }, h("b", {}, "Report it: this may be a protected wild animal"),
+    "Selling native birds and other protected wildlife is a crime under the Wild Life (Protection) Act, 1972. Don't buy it, and report the post. In Tamil Nadu: ",
+    h("a", { class: "link inline", href: "https://tnfwccb.com/online-complaint/", target: "_blank", rel: "noopener" }, "Forest & Wildlife Crime Control online complaint"),
+    ". Elsewhere: your nearest forest office or the Wildlife Crime Control Bureau.");
+}
 function checkSheet() {
   const photos = [];
   const text = h("textarea", { class: "big-input", rows: 5, maxlength: 2000, placeholder: "Paste the post text, e.g. “Lovebirds pair 500 only, full advance, courier only”", "aria-label": "Post text" });
@@ -502,16 +541,22 @@ function checkSheet() {
     try {
       const ids = await uploadPhotos(photos, "external_listing");
       const r = await api("/api/check", { method: "POST", body: JSON.stringify({ text: text.value, upload_ids: ids }) });
+      const sc = r.screening, risky = sc.trust_level !== "TRUSTED";
+      const protectedFound = (sc.checks || []).some((c) => c.result === "block");
       setSheet([
-        trustSummary(r.screening, r.screening.trust_level === "TRUSTED" ? "No warning signs found" : r.screening.trust_level === "BLOCKED" ? "This post can't be trusted" : "This post shows warning signs"),
-        h("div", { class: "callout warn", style: "margin-top:12px" }, h("b", {}, "Before you pay"), "See the animal in person. Never pay the full amount in advance or by courier deal."),
-        h("p", { class: "disclaimer" }, "Nothing you check is saved or published."),
-      ], [h("button", { class: "btn secondary block", type: "button", onclick: checkSheet }, "Check another post"),
+        trustSummary(sc, sc.trust_level === "TRUSTED" ? "No warning signs found" : sc.trust_level === "BLOCKED" ? "This post can't be trusted" : "This post shows warning signs"),
+        protectedFound ? reportWildlife() : null,
+        h("div", { class: "callout warn", style: "margin-top:12px" }, h("b", {}, "Before you pay"), "See the animal in person. Never pay the full amount in advance or by courier deal.",
+          risky ? h("div", { style: "margin-top:6px" }, "Already paid and lost money? Call ", h("a", { class: "link inline", href: "tel:1930" }, "1930"), " (national cyber-fraud helpline) or report at ",
+            h("a", { class: "link inline", href: "https://cybercrime.gov.in", target: "_blank", rel: "noopener" }, "cybercrime.gov.in"), ".") : null),
+        h("p", { class: "disclaimer" }, "Nothing you check is saved or published. Only the number of posts checked is counted."),
+      ], [risky ? shareWarningButton(sc) : null,
+        h("button", { class: "btn secondary block", type: "button", onclick: checkSheet }, "Check another post"),
         h("button", { class: "btn plain block", type: "button", onclick: () => { state.filters.trusted = true; closeSheet(); go("pets"); } }, "See trusted pets near me instead")]);
     } catch (e) { setSheet([errorCallout(e)], [h("button", { class: "btn secondary block", type: "button", onclick: checkSheet }, "Try again")]); }
   });
   openSheet("Is this post safe?", [
-    h("p", { class: "muted", style: "margin:0 0 14px" }, "Saw a pet for sale on WhatsApp, Instagram or Facebook? AI reads it and our rules check it for legality, scam and welfare warning signs."),
+    h("p", { class: "muted", style: "margin:0 0 14px" }, "Saw a pet for sale on social media, like WhatsApp, Instagram or Facebook? AI reads it and our rules check it for legality, scam and welfare warning signs."),
     text, h("div", { style: "height:12px" }), tiles,
   ], [btn]);
 }
@@ -646,7 +691,7 @@ async function viewPets() {
       h("span", { class: "sep", "aria-hidden": "true" }),
       sort),
     presetRow,
-    count, grid, pager, disclaimer()));
+    count, grid, pager, impactSection(), disclaimer()));
   chipRow.querySelector('[aria-pressed="true"]')?.scrollIntoView({ inline: "center", block: "nearest" });
   load();
 }
@@ -779,6 +824,7 @@ async function viewDashboard() {
       h("div", { class: "grow" }, x.text), h("span", { class: "muted small" }, new Date(x.at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })))))
       : empty("sparkles", "No activity yet", "List your first pet: add a photo and a quick message, and AI fills the form.",
         h("button", { class: "btn small primary", type: "button", onclick: () => go("sell") }, "Sell a pet")),
+    impactSection(),
     h("div", { class: "callout info", style: "margin-top:16px" }, h("b", {}, "How trust works"),
       "Every listing gets a trust check: AI reads your photos, and fixed rules check the species, price, wording and registrations. Fair prices and clear photos keep you Trusted."),
   ].filter(Boolean));
@@ -1248,7 +1294,9 @@ function chatCard(name, r) {
       break;
     }
     case "publish_listing": card(trustSummary(r.screening, r.listing_status === "BLOCKED" ? "Not published" : "Published", r.listing_status === "BLOCKED" ? "This listing can't be published." : "Visible to customer accounts on this device in this demo.")); break;
-    case "check_external_listing": card(trustSummary(r.screening, "Post check", "Nothing was published or stored.")); break;
+    case "check_external_listing": card(trustSummary(r.screening, "Post check", "Nothing was published or stored."),
+      (r.screening.checks || []).some((c) => c.result === "block") ? reportWildlife() : null,
+      r.screening.trust_level !== "TRUSTED" ? h("div", { style: "margin-top:10px" }, shareWarningButton(r.screening)) : null); break;
     case "explain_screening": card(trustSummary(r.screening, `Trust checks: ${r.species}`, `Listing ${r.listing_id}`)); break;
     case "recommend_species":
       if (r.options?.length) card(h("h3", { style: "margin:0 0 8px;font-size:19px" }, "Suggested pets"), h("div", { class: "group" }, r.options.map((o) => h("button", { class: "row", type: "button",

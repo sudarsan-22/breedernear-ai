@@ -267,8 +267,9 @@ def s_journey(s):
          "Photos + a Tamil or English message become a full listing", [("17–27 s live: upload, AI fill, trust check", {})]],
         ["Trust", "No checks: stolen photos, scam prices, protected birds",
          "Every listing screened before it goes live; Verified breeder badge", [("8/8 protected species blocked, 0/37 false alarms", G)]],
-        ["Check", "Pay a stranger in a group in full, in advance",
-         "Paste any outside post: “Is this post safe?”", [("5–7 s per post; nothing stored", {})]],
+        ["Check", "Pay a stranger on social media in full, in advance",
+         "Paste any outside post: “Is this post safe?”; share the warning back to the group; report protected animals",
+         [("5–7 s per post; nothing stored", {})]],
         ["Talk", "Endless calls and the same answers",
          "AI drafts the buyer’s first message and the breeder’s reply; scam shield on both", [("Scam scan on every enquiry and reply", {})]],
         ["Buy", "“Courier only”, no handover",
@@ -282,7 +283,8 @@ def s_journey(s):
     text(s, X0, 4.82, W, 0.3, [[
         ("One tool layer, two ways in: ", {"bold": True, "size": 10, "color": GREEN}),
         ("every step works by tapping or by asking seven Gemini agents in English or Tamil. "
-         "Live now: 66/66 agent eval runs, 332 unit tests, 0 accessibility problems.", {"size": 10})]])
+         f"Live now: {_eval_numbers()[0].split()[0]} agent eval runs, {_unit_tests()} unit tests, 0 accessibility problems.",
+         {"size": 10})]])
 
 
 def s_opportunities(s):
@@ -581,13 +583,14 @@ def s_business(s):
         "3 · Other states and languages; the trust API for other marketplaces",
         "Buyers arrive through “Is this post safe?” links shared in the same groups",
     ], fill=AMBER_BG, title_color=AMBER, size=9.8, title_size=11.5)
-    box(s, X0, 4.26, W, 0.62, GREY_BG)
-    text(s, X0 + 0.12, 4.28, W - 0.24, 0.6, [
+    box(s, X0, 4.24, W, 0.82, GREY_BG)
+    text(s, X0 + 0.12, 4.26, W - 0.24, 0.8, [
         [("Growth loop: ", {"bold": True, "size": 10, "color": GREEN}),
          ("verified breeders → trusted listings → more buyers → more sales and care data → sharper fair prices and trust "
           "scores → more breeders join.", {"size": 10})],
-        [("Who benefits: ", {"bold": True, "size": 10, "color": GREEN}),
-         ("buyers pay fair prices for healthy, legal pets; breeders win hours and reach; protected birds never get listed.",
+        [("Impact we measure, live in the app: ", {"bold": True, "size": 10, "color": GREEN}),
+         ("listings checked before going live · protected animals stopped · scam warnings raised · verified breeders. "
+          "Every warning can be shared back to the group it came from, and protected species come with a way to report them.",
           {"size": 10})],
     ])
     footnote(s, ["Revenue lines and rollout are plans, not results", "¹ Euromonitor 2025",

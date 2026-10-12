@@ -445,7 +445,7 @@ def s_architecture(s):
 
 def s_tech(s):
     rows = [["Google technology", "How BreederNear AI uses it"],
-            ["Gemini 3.8 Flash (Vertex AI)", "Seven ADK agents; listing extraction from photos + Tamil/English; photo, facility and "
+            ["Gemini 3.8 Flash (Vertex AI)", "Seven ADK agents; listings from photos, Tamil/English text and voice notes; photo, facility and "
              "certificate reading; care plans, daily-log feedback, symptom urgency; message drafts and scam scan. JSON schemas."],
             ["Google ADK (Python)", "Concierge + listing, trust, match, care, verification and companion agents; tools; "
              "callbacks on every agent; streamed replies"],
@@ -463,6 +463,40 @@ def s_tech(s):
         "pytest, Playwright + axe-core, GitHub Actions",
         "Firebase CLI (deploy only)",
     ], size=9.2)
+
+
+def _case(case_id: str) -> str:
+    """'3/3' for one eval case from evals/RESULTS.md, or '' before it has been run."""
+    import re as _re
+    m = _re.search(rf"^\| {case_id} \| \S+ (\d+/\d+) \|", (ROOT / "evals" / "RESULTS.md").read_text(), _re.M)
+    return m.group(1) if m else ""
+
+
+def s_ai_map(s):
+    """Which Google AI does which job, and what we measured."""
+    G = {"color": GREEN, "bold": True}
+    voice = _case("E23")
+    rows = [
+        ["Google Cloud AI", "What it does in BreederNear AI", "Measured"],
+        ["Gemini vision", "Listing photos: species, protected birds, dye, blur, watermarks, stock photos. Facility "
+         "photos, dog-breeder certificates, vaccination cards, food photos", [("8/8 protected species blocked; 0/37 false alarms; 202/202 photo checks", G)]],
+        ["Gemini audio", "A breeder’s Tamil or English voice note becomes a full listing, with a transcript; "
+         "no separate speech-to-text step", [(f"Tamil voice note → correct listing ({voice} eval runs, E23)" if voice
+                                               else "Tamil voice note → correct listing (eval E23)", G)]],
+        ["Gemini, multilingual", "Romanised Tamil and English sale messages; a buyer’s own words become a home profile",
+         [("Tamil message → same listing (E02); profile → match % (E21)", {})]],
+        ["Gemini structured output", "12 task types, each with a JSON schema. Gemini reads and writes; code decides trust, "
+         "badges, match % and urgency", [("Prompt injection still ends in CAUTION (E12)", {})]],
+        ["Google ADK", "7 agents (a concierge and 6 specialists) and 29 tools, the same tools the tap screens use; "
+         "streamed replies", [(f"{_eval_numbers()[0].split()[0]} agent eval runs passed ({_eval_numbers()[1]})", G)]],
+        ["ADK callbacks", "Context before every model call; every reply checked for medicine names and doses, even "
+         "while streaming; every tool call logged", [("No drug names or doses (E11, E19)", {})]],
+        ["Vertex AI", "Gemini 3.8 Flash on the global endpoint, retries with backoff on 408, 429 and 5xx",
+         [("Listing in 17–27 s; post check 5–7 s", {})]],
+        ["Firebase Auth, Cloud Run, Firestore, Storage", "Google sign-in; the API and agents; all data; private uploads",
+         [("Smoke test 17/17 on every release", {})]],
+    ]
+    table(s, X0, Y0 - 0.02, W, rows, [1.75, 4.75, 2.8], size=8.6, row_h=0.42)
 
 
 def s_snapshots(s):
@@ -645,6 +679,7 @@ def build() -> Path:
         fn(by_title[title])
     blank = slides[14]                     # the template's spare content slide: business case and the journey
     journey = duplicate_slide(prs, blank)
+    ai_map = duplicate_slide(prs, blank)
     add_slide_title(blank, "Business case, scale and go-to-market", by_title["Snapshots of the prototype"])
     s_business(blank)
     add_slide_title(journey, "From pain to product: the whole journey, end to end", by_title["Snapshots of the prototype"])
@@ -652,6 +687,9 @@ def build() -> Path:
     delete_slide(prs, 1)                   # the template's "how to download" note
     move_after(prs, blank, by_title["Estimated implementation cost (optional)"])
     move_after(prs, journey, by_title["Brief about the idea"])
+    add_slide_title(ai_map, "Google Cloud AI map: which AI does each job, and how well", by_title["Snapshots of the prototype"])
+    s_ai_map(ai_map)
+    move_after(prs, ai_map, by_title["Technologies to be used in the solution"])
     pptx = OUT / "BreederNear-AI-deck.pptx"
     prs.save(pptx)
     subprocess.run(["soffice", "--headless", "--convert-to", "pdf", "--outdir", str(OUT), str(pptx)],

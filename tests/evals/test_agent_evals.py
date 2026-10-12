@@ -1,6 +1,7 @@
-"""Agent evals E01–E22 (docs/implementation/06-testing-and-evaluation.md). Live: real Gemini."""
+"""Agent evals E01–E23 (docs/implementation/06-testing-and-evaluation.md). Live: real Gemini."""
 
 import re
+from pathlib import Path
 
 import pytest
 
@@ -293,3 +294,16 @@ def test_e22_book_visit(harness):
     visit = t.last("book_visit")
     assert visit["status"] == "ok" and visit["visit"]["slot"] == "morning"
     assert not re.search(r"pay (now|online|in advance)", t.text, re.IGNORECASE)
+
+
+def test_e23_voice_note_tamil(harness):
+    """Tamil voice note, no typed text → Gemini hears it and fills the same listing"""
+    guest = "eval-e23"
+    audio = (Path(__file__).parent / "data" / "tamil_voice_note.ogg").read_bytes()
+    voice = harness.uploads.put(guest, audio, "audio/ogg", "voice_note")
+    t, _ = harness.chat([f"[attachments upload_ids={voice} kind=voice_note]"], "breeder", guest)
+    d = t.last("extract_listing")["draft"]
+    assert "lovebird" in d["species_common"].lower() and "lutino" in (d["variety"] or "").lower()
+    facts = (d["count"], d["unit"], d["price_inr"], d["age_months"], d["district"])
+    assert facts == (4, "pair", 1800, 5, "coimbatore") and d["voice_transcript"]
+

@@ -130,3 +130,36 @@ def test_code_decides_which_registrations_are_missing(fakes):
     assert "parivesh_registration_id" in svc.extract_listing(GUEST, "fischers pair", [])["missing_fields"]
     vision.draft = vision.draft.model_copy(update={"species_common": "Labrador", "animal_group": "dog"})
     assert "sawb_registration_no" in svc.extract_listing(GUEST, "lab puppies", [])["missing_fields"]
+
+
+def test_voice_note_is_heard_then_deleted_and_its_words_are_screened(fakes):
+    store, uploads, vision = fakes
+    voice = uploads.put(GUEST, b"OggS-fake-audio", "audio/ogg", "voice_note")
+    said = "4 lutino lovebird jodi, 5 maasam, full advance GPay, courier only"
+    vision.draft = vision.draft.model_copy(update={"voice_transcript": said, "price_inr": 500})
+    result = svc.extract_listing(GUEST, "", [upload(uploads)], voice)
+    assert vision.audio_calls == [(b"OggS-fake-audio", "audio/ogg")]
+    assert uploads.get(GUEST, voice) is None                              # the recording is not kept
+    assert result["draft"]["voice_transcript"] == said
+    published = svc.publish_listing(GUEST, result["draft_id"])
+    details = " ".join(c["detail"] for c in published["screening"]["checks"]).lower()
+    assert published["screening"]["trust_level"] == "CAUTION" and "advance" in details
+
+
+def test_voice_note_must_be_audio_and_your_own(fakes):
+    _, uploads, _ = fakes
+    photo = upload(uploads)
+    with pytest.raises(svc.ListingError):
+        svc.extract_listing(GUEST, "", [], photo)                        # a photo is not a voice note
+    other = uploads.put("someone-else", b"OggS", "audio/ogg", "voice_note")
+    with pytest.raises(svc.ListingError):
+        svc.extract_listing(GUEST, "", [], other)
+
+
+def test_voice_note_sent_with_the_photos_in_chat_is_picked_out(fakes):
+    store, uploads, vision = fakes
+    voice = uploads.put(GUEST, b"OggS-fake-audio", "audio/ogg", "voice_note")
+    photo = upload(uploads)
+    result = svc.extract_listing(GUEST, "", [photo, voice])
+    assert vision.extract_calls[-1] == ("", 1) and vision.audio_calls == [(b"OggS-fake-audio", "audio/ogg")]
+    assert store.get_draft(result["draft_id"])["upload_ids"] == [photo]      # only photos are listing photos

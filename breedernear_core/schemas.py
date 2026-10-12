@@ -31,6 +31,9 @@ class ListingDraft(BaseModel):
     parivesh_registration_id: str | None = None
     description: str = ""
     language_detected: str = "en"
+    voice_transcript: str | None = Field(default=None, description=(
+        "Only if a voice note is attached: what the breeder said, written out as spoken "
+        "(Tamil in Tamil script). Otherwise null."))
     photo_text_consistent: bool = True
     missing_fields: list[str] = Field(default=[], description=(
         "Buyer-relevant fields not stated, from: price_inr, age_months, health_notes, district."))

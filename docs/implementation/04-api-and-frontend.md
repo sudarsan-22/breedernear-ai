@@ -61,6 +61,7 @@ SSE events carry an `author` (agent) and `content.parts` (`text`, `function_call
 | `GET /api/seller/enquiries` | seller token | Enquiries received on the seller's own listings (message and any reply; no buyer contact details) | Seller Enquiries | — |
 | `POST /api/seller/enquiries/{id}/draft-reply` | seller token | `{reply, needs_seller_input}` drafted from the listing's facts; nothing is sent | Reply sheet "✨ Draft with AI" | **Gemini** |
 | `POST /api/seller/enquiries/{id}/reply` | `{text}` (≤ 800 chars) | The enquiry with its reply; the buyer sees it under Account | Reply sheet Send | — |
+| `POST /api/uploads` with `kind=voice_note` | multipart audio (WebM, Ogg, MP4/M4A, MP3, AAC, WAV), sellers only | `upload_id` of a voice note; `POST /api/sell/drafts` takes it as `voice_upload_id` (or among `upload_ids` from the chat) | Sell form voice note | — |
 | `GET /api/impact` | — | Impact so far, counted live: listings screened, blocked and Caution; outside posts checked, flagged and with a protected species (counts only, posts never stored); scam-like messages; verified and registered breeders | **Impact so far** on Pets and the seller dashboard | — |
 | `POST /api/check` | `{text, upload_ids}` | Extracted post + screening; nothing stored | "Is this post safe?" form | **Gemini + rules** |
 | `POST /api/enquiries` | `{listing_id, message}` (customer token) | Enquiry (demo) | Contact form | — |

@@ -1,12 +1,13 @@
-"""Uploaded images: a private Cloud Storage bucket in the cloud, in-memory for tests and local runs."""
+"""Uploaded images and voice notes: a private Cloud Storage bucket in the cloud, in memory for tests."""
 
 import uuid
 from typing import Protocol
 
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/heic"}
+AUDIO_TYPES = {"audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/aac", "audio/wav", "audio/x-wav"}
 ALLOWED_KINDS = {"listing_photo", "external_listing", "vaccination", "certificate", "facility_photo",
-                 "pet_photo", "food_photo"}
-SELLER_KINDS = {"listing_photo", "vaccination", "certificate", "facility_photo"}
+                 "pet_photo", "food_photo", "voice_note"}
+SELLER_KINDS = {"listing_photo", "vaccination", "certificate", "facility_photo", "voice_note"}
 CUSTOMER_KINDS = {"pet_photo", "food_photo"}
 
 

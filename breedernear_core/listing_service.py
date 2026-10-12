@@ -71,11 +71,33 @@ def _summary(draft_id: str, d: ListingDraft, raw_text: str) -> dict:
     }
 
 
-def extract_listing(guest_id: str, text: str, upload_ids: list[str]) -> dict:
-    if not text.strip() and not upload_ids:
-        raise ListingError("Send at least a short message or a photo of the animals.")
+def _load_voice(guest_id: str, upload_id: str | None) -> tuple[bytes, str] | None:
+    if not upload_id:
+        return None
+    found = deps.get_uploads().get(guest_id, upload_id)
+    if found is None or not found[1].startswith("audio/"):
+        raise ListingError("That voice note was not found. Please record it again.")
+    return found
+
+
+def extract_listing(guest_id: str, text: str, upload_ids: list[str],
+                    voice_upload_id: str | None = None) -> dict:
+    """Photos plus a typed message and/or a voice note become a draft. Gemini hears the voice note and its
+    transcript joins the message, so the scam-language and price checks read what the breeder said."""
+    if not text.strip() and not upload_ids and not voice_upload_id:
+        raise ListingError("Send at least a short message, a voice note or a photo of the animals.")
+    if not voice_upload_id:      # in the AI chat, a voice note arrives with the photos: pick it out
+        uploads = deps.get_uploads()
+        audio = [u for u in upload_ids
+                 if (found := uploads.get(guest_id, u)) and found[1].startswith("audio/")]
+        voice_upload_id = audio[0] if audio else None
+        upload_ids = [u for u in upload_ids if u not in audio]
     images = _load_images(guest_id, upload_ids)
-    draft = _normalise(deps.get_vision().extract_listing(text, images))
+    voice = _load_voice(guest_id, voice_upload_id)
+    draft = _normalise(deps.get_vision().extract_listing(text, images, voice))
+    if voice:
+        deps.get_uploads().delete(guest_id, voice_upload_id)          # the recording is not kept once heard
+        text = "\n".join(t for t in (text.strip(), draft.voice_transcript or "") if t)
     draft_id = f"DRF_{uuid.uuid4().hex[:10]}"
     deps.get_store().save_draft(draft_id, {
         "draft_id": draft_id, "guest_id": guest_id, "raw_text": text,

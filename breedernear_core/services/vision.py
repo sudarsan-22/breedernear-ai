@@ -17,6 +17,9 @@ from breedernear_core.schemas import (
     VaccinationRead,
 )
 
+VOICE_NOTE = ("A voice note from the breeder is attached (often Tamil or Tamil mixed with English). "
+              "Treat what they say exactly like a typed message; write it out in voice_transcript as spoken.")
+
 EXTRACT_PROMPT = """\
 You turn a pet breeder's casual sale message (English, Tamil, romanised Tamil or a mix, as posted
 in WhatsApp groups) and photos into one structured listing.
@@ -189,7 +192,8 @@ def _all_required(schema: type) -> dict:
 
 
 class Vision(Protocol):
-    def extract_listing(self, text: str, images: list[tuple[bytes, str]]) -> ListingDraft: ...
+    def extract_listing(self, text: str, images: list[tuple[bytes, str]],
+                        audio: tuple[bytes, str] | None = None) -> ListingDraft: ...
     def screen_photos(self, images: list[tuple[bytes, str]]) -> PhotoScreen: ...
     def write_care_plan(self, facts: str) -> CarePlan: ...
     def write_reply(self, facts: str) -> EnquiryReply: ...
@@ -231,9 +235,12 @@ class GeminiVision:
         )
         return schema.model_validate_json(response.text)
 
-    def extract_listing(self, text: str, images: list[tuple[bytes, str]]) -> ListingDraft:
-        return self._generate(EXTRACT_PROMPT, f"Breeder message:\n{text}" if text else "", images,
-                              ListingDraft)
+    def extract_listing(self, text: str, images: list[tuple[bytes, str]],
+                        audio: tuple[bytes, str] | None = None) -> ListingDraft:
+        note = f"Breeder message:\n{text}" if text else ""
+        if audio:   # Gemini listens to the voice note directly: no separate speech-to-text step
+            note = (note + "\n\n" if note else "") + VOICE_NOTE
+        return self._generate(EXTRACT_PROMPT, note, [*images, *([audio] if audio else [])], ListingDraft)
 
     def screen_photos(self, images: list[tuple[bytes, str]]) -> PhotoScreen:
         return self._generate(SCREEN_PROMPT, "", images, PhotoScreen)

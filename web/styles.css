@@ -623,3 +623,19 @@ button.tag { border: 0; font: inherit; font-size: 12px; font-weight: 700; }
 .link.inline { display: inline; text-decoration: underline; text-underline-offset: 2px; }
 @media (max-width: 699px) { .impact-tile { flex-direction: column; gap: 8px; } }
 .callout .link.inline { color: inherit; font-weight: 700; }
+
+/* voice note on the sell form */
+.voice { margin: 10px 0 0; }
+.voice-live { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 14px; background: var(--bad-tint); color: var(--bad); font-weight: 600; }
+.voice-live .btn { margin-left: auto; min-height: 40px; }
+.voice-clock { font-variant-numeric: tabular-nums; color: var(--label); }
+.rec-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bad); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .rec-dot { animation: none; } }
+.voice-clip { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 14px; background: var(--bg-elev); box-shadow: inset 0 0 0 1px var(--line); }
+.voice-clip .ico { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; flex: none; }
+.voice-clip audio { height: 36px; max-width: 100%; flex: 1 1 200px; }
+/* the bottom tab bar stays readable over any content scrolling beneath it */
+.tabbar { background: color-mix(in srgb, var(--bg-elev) 94%, transparent); }
+.tabbar .tab[aria-current="page"] { color: var(--accent-hover); }
+@media (prefers-color-scheme: dark) { .tabbar .tab[aria-current="page"] { color: var(--accent); } }

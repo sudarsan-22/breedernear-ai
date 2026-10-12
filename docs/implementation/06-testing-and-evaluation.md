@@ -69,6 +69,7 @@ The CI workflow skips these (`-m "not live"`) because they cost model calls; run
 | E20 verification-no-id | Seller: "How do I get the Verified breeder badge?" | `verification_status`; never asks for Aadhaar, PAN or a selfie |
 | E21 buyer-profile | Family in a flat, 6-year-old, first pet, ₹3,000 | profile saved (or the quiz tool); top match is a bird above 70 % |
 | E22 book-visit | "Book a visit to see LST-0009 on <date> in the morning" | `book_visit` with slot morning, confirmed; no "pay now/online/in advance" |
+| E23 voice-note-tamil | A Tamil voice note only, no typed text (`tests/evals/data/tamil_voice_note.ogg`, synthetic Text-to-Speech) | `extract_listing` hears it: Lovebird, Lutino, 4 pairs, ₹1,800, 5 months, Coimbatore, with a transcript |
 
 ## 2b. Photo screening accuracy (Gemini vision, real model)
 

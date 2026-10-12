@@ -88,7 +88,7 @@ Everything works by tapping; the AI does the hard parts on every screen. Chat is
 
 | Step | What happens | How |
 |---|---|---|
-| **List** | A breeder sends photos plus a casual message, the way they'd post on WhatsApp, in English or Tamil. They get a complete, priced listing ready to publish. | Gemini multimodal and multilingual extraction into a validated schema; fair-price range from data |
+| **List** | A breeder sends photos plus a casual message, typed **or spoken as a voice note**, the way they'd post on social media, in English or Tamil. They get a complete, priced listing ready to publish. | Gemini multimodal (photos **and audio**) and multilingual extraction into a validated schema; Gemini hears the voice note directly, no separate speech-to-text; fair-price range from data |
 | **Check** | Every listing is screened before buyers see it. Protected species are **blocked**. Dyed birds, visible health concerns, reused photos, suspicious prices and scam language are flagged. Buyers see an explainable trust score. | Gemini vision + deterministic rules (perceptual hashing, price rules, species lists) → trust score **computed in code** |
 | **Find** | A buyer browses nearby pets, takes a short quiz or describes their home, family and budget. BreederNear suggests suitable pets and finds trusted breeders nearby, with fair-price indicators. | Rules + ADK agent with tool calls over Firestore; distance by district |
 | **Start right** | A personalised starter kit (correct cage size, food, accessories) and a first-14-days care plan with "see a vet if…" signs | Product rules + Gemini structured care plans |

@@ -83,6 +83,8 @@ const ICONS = {
   user: '<circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5"/>',
   grid: '<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',
   eye: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+  mic: '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5"/>',
+  stop: '<rect x="6.5" y="6.5" width="11" height="11" rx="2"/>',
   logout: '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>', search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
 };
 const icon = (name) => h("span", { html: `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`, style: "display:contents" });
@@ -160,6 +162,61 @@ async function uploadPhotos(photos, kind) {
     ids.push(body.upload_id);
   }
   return ids;
+}
+async function uploadVoice(voice) {
+  const form = new FormData();
+  const ext = voice.blob.type.includes("mp4") ? "m4a" : voice.blob.type.includes("ogg") ? "ogg" : "webm";
+  form.append("file", voice.blob, `voice-note.${ext}`); form.append("kind", "voice_note");
+  const res = await fetch(url("/api/uploads"), { method: "POST", headers: authHeaders(), body: form });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.detail || "Couldn't upload the voice note.");
+  return body.upload_id;
+}
+// A voice note in Tamil or English, recorded in the browser (up to 60 s). Gemini listens to it directly.
+const VOICE_MAX_S = 60;
+function voiceRecorder(voice, onDone) {
+  const box = h("div", { class: "voice" });
+  const idle = () => {
+    if (voice.get()) {
+      const v = voice.get();
+      box.replaceChildren(h("div", { class: "voice-clip" }, h("span", { class: "ico green" }, icon("mic")),
+        h("div", { class: "grow" }, h("b", {}, "Voice note"), h("span", { class: "muted small" }, ` ${v.seconds} s`)),
+        h("audio", { controls: true, src: v.url, "aria-label": "Play your voice note" }),
+        h("button", { class: "btn small plain", type: "button", style: "color:var(--bad)", onclick: () => { URL.revokeObjectURL(v.url); voice.set(null); idle(); onDone(); } }, "Delete")));
+      return;
+    }
+    const start = h("button", { class: "btn secondary block", type: "button" }, icon("mic"), "Record a voice note instead");
+    start.addEventListener("click", record);
+    box.replaceChildren(start);
+  };
+  async function record() {
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) { toast("Voice notes aren't supported in this browser. Please type the message."); return; }
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    catch { toast("Allow the microphone to record, or type the message instead."); return; }
+    const type = ["audio/webm;codecs=opus", "audio/ogg;codecs=opus", "audio/mp4"].find((t) => MediaRecorder.isTypeSupported(t)) || "";
+    const rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
+    const chunks = [], began = Date.now();
+    const clock = h("span", { class: "voice-clock", "aria-live": "off" }, "0:00");
+    const stop = h("button", { class: "btn primary", type: "button" }, icon("stop"), "Stop");
+    box.replaceChildren(h("div", { class: "voice-live", role: "status" }, h("span", { class: "rec-dot", "aria-hidden": "true" }), "Recording… speak in Tamil or English", clock, stop));
+    const tick = setInterval(() => {
+      const sec = Math.floor((Date.now() - began) / 1000);
+      clock.textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+      if (sec >= VOICE_MAX_S) rec.stop();
+    }, 250);
+    rec.addEventListener("dataavailable", (e) => e.data.size && chunks.push(e.data));
+    rec.addEventListener("stop", () => {
+      clearInterval(tick); stream.getTracks().forEach((t) => t.stop());
+      const blob = new Blob(chunks, { type: (rec.mimeType || type || "audio/webm").split(";")[0] });
+      voice.set(blob.size ? { blob, url: URL.createObjectURL(blob), seconds: Math.max(1, Math.round((Date.now() - began) / 1000)) } : null);
+      idle(); onDone();
+    });
+    stop.addEventListener("click", () => rec.state !== "inactive" && rec.stop());
+    rec.start();
+  }
+  idle();
+  return box;
 }
 function pickPhotos(list, onChange) {
   const input = h("input", { type: "file", accept: "image/*", multiple: true, hidden: true });
@@ -732,7 +789,7 @@ async function viewBreeders() {
 }
 
 // ---- Seller app: Dashboard · Listings · Enquiries · Farm, and the AI-filled sell form
-const sell = { photos: [], text: "", draftId: null, data: null, busy: "", result: null };
+const sell = { photos: [], text: "", voice: null, draftId: null, data: null, busy: "", result: null };
 const SELLER_TYPES = [["home_breeder", "Home"], ["kennel", "Kennel"], ["farm", "Farm"]];
 const FARM_SPECIES = [["budgerigar", "Budgies"], ["lovebird", "Lovebirds"], ["cockatiel", "Cockatiels"], ["finch", "Finches"],
   ["canary", "Canaries"], ["dog", "Dogs"], ["cat", "Cats"]];
@@ -1022,13 +1079,15 @@ function renderSell(pane) {
   const text = h("textarea", { class: "big-input", rows: 4, maxlength: 2000, "aria-label": "Describe your animals",
     placeholder: "e.g. 4 jodi lutino lovebird, 5 maasam, oru jodi 1800 rubai. Saibaba Colony, Kovai." });
   text.value = sell.text;
-  const fill = h("button", { class: "btn primary block", type: "button", disabled: !(sell.text.trim() || sell.photos.length) || !!sell.busy }, icon("sparkles"), sell.draftId ? "Fill again with AI" : "Fill with AI");
-  text.addEventListener("input", () => { sell.text = text.value; fill.disabled = !(sell.text.trim() || sell.photos.length); });
+  const ready = () => !!(sell.text.trim() || sell.photos.length || sell.voice);
+  const fill = h("button", { class: "btn primary block", type: "button", disabled: !ready() || !!sell.busy }, icon("sparkles"), sell.draftId ? "Fill again with AI" : "Fill with AI");
+  text.addEventListener("input", () => { sell.text = text.value; fill.disabled = !ready(); });
   fill.addEventListener("click", async () => {
     sell.busy = "fill"; redraw();
     try {
       const ids = await uploadPhotos(sell.photos, "listing_photo");
-      const r = await api("/api/sell/drafts", { method: "POST", body: JSON.stringify({ text: sell.text, upload_ids: ids }) });
+      const voiceId = sell.voice ? await uploadVoice(sell.voice) : null;
+      const r = await api("/api/sell/drafts", { method: "POST", body: JSON.stringify({ text: sell.text, upload_ids: ids, voice_upload_id: voiceId }) });
       sell.draftId = r.draft_id; sell.data = r;
     } catch (e) { toast(e.message); }
     sell.busy = ""; redraw();
@@ -1036,14 +1095,15 @@ function renderSell(pane) {
   const tiles = h("div");
   const redrawTiles = () => {
     tiles.replaceChildren(photoTiles(sell.photos, redrawTiles));
-    fill.disabled = !(sell.text.trim() || sell.photos.length) || !!sell.busy;
+    fill.disabled = !ready() || !!sell.busy;
   };
   redrawTiles();
+  const recorder = voiceRecorder({ get: () => sell.voice, set: (v) => { sell.voice = v; } }, () => { fill.disabled = !ready() || !!sell.busy; });
   const parts = [
-    h("div", { class: "step-label" }, h("span", { class: "num" }, "1"), "Photos and a quick message"),
-    tiles, text,
-    h("p", { class: "muted small", style: "margin:8px 2px 12px" }, "Write it like a WhatsApp post, in English, Tamil or both. Include price, age and area if you can."),
-    sell.busy === "fill" ? loading(sell.photos.length ? "Reading your photos and message…" : "Reading your message…") : fill,
+    h("div", { class: "step-label" }, h("span", { class: "num" }, "1"), "Photos and a quick message or voice note"),
+    tiles, text, recorder,
+    h("p", { class: "muted small", style: "margin:8px 2px 12px" }, "Type it or say it, the way you'd post on social media, in Tamil, English or both. Include price, age and area if you can."),
+    sell.busy === "fill" ? loading(sell.voice ? "Listening to your voice note…" : sell.photos.length ? "Reading your photos and message…" : "Reading your message…") : fill,
   ];
   if (sell.data) parts.push(...draftForm(redraw));
   parts.push(h("p", { class: "muted small", style: "text-align:center;margin-top:18px" }, "Prefer to chat? ",
@@ -1077,6 +1137,8 @@ function draftForm(redraw) {
   return [
     h("div", { class: "step-label" }, h("span", { class: "num" }, "2"), "Check the details"),
     h("p", { class: "muted small", style: "margin:-4px 2px 10px" }, "AI filled these in. Tap any field to change it."),
+    d.voice_transcript ? h("div", { class: "callout info", style: "margin-bottom:12px" }, h("b", {}, "What Gemini heard"), h("div", { lang: d.language_detected === "en" ? "en" : "ta" }, d.voice_transcript),
+      h("div", { class: "small", style: "margin-top:4px" }, "The recording itself is deleted once it has been heard.")) : null,
     h("div", { class: "form-group" },
       text("species_common", "Species"), text("variety", "Variety", { placeholder: "e.g. Lutino" }),
       num("count", "How many"), h("div", { class: "field" }, h("label", {}, "Sold per"), unitSeg),
@@ -1094,7 +1156,7 @@ function draftForm(redraw) {
 }
 function sellResult() {
   const r = sell.result, s = r.screening, ok = r.listing_status === "PUBLISHED";
-  const again = () => { sell.photos = []; sell.text = ""; sell.draftId = null; sell.data = null; sell.result = null; route(); };
+  const again = () => { sell.photos = []; sell.text = ""; sell.voice = null; sell.draftId = null; sell.data = null; sell.result = null; route(); };
   return h("div", { class: "card", style: "margin-top:16px" },
     h("div", { class: "success" }, h("div", { class: "ring", style: ok ? "" : "background:var(--bad-tint);color:var(--bad)" }, icon(ok ? "check" : "x")),
       h("h3", { style: "margin:0;font-size:22px" }, ok ? "Your listing is live" : "This listing can't be published"),
@@ -1559,7 +1621,7 @@ async function finishLogin(r, remember) {
   saveToken(r.token, remember);
   document.body.classList.remove("signed-out");
   if (r.user.district) { state.district = r.user.district; store.set("breedernear_district", r.user.district); }
-  resetChat(); Object.assign(sell, { photos: [], text: "", draftId: null, data: null, busy: "", result: null });
+  resetChat(); Object.assign(sell, { photos: [], text: "", voice: null, draftId: null, data: null, busy: "", result: null });
   renderHeader();
   history.replaceState(null, "", isSeller() ? "#dashboard" : "#pets");
   route();

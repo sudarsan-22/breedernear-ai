@@ -61,6 +61,7 @@ The PCA (Dog Breeding and Marketing) Rules, 2017 require dog breeders to hold a 
 - Tool-call logs record the account ID and role, never the name or login; free-text arguments are reduced to their length.
 - All breeders, listings, registries and products are **synthetic**, with fictional names and `SIM-` registration numbers.
 - Uploads are stored in a private Cloud Storage bucket and never served back publicly. A lifecycle rule deletes them after 30 days.
+- **Voice notes** are recorded only when the seller taps Record, sent once to Gemini, and the recording is deleted as soon as it has been heard. Only the transcript is kept, as part of the draft, so the seller can check what was understood.
 - Posts checked with "Is this post safe?" are never stored. Only three counters are kept for **Impact so far** (posts checked, flagged, with a protected species). **Share this warning** shares only the trust reasons, through the user's own share sheet; nothing is sent by the app.
 - When a protected species is found, the app points to official channels (Tamil Nadu's Forest & Wildlife Crime Control online complaint, the forest office, the Wildlife Crime Control Bureau) and, for money already lost, the 1930 cyber-fraud helpline. It never files reports itself or names the seller.
 

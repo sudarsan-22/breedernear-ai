@@ -64,9 +64,11 @@ class FakeVision:
                                     possible_meaning="Sneezing can be dust or an infection.",
                                     watch_for=["fluffed feathers"], do_now=["Keep the bird warm and quiet."])
         self.calls: list[str] = []
+        self.audio_calls: list = []
 
-    def extract_listing(self, text, images):
+    def extract_listing(self, text, images, audio=None):
         self.extract_calls.append((text, len(images)))
+        self.audio_calls.append(audio)
         return self.draft
 
     def screen_photos(self, images):

@@ -99,3 +99,18 @@ def test_agent_tree_has_all_sub_agents():
         "companion_agent",
         "care_agent",
     }
+
+
+def test_voice_notes_are_audio_for_sellers_only(fakes):
+    seller, customer = auth_headers(client, "seller"), auth_headers(client, "customer")
+    audio = {"file": ("note.webm", b"\x1aE\xdf\xa3webm", "audio/webm;codecs=opus")}
+    r = client.post("/api/uploads", headers=seller, files=audio, data={"kind": "voice_note"})
+    assert r.status_code == 200 and r.json()["upload_id"].startswith("UPL_")
+    photo = {"file": ("bird.jpg", make_image(1), "image/jpeg")}
+
+    def status(headers, files, kind):
+        return client.post("/api/uploads", headers=headers, files=files, data={"kind": kind}).status_code
+
+    assert status(customer, audio, "voice_note") == 403
+    assert status(seller, photo, "voice_note") == 415
+    assert status(seller, audio, "listing_photo") == 415

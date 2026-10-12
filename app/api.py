@@ -11,7 +11,13 @@ from breedernear_core import listing_service as svc
 from breedernear_core.config import get_settings
 from breedernear_core.data import load_seed
 from breedernear_core.match_service import Viewer
-from breedernear_core.services.uploads import ALLOWED_KINDS, ALLOWED_TYPES, CUSTOMER_KINDS, SELLER_KINDS
+from breedernear_core.services.uploads import (
+    ALLOWED_KINDS,
+    ALLOWED_TYPES,
+    AUDIO_TYPES,
+    CUSTOMER_KINDS,
+    SELLER_KINDS,
+)
 
 router = APIRouter(prefix="/api")
 
@@ -92,6 +98,10 @@ class CartItemIn(BaseModel):
 class TextAndPhotosIn(BaseModel):
     text: str = ""
     upload_ids: list[str] = []
+
+
+class DraftIn(TextAndPhotosIn):
+    voice_upload_id: str | None = None
 
 
 class QuizIn(BaseModel):
@@ -223,7 +233,11 @@ async def upload(file: UploadFile = File(...), kind: str = Form("listing_photo")
         raise HTTPException(status_code=403, detail="Only seller accounts can upload this kind of file.")
     if kind in CUSTOMER_KINDS and user["role"] != "customer":
         raise HTTPException(status_code=403, detail="Only customer accounts can upload this kind of file.")
-    if file.content_type not in ALLOWED_TYPES:
+    content_type = (file.content_type or "").split(";")[0].strip()
+    if kind == "voice_note":
+        if content_type not in AUDIO_TYPES:
+            raise HTTPException(status_code=415, detail="Please record the voice note again.")
+    elif content_type not in ALLOWED_TYPES:
         raise HTTPException(status_code=415, detail="Please upload a JPEG, PNG, WebP or HEIC photo.")
     limit = get_settings().max_upload_mb * 1024 * 1024
     data = await file.read(limit + 1)
@@ -232,7 +246,7 @@ async def upload(file: UploadFile = File(...), kind: str = Form("listing_photo")
         raise HTTPException(status_code=413, detail=f"Photos must be under {limit_mb} MB.")
     if not data:
         raise HTTPException(status_code=400, detail="The file is empty.")
-    return {"upload_id": deps.get_uploads().put(user["id"], data, file.content_type, kind)}
+    return {"upload_id": deps.get_uploads().put(user["id"], data, content_type, kind)}
 
 
 @router.get("/pets")
@@ -358,8 +372,8 @@ def seller_reply(enquiry_id: str, body: ReplyIn, user: dict = Depends(seller)) -
 
 
 @router.post("/sell/drafts")
-def sell_draft(body: TextAndPhotosIn, user: dict = Depends(seller)) -> dict:
-    return _call(svc.extract_listing, user["id"], body.text, body.upload_ids)
+def sell_draft(body: DraftIn, user: dict = Depends(seller)) -> dict:
+    return _call(svc.extract_listing, user["id"], body.text, body.upload_ids, body.voice_upload_id)
 
 
 @router.patch("/sell/drafts/{draft_id}")

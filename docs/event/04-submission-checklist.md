@@ -82,7 +82,7 @@ The "Prototype Submission" module (read 10 Oct). Every field is required; nothin
 - [ ] Deck PDF uploaded (≤ 5 MB, on the template)
 - [ ] Brief description pasted; counter shows ≤ 1024
 - [ ] All text fields in English, proofread
-- [ ] **Submitted.** Screenshot of the confirmation saved, and the confirmation email received
+- [x] **Submitted on 12 Oct 2026** (live app revision `breedernear-00026-5w4`, code `6dd5dac`; deck and docs at `8b93ad0`). Keep the confirmation screenshot and email
 
 ## G. After submission (19 Oct – 7 Nov, and to 4 Dec if shortlisted)
 

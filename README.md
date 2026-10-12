@@ -164,7 +164,7 @@ Measured on 10–11 Oct 2026 with real Gemini (`gemini-3.8-flash`). Each command
 | Ordinary pet photos wrongly flagged as protected | **0/37** | same |
 | All photo checks (species, dye, blur, no animal, watermark, screenshot) | **202/202** | same; test photos are AI-generated and the prompt was tuned on them, so treat this as an upper bound |
 | Accessibility: axe-core WCAG 2.2 AA on every screen and sheet, light and dark, 320 / 390 / 1280 px | **0 problems** | `pytest -m ui tests/ui` |
-| Unit tests (CI on every push) | **317 passed** | `pytest -m "not live"` |
+| Unit tests (CI on every push) | **332 passed** | `pytest -m "not live"` |
 | Live smoke test | **17/17** | `scripts/smoke_test.py <URL>` |
 
 ## Simulated vs real

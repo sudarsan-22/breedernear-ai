@@ -4,6 +4,7 @@
 Usage:
     PYTHONPATH=. python scripts/build_video.py [OUT_DIR]
     PYTHONPATH=. python scripts/build_video.py --assemble [OUT_DIR]   # title card and final join only, reusing the clips
+    PYTHONPATH=. python scripts/build_video.py --long [OUT_DIR]       # the 3–4 minute cut with four extra scenes
 
 Needs Playwright with Chromium (CHROMIUM=/path/to/chrome to use a local build), imageio-ffmpeg (a portable
 ffmpeg with libx264 and libass), poppler's pdftoppm for the deck slide, and gcloud Application Default
@@ -57,6 +58,23 @@ SCENES = [
     ("reply", "/#enquiries", "Visit requests and messages arrive here. Gemini drafts a reply from the listing's facts, and Karthik edits and sends it."),
     ("close", "/", ""),
 ]
+
+
+# The 3–4 minute cut (`--long`): the same scenes plus these, each inserted after the named scene.
+LONG_EXTRA = {
+    "kit": [("quiz", "/#pets", "Not sure which pet fits? Which pet suits me takes a few taps and suggests pets for Priya's home, from the same fixed rules, with the reasons. Pets that don't suit a flat or young children are left out, and she is told why.")],
+    "visit": [("breeders", "/#breeders", "Local Breeders lists the breeders near her, with their distance and whether they are verified. Tap any badge to see exactly what it means and how it was decided. Buying straight from the breeder means farm prices, with no broker in between.")],
+    "check": [("impact", "/#pets", "She can share that warning back to the group in one tap, and a protected bird comes with a way to report it. Impact so far counts the listings checked, the animals stopped and the scam warnings raised, live from the app's own data.")],
+}
+
+
+def scene_list(long: bool) -> list[tuple[str, str, str]]:
+    scenes = []
+    for scene in SCENES:
+        scenes.append(scene)
+        if long:
+            scenes += LONG_EXTRA.get(scene[0], [])
+    return [(n, path, close_line() if n == "close" else t) for n, path, t in scenes]
 
 
 def close_line() -> str:
@@ -243,8 +261,19 @@ def act_breeders(page, d):
         page.wait_for_timeout(int(d * 300))
         page.mouse.wheel(0, 300)
         page.wait_for_timeout(int(d * 150))
-        page.locator(".breeder").first.click()
-        page.wait_for_selector("#sheet[open] .avatar.lg")
+        page.locator(".breeder .tag-btn", has_text="Verified breeder").first.click()
+        page.wait_for_selector("#sheet[open]")
+    return go
+
+
+def act_impact(page, d):
+    goto(page, WEB + "/#pets")
+    page.wait_for_selector(".impact-tile", timeout=30000)
+
+    def go():
+        page.wait_for_timeout(int(d * 200))
+        page.evaluate("document.querySelector('.impact').scrollIntoView({block: 'center', behavior: 'smooth'})")
+        page.wait_for_timeout(int(d * 500))
     return go
 
 
@@ -495,21 +524,23 @@ def captions(scenes, durations) -> str:
     return "\n".join(cues)
 
 
-def main(out_dir: Path) -> None:
+def main(out_dir: Path, long: bool = False) -> None:
     from playwright.sync_api import sync_playwright
 
     work = out_dir / "work"
     work.mkdir(parents=True, exist_ok=True)
     chromium = os.environ.get("CHROMIUM")
     durations = []
-    scenes = [(n, path, close_line() if n == "close" else t) for n, path, t in SCENES]
+    scenes = scene_list(long)
     for name, _, narration in scenes:
         d = tts(narration, work / f"{name}.wav")
         durations.append(d)
         print(f"voice {name}: {d:.1f}s")
     total = sum(durations) + GAP * len(durations)
     print(f"narration total {total:.1f}s")
-    if total > 175:
+    if long and not 185 <= total <= 230:
+        sys.exit(f"The long cut must run 3:05–3:50; the narration is {total:.0f} s.")
+    if not long and total > 175:
         sys.exit("Narration is longer than 2:55; shorten the script.")
     photo = lovebird_photo(work / "lovebird.jpg")
     title_card(work / "title.png")
@@ -518,7 +549,7 @@ def main(out_dir: Path) -> None:
                "visit": ("customer", act_visit), "companion": ("customer", act_companion),
                "verify": ("seller", act_verify),
                "quiz": ("customer", act_quiz), "breeders": ("customer", act_breeders),
-               "dashboard": ("seller", act_dashboard),
+               "dashboard": ("seller", act_dashboard), "impact": ("customer", act_impact),
                "check": ("customer", act_check), "chat": ("customer", act_chat),
                "sell": ("seller", lambda p, d: act_sell(p, d, photo)), "blocked": ("seller", act_blocked),
                "reply": ("seller", act_reply)}
@@ -540,10 +571,10 @@ def main(out_dir: Path) -> None:
                 address_bar(path_part, work / f"bar-{name}.png")
                 fit_clip(video, offset, target, work / f"bar-{name}.png", clip)
             clips.append(clip)
-    assemble(out_dir, scenes, durations, clips)
+    assemble(out_dir, scenes, durations, clips, long)
 
 
-def assemble(out_dir: Path, scenes: list, durations: list, clips: list) -> None:
+def assemble(out_dir: Path, scenes: list, durations: list, clips: list, long: bool = False) -> None:
     """Join the scene clips and narration and burn in captions (re-run alone with --assemble)."""
     work = out_dir / "work"
     # audio: each scene's narration followed by GAP seconds of silence
@@ -558,27 +589,29 @@ def assemble(out_dir: Path, scenes: list, durations: list, clips: list) -> None:
     concat_video = work / "video.txt"
     concat_video.write_text("\n".join(f"file '{c}'" for c in clips))
     run("-f", "concat", "-safe", "0", "-i", concat_video, "-c", "copy", work / "silent.mp4")
-    srt = out_dir / "BreederNear-AI-demo.srt"
+    name = "BreederNear-AI-demo-long" if long else "BreederNear-AI-demo"
+    srt = out_dir / f"{name}.srt"
     srt.write_text(captions(scenes, durations))
     style = "FontName=Google Sans Flex,FontSize=15,PrimaryColour=&H00FFFFFF,BackColour=&H99000000,BorderStyle=4,Outline=0,Shadow=0,MarginV=28"
-    out = out_dir / "BreederNear-AI-demo.mp4"
+    out = out_dir / f"{name}.mp4"
     run("-i", work / "silent.mp4", "-i", work / "narration.wav", "-vf", f"subtitles={srt}:force_style='{style}'",
         "-c:v", "libx264", "-preset", "medium", "-crf", "20", "-c:a", "aac", "-b:a", "160k", "-shortest",
         "-movflags", "+faststart", out)
     print(f"{out} ({out.stat().st_size / 1e6:.1f} MB), {srt}")
 
 
-def reassemble(out_dir: Path) -> None:
+def reassemble(out_dir: Path, long: bool = False) -> None:
     """Rebuild the title card and the final video from the clips and narration of an earlier run."""
     work = out_dir / "work"
-    scenes = [(n, path, close_line() if n == "close" else t) for n, path, t in SCENES]
+    scenes = scene_list(long)
     durations = [wav_seconds(work / f"{n}.wav") for n, _, _ in scenes]
     title_card(work / "title.png")
     still_clip(work / "title.png", durations[0] + GAP, work / "clip-title.mp4")
-    assemble(out_dir, scenes, durations, [work / f"clip-{n}.mp4" for n, _, _ in scenes])
+    assemble(out_dir, scenes, durations, [work / f"clip-{n}.mp4" for n, _, _ in scenes], long)
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a != "--assemble"]
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
     target = Path(args[0]) if args else ROOT / "build" / "video"
-    reassemble(target) if "--assemble" in sys.argv else main(target)
+    long_cut = "--long" in sys.argv
+    reassemble(target, long_cut) if "--assemble" in sys.argv else main(target, long_cut)

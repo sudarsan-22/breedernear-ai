@@ -29,3 +29,13 @@ The narration is in the third person ("our founder…"). To use a team member's 
 - [ ] Optional: Subtitles → upload `BreederNear-AI-demo.srt` (captions are already burned in)
 - [ ] Open the link in a private window while logged out; it plays
 - [ ] Put the link in the deck (`VIDEO_URL` in `scripts/build_deck.py`, then rebuild), the README and the submission form
+
+## The 3–4 minute cut (`scripts/build_video.py --long`)
+
+The organisers' wording on video length differs: the T&C say "strictly under three minutes" and the form field says "up to 3 minutes", while the submission page and emails say "3 to 4 minutes". We submitted the 2:31 cut on 12 Oct and asked support which applies. The long cut (3:11) is ready in case they answer "3 to 4 minutes": the same scenes plus four, each inserted after the scene named.
+
+| After | Scene | Narration |
+|---|---|---|
+| Starter kit | "Which pet suits me?" → best match | Not sure which pet fits? Which pet suits me takes a few taps and suggests pets for Priya's home, from the same fixed rules, with the reasons. Pets that don't suit a flat or young children are left out, and she is told why. |
+| Visit | Local Breeders → tap the Verified breeder badge | Local Breeders lists the breeders near her, with their distance and whether they are verified. Tap any badge to see exactly what it means and how it was decided. Buying straight from the breeder means farm prices, with no broker in between. |
+| Post check | Share this warning; Impact so far | She can share that warning back to the group in one tap, and a protected bird comes with a way to report it. Impact so far counts the listings checked, the animals stopped and the scam warnings raised, live from the app's own data. |

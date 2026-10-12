@@ -40,17 +40,17 @@ FONTS = Path.home() / ".local/share/fonts/googlesansflex"
 
 # The closing line's numbers come from evals/RESULTS.md and evals/VISION_RESULTS.md (see close_line()).
 SCENES = [
-    ("title", "/", "Most pets in India are sold in WhatsApp groups, with no checks at all. Our founder, a bird breeder from Coimbatore, watched buyers overpay while healthy birds waited a street away."),
+    ("title", "/", "In India, pets are sold on social media like WhatsApp, Instagram and Facebook, but there is no dedicated, trusted platform for this market. BreederNear AI is that platform. Our founder, a bird breeder from Coimbatore, watched buyers overpay while healthy birds waited a street away."),
     ("login", "/", "BreederNear AI connects buyers with trusted local breeders. It runs on Google Cloud, with Gemini agents on Cloud Run, Firestore and Firebase. We log in as our demo buyer, Priya."),
     ("pets", "/#pets", "Every pet shows a match score for Priya's home, worked out by fixed rules, and trusted breeders nearby come first. Open a listing to see each trust check and the questions to ask."),
     ("kit", "/#pets", "Tap Starter kit: the cage is sized for the animals, never smaller, and Gemini writes a fourteen-day care plan with the signs that need a vet."),
     ("visit", "/#pets", "Priya can message the breeder with an AI-drafted note, and book a visit. There is no delivery and no payment in the app: she sees the birds and their parents first."),
     ("companion", "/#account", "After the visit she taps I bought this pet, and the care companion starts: a daily log with AI feedback, a growth tracker, a health calendar, and a symptom checker that says how urgently to see a vet, never which medicine."),
-    ("check", "/#pets", "Pets are still sold in WhatsApp groups, so paste any post into Is this post safe. Our rules flag a price far below the market, full advance payment and courier-only delivery."),
+    ("check", "/#pets", "Saw a pet for sale on social media? Paste the post into Is this post safe. Our rules flag a price far below the market, full advance payment and courier-only delivery."),
     ("chat", "/#ai", "Prefer to talk? Seven Gemini agents understand English and Tamil, and use the same tools as the screens."),
     ("dashboard", "/#dashboard", "Now the seller side. Karthik sees this week against last, a nudge to answer a waiting visit, and charts of his views, enquiries and sales."),
     ("verify", "/#farm", "He is a Verified breeder: a phone code and facility photos checked by Gemini, with no ID documents."),
-    ("sell", "/#sell", "A breeder posts the way they do on WhatsApp: a photo and a quick message in Tamil. Gemini fills in the listing form, and every listing is screened before it goes live. This one is trusted."),
+    ("sell", "/#sell", "A breeder lists the way they already post on social media: a photo and a quick message in Tamil. Gemini fills in the listing form, and every listing is screened before it goes live. This one is trusted."),
     ("blocked", "/#sell", "Try to sell native rose-ringed parakeet chicks, and the listing is blocked. Trading protected Indian birds is illegal, and this decision is made in code."),
     ("reply", "/#enquiries", "Visit requests and messages arrive here. Gemini drafts a reply from the listing's facts, and Karthik edits and sends it."),
     ("close", "/", ""),

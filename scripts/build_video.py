@@ -3,6 +3,7 @@
 
 Usage:
     PYTHONPATH=. python scripts/build_video.py [OUT_DIR]
+    PYTHONPATH=. python scripts/build_video.py --assemble [OUT_DIR]   # title card and final join only, reusing the clips
 
 Needs Playwright with Chromium (CHROMIUM=/path/to/chrome to use a local build), imageio-ffmpeg (a portable
 ffmpeg with libx264 and libass), poppler's pdftoppm for the deck slide, and gcloud Application Default
@@ -47,7 +48,7 @@ SCENES = [
     ("companion", "/#account", "After the visit she taps I bought this pet, and the care companion starts: a daily log with AI feedback, a growth tracker, a health calendar, and a symptom checker that says how urgently to see a vet, never which medicine."),
     ("check", "/#pets", "Pets are still sold in WhatsApp groups, so paste any post into Is this post safe. Our rules flag a price far below the market, full advance payment and courier-only delivery."),
     ("chat", "/#ai", "Prefer to talk? Seven Gemini agents understand English and Tamil, and use the same tools as the screens."),
-    ("dashboard", "/#dashboard", "Now the seller side. Karthik's dashboard charts his views, enquiries, visits and sales, week by week."),
+    ("dashboard", "/#dashboard", "Now the seller side. Karthik sees this week against last, a nudge to answer a waiting visit, and charts of his views, enquiries and sales."),
     ("verify", "/#farm", "He is a Verified breeder: a phone code and facility photos checked by Gemini, with no ID documents."),
     ("sell", "/#sell", "A breeder posts the way they do on WhatsApp: a photo and a quick message in Tamil. Gemini fills in the listing form, and every listing is screened before it goes live. This one is trusted."),
     ("blocked", "/#sell", "Try to sell native rose-ringed parakeet chicks, and the listing is blocked. Trading protected Indian birds is illegal, and this decision is made in code."),
@@ -90,6 +91,10 @@ def tts(text: str, path: Path) -> float:
                                  {"Authorization": f"Bearer {token()}", "x-goog-user-project": PROJECT,
                                   "Content-Type": "application/json"})
     path.write_bytes(base64.b64decode(json.load(urllib.request.urlopen(req, timeout=120))["audioContent"]))
+    return wav_seconds(path)
+
+
+def wav_seconds(path: Path) -> float:
     with wave.open(str(path)) as w:
         return w.getnframes() / w.getframerate()
 
@@ -110,16 +115,16 @@ def address_bar(path_part: str, out: Path) -> None:
 
 
 def title_card(out: Path) -> None:
-    img = Image.new("RGB", (W, H), (16, 46, 30))
+    img = Image.new("RGB", (W, H), (194, 65, 12))
     d = ImageDraw.Draw(img)
-    for y in range(H):                                   # soft green gradient
+    for y in range(H):                                   # the app's Sunrise gradient: saffron to deep orange
         t = y / H
-        d.line([(0, y), (W, y)], fill=(int(24 + 10 * t), int(84 - 40 * t), int(52 - 22 * t)))
+        d.line([(0, y), (W, y)], fill=(int(234 - 60 * t), int(108 - 52 * t), int(28 - 16 * t)))
     d.rounded_rectangle((W // 2 - 90, 250, W // 2 + 90, 430), radius=44, fill=(255, 255, 255))
-    d.text((W // 2, 342), "BN", font=font(84, 700), fill=(31, 110, 67), anchor="mm")
+    d.text((W // 2, 342), "BN", font=font(84, 700), fill=(194, 65, 12), anchor="mm")
     d.text((W // 2, 540), "BreederNear AI", font=font(110, 700), fill=(255, 255, 255), anchor="mm")
-    d.text((W // 2, 640), "Find the trusted breeder next door", font=font(54, 500), fill=(214, 236, 222), anchor="mm")
-    d.text((W // 2, 800), "Google Cloud AI Builder Cup 2026  ·  Retail & Commerce", font=font(36), fill=(190, 220, 200),
+    d.text((W // 2, 640), "Find the trusted breeder next door", font=font(54, 500), fill=(255, 237, 213), anchor="mm")
+    d.text((W // 2, 800), "Google Cloud AI Builder Cup 2026  ·  Retail & Commerce", font=font(36), fill=(254, 215, 170),
            anchor="mm")
     img.save(out)
 
@@ -243,13 +248,13 @@ def act_breeders(page, d):
 
 def act_dashboard(page, d):
     goto(page, WEB + "/#dashboard")
-    page.wait_for_selector(".chart", timeout=30000)
+    page.wait_for_selector(".metric .spark", timeout=30000)
 
     def go():
-        page.wait_for_timeout(int(d * 200))
-        page.evaluate("document.querySelector('.chart-card').scrollIntoView({block: 'start', behavior: 'smooth'})")
+        page.wait_for_timeout(int(d * 250))
+        page.evaluate("document.querySelector('.metrics').scrollIntoView({block: 'center', behavior: 'smooth'})")
         page.wait_for_timeout(int(d * 300))
-        page.evaluate("document.querySelector('.funnel').scrollIntoView({block: 'center', behavior: 'smooth'})")
+        page.evaluate("document.querySelector('.chart-card').scrollIntoView({block: 'start', behavior: 'smooth'})")
     return go
 
 
@@ -520,6 +525,12 @@ def main(out_dir: Path) -> None:
                 address_bar(path_part, work / f"bar-{name}.png")
                 fit_clip(video, offset, target, work / f"bar-{name}.png", clip)
             clips.append(clip)
+    assemble(out_dir, scenes, durations, clips)
+
+
+def assemble(out_dir: Path, scenes: list, durations: list, clips: list) -> None:
+    """Join the scene clips and narration and burn in captions (re-run alone with --assemble)."""
+    work = out_dir / "work"
     # audio: each scene's narration followed by GAP seconds of silence
     concat_audio = work / "audio.txt"
     lines = []
@@ -542,5 +553,17 @@ def main(out_dir: Path) -> None:
     print(f"{out} ({out.stat().st_size / 1e6:.1f} MB), {srt}")
 
 
+def reassemble(out_dir: Path) -> None:
+    """Rebuild the title card and the final video from the clips and narration of an earlier run."""
+    work = out_dir / "work"
+    scenes = [(n, path, close_line() if n == "close" else t) for n, path, t in SCENES]
+    durations = [wav_seconds(work / f"{n}.wav") for n, _, _ in scenes]
+    title_card(work / "title.png")
+    still_clip(work / "title.png", durations[0] + GAP, work / "clip-title.mp4")
+    assemble(out_dir, scenes, durations, [work / f"clip-{n}.mp4" for n, _, _ in scenes])
+
+
 if __name__ == "__main__":
-    main(Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "build" / "video")
+    args = [a for a in sys.argv[1:] if a != "--assemble"]
+    target = Path(args[0]) if args else ROOT / "build" / "video"
+    reassemble(target) if "--assemble" in sys.argv else main(target)

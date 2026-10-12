@@ -168,11 +168,11 @@ Details: [docs/product/03-responsible-ai-and-safety.md](docs/product/03-responsi
 
 ## Measured quality
 
-Measured on 10–11 Oct 2026 with real Gemini (`gemini-3.8-flash`). Each command reproduces its figure.
+Measured on 10–12 Oct 2026 with real Gemini (`gemini-3.8-flash`). Each command reproduces its figure.
 
 | What | Result | Details |
 |---|---|---|
-| Agent evals (22 cases: listing, Tamil input, blocking, scams, reused photos, prompt injection, no medicine advice, roles, badge explanations, seller reply drafts, verification, buyer profile, visits, care companion), **run 3 times** | **66/66 case runs passed** | [evals/RESULTS.md](evals/RESULTS.md) · `scripts/run_evals.sh 3` |
+| Agent evals (23 cases: listing, Tamil input, a Tamil voice note, blocking, scams, reused photos, prompt injection, no medicine advice, roles, badge explanations, seller reply drafts, verification, buyer profile, visits, care companion), **run 3 times** | **69/69 case runs passed** | [evals/RESULTS.md](evals/RESULTS.md) · `scripts/run_evals.sh 3` |
 | Protected native species blocked from the photo alone (parakeets, munias, avadavat, myna, star tortoise, a dyed munia) | **8/8** | [evals/VISION_RESULTS.md](evals/VISION_RESULTS.md) · `scripts/vision_accuracy.py` |
 | Ordinary pet photos wrongly flagged as protected | **0/37** | same |
 | All photo checks (species, dye, blur, no animal, watermark, screenshot) | **202/202** | same; test photos are AI-generated and the prompt was tuned on them, so treat this as an upper bound |

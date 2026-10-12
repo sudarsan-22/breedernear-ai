@@ -1,6 +1,6 @@
 # Agent eval results
 
-Model `gemini-3.8-flash`, real Gemini, sample data in memory. **3 full runs: 66/66 case runs passed (100%); 3 of 3 runs passed every case. Wrong answers: 0; network errors: 0.**
+Model `gemini-3.8-flash`, real Gemini, sample data in memory. **3 full runs: 69/69 case runs passed (100%); 3 of 3 runs passed every case. Wrong answers: 0; network errors: 0.**
 
 A network error means the connection to Gemini dropped before a reply arrived; it counts as a miss but is not a wrong answer.
 
@@ -8,9 +8,9 @@ Gemini is not deterministic, so each case is run several times and the pass coun
 
 | Run | Date | Passed |
 |---|---|---|
-| 1 | 2026-10-11 | 22/22 |
-| 2 | 2026-10-11 | 22/22 |
-| 3 | 2026-10-11 | 22/22 |
+| 1 | 2026-10-12 | 23/23 |
+| 2 | 2026-10-12 | 23/23 |
+| 3 | 2026-10-12 | 23/23 |
 
 | Case | Passed | What it checks |
 |---|---|---|
@@ -36,3 +36,4 @@ Gemini is not deterministic, so each case is run several times and the pass coun
 | E20 | ✅ 3/3 | Seller asks what is left for the Verified badge → verification_status; never asks for Aadhaar/PAN |
 | E21 | ✅ 3/3 | Family describes their home → profile saved, match % calculated in code, budgie-type birds on top |
 | E22 | ✅ 3/3 | Buyer asks to visit a listing → book_visit with a slot; sample breeder visit confirmed, no payment |
+| E23 | ✅ 3/3 | Tamil voice note, no typed text → Gemini hears it and fills the same listing |

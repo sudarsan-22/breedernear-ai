@@ -32,7 +32,7 @@ The narration is in the third person ("our founder…"). To use a team member's 
 
 ## The 3–4 minute cut (`scripts/build_video.py --long`)
 
-The organisers' wording on video length differs: the T&C say "strictly under three minutes" and the form field says "up to 3 minutes", while the submission page and emails say "3 to 4 minutes". We submitted the 2:31 cut on 12 Oct and asked support which applies. The long cut (3:11) is ready in case they answer "3 to 4 minutes": the same scenes plus four, each inserted after the scene named.
+The organisers' wording on video length differs: the T&C say "strictly under three minutes" and the form field says "up to 3 minutes", while the submission page and emails say "3 to 4 minutes". We submitted the 2:31 cut on 12 Oct and asked support which applies. **On 13 Oct support confirmed in writing: strictly under 3 minutes, and 2:31 meets it.** The long cut (3:11) is therefore not used; it is kept here only for reference: the same scenes plus four, each inserted after the scene named.
 
 | After | Scene | Narration |
 |---|---|---|

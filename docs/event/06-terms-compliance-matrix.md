@@ -179,6 +179,7 @@ Risk IDs (R#) refer to the [risk tracker](02-rules-dos-and-donts.md#risk-tracker
 | 10 Oct 2026 | Sudarsan | Discord #rules, #faq, #announcements read | Added R44 (community rules) and R45 (no confirmed credits) |
 | 10 Oct 2026 | Sudarsan | Organiser reply to the R25 eligibility email | R25 resolved; deck may mention the startup background |
 | 12 Oct 2026 | Sudarsan | T&C: roster changes now allowed until **14 Oct** (was 11 Oct); Deliverables now read "live URL (on Cloud Run/GCP/Firebase)"; sections and all other obligations unchanged. FAQ: team formation closes 14 Oct; nothing on AI-generated content, third-party APIs or the deck template | None needed: team stays at 2; we deploy on both Cloud Run and Firebase Hosting. Full pre-submission audit done (see the [audit log](04-submission-checklist.md#h-pre-submission-audit-12-oct)) |
+| 13 Oct 2026 | Sudarsan | Support reply on video length (the submission page and emails said "3 to 4 minutes"; the T&C and form say under 3) | Organisers confirmed in writing: **strictly under 3 minutes**; our 2:31 video meets it. No change. Email kept |
 | 15 Oct | | | |
 | 17 Oct | | | |
 | 18 Oct | | | |
